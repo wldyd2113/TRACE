@@ -6,12 +6,11 @@
 //
 
 import UIKit
+import SnapKit
+import RxSwift
+import RxCocoa
+import RealmSwift
 
 class TravelPlanMainViewController: UIViewController {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .white
-    }
-    
 }
