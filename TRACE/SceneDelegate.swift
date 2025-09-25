@@ -16,7 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         //SceneDelegate접근
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
         let sceneDelegate = windowScene.delegate as? SceneDelegate else { return }
-        let nav = UINavigationController(rootViewController: ViewController())
+        let nav = UINavigationController(rootViewController: TravelPlanMainViewController())
         sceneDelegate.window?.rootViewController = nav
     }
 
