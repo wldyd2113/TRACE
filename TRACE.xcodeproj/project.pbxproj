@@ -13,6 +13,7 @@
 		3B6AB3B32E85357700FBADF6 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3B22E85357700FBADF6 /* RealmSwift */; };
 		3B6AB3B62E85358700FBADF6 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3B52E85358700FBADF6 /* Alamofire */; };
 		3B6AB3B92E85359700FBADF6 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3B82E85359700FBADF6 /* Kingfisher */; };
+		3B6AB46B2E8577A500FBADF6 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB46A2E8577A500FBADF6 /* Then */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 				3B6AB3B92E85359700FBADF6 /* Kingfisher in Frameworks */,
 				3B6AB3B62E85358700FBADF6 /* Alamofire in Frameworks */,
 				3B6AB3B32E85357700FBADF6 /* RealmSwift in Frameworks */,
+				3B6AB46B2E8577A500FBADF6 /* Then in Frameworks */,
 				3B6AB3AD2E85354800FBADF6 /* RxSwift in Frameworks */,
 				3B6AB3B02E85355A00FBADF6 /* SnapKit in Frameworks */,
 				3B6AB3AB2E85354800FBADF6 /* RxCocoa in Frameworks */,
@@ -99,6 +101,7 @@
 				3B6AB3B22E85357700FBADF6 /* RealmSwift */,
 				3B6AB3B52E85358700FBADF6 /* Alamofire */,
 				3B6AB3B82E85359700FBADF6 /* Kingfisher */,
+				3B6AB46A2E8577A500FBADF6 /* Then */,
 			);
 			productName = TRACE;
 			productReference = 3B6AB3112E8532DF00FBADF6 /* TRACE.app */;
@@ -134,6 +137,7 @@
 				3B6AB3B12E85357700FBADF6 /* XCRemoteSwiftPackageReference "realm-swift" */,
 				3B6AB3B42E85358700FBADF6 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				3B6AB3B72E85359700FBADF6 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				3B6AB4692E8577A500FBADF6 /* XCRemoteSwiftPackageReference "Then" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3B6AB3122E8532DF00FBADF6 /* Products */;
@@ -407,6 +411,14 @@
 				minimumVersion = 8.5.0;
 			};
 		};
+		3B6AB4692E8577A500FBADF6 /* XCRemoteSwiftPackageReference "Then" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/devxoul/Then.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -439,6 +451,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3B6AB3B72E85359700FBADF6 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		3B6AB46A2E8577A500FBADF6 /* Then */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B6AB4692E8577A500FBADF6 /* XCRemoteSwiftPackageReference "Then" */;
+			productName = Then;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

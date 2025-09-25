@@ -14,3 +14,23 @@ import RealmSwift
 class TravelPlanMainViewController: UIViewController {
 
 }
+
+extension TravelPlanMainViewController: DesiginProtocolBind {
+    func bind() {
+        <#code#>
+    }
+    
+    func configureHierarchy() {
+        <#code#>
+    }
+    
+    func configureUI() {
+        <#code#>
+    }
+    
+    func configureLayout() {
+        <#code#>
+    }
+    
+    
+}
