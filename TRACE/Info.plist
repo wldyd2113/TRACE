@@ -4,7 +4,7 @@
 <dict>
 	<key>UIAppFonts</key>
 	<array>
-		<string>온글잎 의연체</string>
+		<string>온글잎 의연체.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
