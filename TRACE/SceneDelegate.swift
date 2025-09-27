@@ -16,12 +16,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
+        let tabBarController = UITabBarController()
+        
+        let planVC = TravelPlanMainViewController()
+        let plan = UINavigationController(rootViewController: planVC)
+        plan.tabBarItem = UITabBarItem(title: "계획", image: UIImage(systemName: "calendar"), tag: 0)
+        
+        let recordVc = TravelRecordViewController()
+        let record = UINavigationController(rootViewController: recordVc)
+        record.tabBarItem = UITabBarItem(title: "기록", image: UIImage(systemName: "text.page.fill"), tag: 1)
 
-        let window = UIWindow(windowScene: windowScene)
-        let nav = UINavigationController(rootViewController: TravelPlanMainViewController())
-        window.rootViewController = nav
-        window.makeKeyAndVisible()
-        self.window = window
+
+
+        tabBarController.viewControllers = [plan, record]
+        tabBarController.tabBar.tintColor = .darkBlue
+        tabBarController.tabBar.unselectedItemTintColor = .skyBlue
+        
+        window = UIWindow(windowScene: windowScene)
+
+        window?.rootViewController = tabBarController
+        window?.makeKeyAndVisible()
     }
 
 

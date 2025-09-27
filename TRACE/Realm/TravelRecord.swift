@@ -8,7 +8,7 @@
 import Foundation
 import RealmSwift
 
-class TravelRecod: Object {
+class TravelRecord: Object {
     @Persisted(primaryKey: true) var id: ObjectId
     @Persisted var nation: String
     @Persisted var travelName: String
