@@ -17,22 +17,16 @@ class TravelPlanMainViewController: UIViewController {
     
     // MARK: - UI Components
     private let titleLabel = UILabel().then {
-        $0.text = "여행지"
-        $0.font = FontManager.onglapBoldFont(24)
-        $0.textColor = .label
+        $0.applyTitleStyle(text: "여행지")
     }
     
     private let subtitleLabel = UILabel().then {
-        $0.text = "어디로 여행을 가나요?"
-        $0.font = FontManager.onglapFont(14)
-        $0.textColor = .systemGray
+        $0.applySubtitleStyle(text: "어디로 여행을 가나요?")
     }
     
     // 메인 여행 정보를 담는 컨테이너 뷰
     private let mainTravelContainerView = UIView().then {
-        $0.backgroundColor = .systemGray6
-        $0.layer.cornerRadius = 12
-        $0.clipsToBounds = true
+        $0.applyCardStyle()
     }
     
     private let dDayLabel = UILabel().then {
@@ -79,33 +73,20 @@ class TravelPlanMainViewController: UIViewController {
     }
     
     private let recordButton = UIButton(type: .system).then {
-        $0.setTitle("일정 보기", for: .normal)
-        $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.setTitleColor(.label, for: .normal)
-        $0.backgroundColor = .background
-        $0.layer.cornerRadius = 10
-        $0.layer.borderWidth = 1
-        $0.layer.borderColor = UIColor.systemGray4.cgColor
+        $0.applySubActionStyle(title: "일정 보기")
     }
     
     private let addTravelButton = UIButton(type: .system).then {
-        $0.setTitle("여행 추가하기", for: .normal)
-        $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.setTitleColor(.white, for: .normal)
-        $0.backgroundColor = .buttonDark
+        $0.applyMainActionStyle(title: "여행 추가하기", fontSize: 16)
         $0.layer.cornerRadius = 10
     }
     
     private let travelListLabel = UILabel().then {
-        $0.text = "여행 계획 리스트"
-        $0.font = FontManager.onglapBoldFont(18)
-        $0.textColor = .labelLight
+        $0.applyTitleStyle(text: "여행 계획 리스트", fontSize: 18)
     }
     
     private let myTravelLabel = UILabel().then {
-        $0.text = "나의 여행 계획"
-        $0.font = FontManager.onglapFont(12)
-        $0.textColor = .systemGray
+        $0.applyDescriptionStyle(text: "나의 여행 계획")
     }
     
     private let manageButton = UIButton(type: .system).then {

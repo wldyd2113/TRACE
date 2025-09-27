@@ -23,74 +23,46 @@ class TravelPlanWriteViewController: UIViewController {
     private let contentView = UIView()
     
     private let titleLabel = UILabel().then {
-        $0.text = "여행 계획"
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 24)
-        $0.textColor = .labelLight
+        $0.applyTitleStyle(text: "여행 계획")
     }
     
     // 여행 국가 섹션
     private let countryTitleLabel = UILabel().then {
-        $0.text = "여행 국가"
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.textColor = .labelLight
+        $0.applySectionTitleStyle(text: "여행 국가")
     }
     
     private let countryTextField = UITextField().then {
-        $0.placeholder = "예) 국내/ 해외"
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
-        $0.borderStyle = .roundedRect
-        $0.backgroundColor = .systemGray6
-        $0.layer.cornerRadius = 8
+        $0.applyTravelStyle(placeholder: "예) 국내/ 해외")
     }
     
     private let countryDescriptionLabel = UILabel().then {
-        $0.text = "원하시는 여행지를 입력해주세요."
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 12)
-        $0.textColor = .systemGray
+        $0.applyDescriptionStyle(text: "원하시는 여행지를 입력해주세요.")
     }
     
     // 여행지 입력 섹션
     private let destinationTitleLabel = UILabel().then {
-        $0.text = "여행지 입력"
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.textColor = .labelLight
+        $0.applySectionTitleStyle(text: "여행지 입력")
     }
     
     private let destinationTextField = UITextField().then {
-        $0.placeholder = "예: 파리"
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
-        $0.borderStyle = .roundedRect
-        $0.backgroundColor = .systemGray6
-        $0.layer.cornerRadius = 8
+        $0.applyTravelStyle(placeholder: "예: 파리")
     }
     
     private let destinationDescriptionLabel = UILabel().then {
-        $0.text = "원하시는 여행지를 입력해주세요."
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 12)
-        $0.textColor = .systemGray
+        $0.applyDescriptionStyle(text: "원하시는 여행지를 입력해주세요.")
     }
     
     // 여행일자 입력 섹션
     private let dateTitleLabel = UILabel().then {
-        $0.text = "여행일자 입력"
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.textColor = .labelLight
+        $0.applySectionTitleStyle(text: "여행일자 입력")
     }
 
     private let startDateTextField = UITextField().then {
-        $0.placeholder = "여행 시작일"
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
-        $0.borderStyle = .roundedRect
-        $0.backgroundColor = .systemGray6
-        $0.layer.cornerRadius = 8
+        $0.applyTravelStyle(placeholder: "여행 시작일")
     }
 
     private let endDateTextField = UITextField().then {
-        $0.placeholder = "여행 종료일"
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
-        $0.borderStyle = .roundedRect
-        $0.backgroundColor = .systemGray6
-        $0.layer.cornerRadius = 8
+        $0.applyTravelStyle(placeholder: "여행 종료일")
     }
 
     private let startDatePicker = UIDatePicker().then {
@@ -106,18 +78,12 @@ class TravelPlanWriteViewController: UIViewController {
     }
 
     private let dateDescriptionLabel = UILabel().then {
-        $0.text = "여행 시작일과 종료일을 입력해주세요."
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 12)
-        $0.textColor = .systemGray
+        $0.applyDescriptionStyle(text: "여행 시작일과 종료일을 입력해주세요.")
     }
     
     // 여행 계획하기 버튼
     private let planButton = UIButton(type: .system).then {
-        $0.setTitle("여행 계획하기", for: .normal)
-        $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.setTitleColor(.white, for: .normal)
-        $0.backgroundColor = .buttonLight
-        $0.layer.cornerRadius = 25
+        $0.applyLightActionStyle(title: "여행 계획하기")
     }
     
     override func viewDidLoad() {
@@ -129,10 +95,7 @@ class TravelPlanWriteViewController: UIViewController {
         configureLayout()
         bind()
     }
-    
-
-    
-    
+ 
     @objc private func backButtonTapped() {
         navigationController?.popViewController(animated: true)
     }
