@@ -6,7 +6,6 @@
 //
 
 import UIKit
-
 class TravelRecordViewController: UIViewController {
 
     override func viewDidLoad() {
