@@ -6,6 +6,10 @@
 	<array>
 		<string>온글잎 의연체.ttf</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>여행 계획을 위해 현재 위치를 지도에 표시합니다.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>여행 계획을 위해 현재 위치를 지도에 표시합니다.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

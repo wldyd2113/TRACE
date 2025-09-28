@@ -6,10 +6,12 @@
 //
 
 import UIKit
+import CoreLocation
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    private let locationManager = CLLocationManager()
 
 
     func scene(_ scene: UIScene,
@@ -49,6 +51,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
+
+        // 위치 권한 요청
+        requestLocationPermissionIfNeeded()
+    }
+
+    private func requestLocationPermissionIfNeeded() {
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            print("📍 App startup: Requesting location permission")
+            locationManager.requestWhenInUseAuthorization()
+        case .denied:
+            print("📍 App startup: Location permission denied")
+        case .restricted:
+            print("📍 App startup: Location permission restricted")
+        case .authorizedWhenInUse, .authorizedAlways:
+            print("📍 App startup: Location permission already granted")
+        @unknown default:
+            print("📍 App startup: Unknown location permission status")
+        }
     }
 
     func sceneWillResignActive(_ scene: UIScene) {

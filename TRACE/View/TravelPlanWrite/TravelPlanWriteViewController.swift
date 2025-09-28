@@ -159,8 +159,10 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
 
         // 여행 계획하기 버튼 액션
         planButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.createTravelPlan()
+            .bind(with: self, onNext: { owner, _ in
+                let vc = TravelPlanDetailViewController()
+                owner.navigationController?.pushViewController(vc, animated: true)
+                
             })
             .disposed(by: disposeBag)
 
