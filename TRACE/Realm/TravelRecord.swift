@@ -14,10 +14,10 @@ class TravelRecord: Object {
     @Persisted var travelName: String
     @Persisted var recordLog: String
     @Persisted var travelDate: Date
-    @Persisted var photo: TravelPhoto
-    @Persisted var location: RecordPlace
-    
-    convenience init(id: ObjectId, nation: String, travelName: String, recordLog: String, TravelDate: Date, photo: TravelPhoto, location: RecordPlace) {
+    @Persisted var photo: TravelPhoto? // optional로 변경
+    @Persisted var location: RecordPlace? // optional로 변경
+
+    convenience init(id: ObjectId, nation: String, travelName: String, recordLog: String, TravelDate: Date, photo: TravelPhoto?, location: RecordPlace?) {
         self.init()
         self.nation = nation
         self.travelName = travelName

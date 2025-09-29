@@ -14,9 +14,9 @@ class TravelPlan: Object {
     @Persisted var travelName: String // 여행지
     @Persisted var startDate: Date //여행 시작일
     @Persisted var endDate: Date // 여행 종료일
-    @Persisted var day: TravelDay // 여행 일차
-    
-    convenience init(nation: String, travelName: String, startDate: Date, endDate: Date, day: TravelDay) {
+    @Persisted var day: TravelDay? // 여행 일차 (optional)
+
+    convenience init(nation: String, travelName: String, startDate: Date, endDate: Date, day: TravelDay?) {
         self.init()
         self.nation = nation
         self.travelName = travelName

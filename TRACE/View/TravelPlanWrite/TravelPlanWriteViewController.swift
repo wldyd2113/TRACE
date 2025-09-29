@@ -13,8 +13,9 @@ import Then
 import RealmSwift
 
 class TravelPlanWriteViewController: UIViewController {
-    
+
     private let disposeBag = DisposeBag()
+    private let viewModel = PlanWriteViewModel()
     
     // MARK: - UI Components
     private let scrollView = UIScrollView().then {
@@ -106,89 +107,65 @@ class TravelPlanWriteViewController: UIViewController {
         endDateTextField.resignFirstResponder()
     }
     
-    private func createTravelPlan() {
-        guard let country = countryTextField.text, !country.isEmpty,
-              let destination = destinationTextField.text, !destination.isEmpty,
-              let startDate = startDateTextField.text, !startDate.isEmpty,
-              let endDate = endDateTextField.text, !endDate.isEmpty else {
-            return
-        }
-
-        // 여행 계획 생성 로직
-        print("여행 계획 생성:")
-        print("국가: \(country)")
-        print("여행지: \(destination)")
-        print("시작일: \(startDate)")
-        print("종료일: \(endDate)")
-
-        // 성공 알림 또는 다음 화면으로 이동
-        let alert = UIAlertController(title: "완료", message: "여행 계획이 생성되었습니다!", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default) { [weak self] _ in
-            self?.navigationController?.popViewController(animated: true)
-        })
-        present(alert, animated: true)
-    }
 }
 
 extension TravelPlanWriteViewController: DesiginProtocolBind {
     func bind() {
-        // DatePicker 값 변경 감지
+        // Input: TextField -> ViewModel
+        countryTextField.rx.text.orEmpty
+            .bind(to: viewModel.countryText)
+            .disposed(by: disposeBag)
+
+        destinationTextField.rx.text.orEmpty
+            .bind(to: viewModel.destinationText)
+            .disposed(by: disposeBag)
+
         startDatePicker.rx.date
-            .subscribe(onNext: { [weak self] date in
-                guard let self = self else { return }
+            .bind(to: viewModel.startDate)
+            .disposed(by: disposeBag)
 
-                // 시작일 텍스트 업데이트
-                self.startDateTextField.text = DateManager.shared.formatToKoreanString(from: date)
+        endDatePicker.rx.date
+            .bind(to: viewModel.endDate)
+            .disposed(by: disposeBag)
 
-                // 종료일 최소 날짜를 시작일로 설정
-                self.endDatePicker.minimumDate = date
+        // Output: ViewModel -> View
+        viewModel.startDateText
+            .bind(to: startDateTextField.rx.text)
+            .disposed(by: disposeBag)
 
-                // 종료일이 시작일보다 이전이면 시작일로 설정
-                if self.endDatePicker.date < date {
-                    self.endDatePicker.date = date
-                    self.endDateTextField.text = DateManager.shared.formatToKoreanString(from: date)
+        viewModel.endDateText
+            .bind(to: endDateTextField.rx.text)
+            .disposed(by: disposeBag)
+
+        viewModel.endDateMinimum
+            .bind(to: endDatePicker.rx.minimumDate)
+            .disposed(by: disposeBag)
+
+        viewModel.isFormValid
+            .bind(to: planButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+
+        viewModel.buttonBackgroundColor
+            .bind(to: planButton.rx.backgroundColor)
+            .disposed(by: disposeBag)
+
+        // 여행 계획 생성 성공 시 Detail 화면으로 바로 이동
+        viewModel.showAlert
+            .subscribe(onNext: { [weak self] title, message, completion in
+                if title == "완료" {
+                    // 성공 시 Detail 화면으로 이동
+                    let detailVC = TravelPlanDetailViewController()
+                    self?.navigationController?.pushViewController(detailVC, animated: true)
                 }
             })
             .disposed(by: disposeBag)
 
-        endDatePicker.rx.date
-            .map { date in
-                return DateManager.shared.formatToKoreanString(from: date)
-            }
-            .bind(to: endDateTextField.rx.text)
-            .disposed(by: disposeBag)
-
         // 여행 계획하기 버튼 액션
         planButton.rx.tap
-            .bind(with: self, onNext: { owner, _ in
-                let vc = TravelPlanDetailViewController()
-                owner.navigationController?.pushViewController(vc, animated: true)
-                
+            .subscribe(onNext: { [weak self] in
+                self?.viewModel.createTravelPlan()
             })
             .disposed(by: disposeBag)
-
-        // 텍스트필드 입력 감지
-        Observable.combineLatest(
-            countryTextField.rx.text.orEmpty,
-            destinationTextField.rx.text.orEmpty,
-            startDateTextField.rx.text.orEmpty,
-            endDateTextField.rx.text.orEmpty
-        )
-        .map { !$0.isEmpty && !$1.isEmpty && !$2.isEmpty && !$3.isEmpty }
-        .bind(to: planButton.rx.isEnabled)
-        .disposed(by: disposeBag)
-
-        // 버튼 활성/비활성 상태에 따른 색상 변경
-        Observable.combineLatest(
-            countryTextField.rx.text.orEmpty,
-            destinationTextField.rx.text.orEmpty,
-            startDateTextField.rx.text.orEmpty,
-            endDateTextField.rx.text.orEmpty
-        )
-        .map { !$0.isEmpty && !$1.isEmpty && !$2.isEmpty && !$3.isEmpty }
-        .map { $0 ? UIColor.buttonDark : UIColor.systemGray4 }
-        .bind(to: planButton.rx.backgroundColor)
-        .disposed(by: disposeBag)
     }
 
     func configureHierarchy() {
