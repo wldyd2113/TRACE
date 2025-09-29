@@ -12,6 +12,8 @@ import CoreLocation
 protocol MapMangerDelegate: AnyObject {
     func mapManagerDidUpdateLocation(_ coordinate: CLLocationCoordinate2D)
     func mapManagerDidFailToGetLocation()
+    func mapManagerDidSelectPlace(_ place: KakaoPlace)
+    func mapManagerDidUpdateSearchedPlaces(_ places: [KakaoPlace])
 }
 
 class MapManger: NSObject {
@@ -20,6 +22,9 @@ class MapManger: NSObject {
 
     private let locationManager = CLLocationManager()
     let mapView = MKMapView()
+
+    // 검색된 장소들을 누적 저장
+    private var searchedPlaces: [KakaoPlace] = []
 
     override init() {
         super.init()
@@ -32,6 +37,7 @@ class MapManger: NSObject {
         mapView.layer.cornerRadius = 12
         mapView.showsUserLocation = true
         mapView.mapType = .standard
+        mapView.delegate = self
     }
 
     private func setupLocationManager() {
@@ -98,6 +104,90 @@ class MapManger: NSObject {
     func clearAnnotations() {
         mapView.removeAnnotations(mapView.annotations)
     }
+
+    // MARK: - Search Results Display
+    func displaySearchResults(places: [KakaoPlace]) {
+        guard let newPlace = places.first else { return }
+
+        // 중복 검사 (같은 장소가 이미 있는지 확인)
+        if !searchedPlaces.contains(where: { $0.id == newPlace.id }) {
+            // 새로운 장소를 목록에 추가
+            searchedPlaces.append(newPlace)
+            print("📍 새 장소 추가: \(newPlace.placeName)")
+        } else {
+            print("📍 이미 존재하는 장소: \(newPlace.placeName)")
+            return
+        }
+
+        // 기존 어노테이션 제거 후 모든 장소 다시 표시
+        mapView.removeAnnotations(mapView.annotations)
+        mapView.removeOverlays(mapView.overlays)
+
+        var coordinates: [CLLocationCoordinate2D] = []
+
+        // 모든 검색된 장소들을 지도에 표시
+        for (index, place) in searchedPlaces.enumerated() {
+            let annotation = PlaceAnnotation()
+            annotation.coordinate = place.coordinate
+            annotation.title = "\(index + 1). \(place.placeName)"
+            annotation.subtitle = place.addressName
+            annotation.kakaoPlace = place
+
+            mapView.addAnnotation(annotation)
+            coordinates.append(place.coordinate)
+
+            print("📍 POI 표시: \(index + 1). \(place.placeName)")
+        }
+
+        // 2개 이상의 장소가 있으면 루트 그리기
+        if coordinates.count > 1 {
+            drawRoute(coordinates: coordinates)
+        }
+
+        // 지도 영역 조정
+        updateMapRegion(coordinates: coordinates)
+
+        // 델리게이트에 검색된 장소들 업데이트 알림
+        delegate?.mapManagerDidUpdateSearchedPlaces(searchedPlaces)
+    }
+
+    func clearAllSearchResults() {
+        searchedPlaces.removeAll()
+        mapView.removeAnnotations(mapView.annotations)
+        mapView.removeOverlays(mapView.overlays)
+        print("📍 모든 검색 결과 삭제")
+    }
+
+    private func updateMapRegion(coordinates: [CLLocationCoordinate2D]) {
+        guard !coordinates.isEmpty else { return }
+
+        if coordinates.count == 1 {
+            // 하나의 장소만 있으면 해당 위치를 중심으로
+            let region = MKCoordinateRegion(
+                center: coordinates[0],
+                latitudinalMeters: 2000,
+                longitudinalMeters: 2000
+            )
+            mapView.setRegion(region, animated: true)
+        } else {
+            // 여러 장소가 있으면 모든 장소를 포함하는 영역으로
+            let region = MKCoordinateRegion(coordinates: coordinates)
+            mapView.setRegion(region, animated: true)
+        }
+    }
+
+    private func drawRoute(coordinates: [CLLocationCoordinate2D]) {
+        // 기존 루트 제거
+        mapView.removeOverlays(mapView.overlays)
+
+        guard coordinates.count >= 2 else { return }
+
+        // 좌표들을 연결하는 폴리라인 생성
+        let polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
+        mapView.addOverlay(polyline)
+
+        print("🗺️ 루트 그리기: \(coordinates.count)개 지점 연결")
+    }
 }
 
 // MARK: - CLLocationManagerDelegate
@@ -136,6 +226,39 @@ extension MapManger: CLLocationManagerDelegate {
             print("📍 MapManger: Unknown authorization status, using default location")
             setDefaultLocation()
         }
+    }
+}
+
+// MARK: - MKMapViewDelegate
+extension MapManger: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        guard let placeAnnotation = view.annotation as? PlaceAnnotation,
+              let kakaoPlace = placeAnnotation.kakaoPlace else { return }
+
+        delegate?.mapManagerDidSelectPlace(kakaoPlace)
+    }
+
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        if let polyline = overlay as? MKPolyline {
+            let renderer = MKPolylineRenderer(polyline: polyline)
+            renderer.strokeColor = .systemBlue
+            renderer.lineWidth = 3.0
+            return renderer
+        }
+        return MKOverlayRenderer(overlay: overlay)
+    }
+}
+
+// MARK: - Custom Annotation
+class PlaceAnnotation: NSObject, MKAnnotation {
+    var coordinate: CLLocationCoordinate2D
+    var title: String?
+    var subtitle: String?
+    var kakaoPlace: KakaoPlace?
+
+    override init() {
+        self.coordinate = CLLocationCoordinate2D()
+        super.init()
     }
 }
 
