@@ -78,4 +78,30 @@ class DateManager {
     func isFutureDate(_ date: Date) -> Bool {
         return date >= Calendar.current.startOfDay(for: Date())
     }
+
+    /// 현재 날짜로부터 여행 시작일까지의 일수 계산 (D-day 형식)
+    func daysUntilTravel(_ startDate: Date) -> String {
+        let today = Calendar.current.startOfDay(for: Date())
+        let travelStart = Calendar.current.startOfDay(for: startDate)
+
+        let components = Calendar.current.dateComponents([.day], from: today, to: travelStart)
+        let days = components.day ?? 0
+
+        if days > 0 {
+            return "D-\(days)"
+        } else if days == 0 {
+            return "D-Day"
+        } else {
+            return "D+\(abs(days))"
+        }
+    }
+
+    /// 현재 날짜로부터 여행 시작일까지의 일수 반환 (숫자만)
+    func daysFromNowToTravel(_ startDate: Date) -> Int {
+        let today = Calendar.current.startOfDay(for: Date())
+        let travelStart = Calendar.current.startOfDay(for: startDate)
+
+        let components = Calendar.current.dateComponents([.day], from: today, to: travelStart)
+        return components.day ?? 0
+    }
 }

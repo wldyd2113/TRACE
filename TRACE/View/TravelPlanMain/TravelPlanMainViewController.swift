@@ -12,8 +12,9 @@ import RxCocoa
 import Then
 
 class TravelPlanMainViewController: UIViewController {
-    
+
     private let disposeBag = DisposeBag()
+    private let viewModel = PlanMainViewModel()
     
     // MARK: - UI Components
     private let titleLabel = UILabel().then {
@@ -107,53 +108,121 @@ class TravelPlanMainViewController: UIViewController {
     }
     
     // MARK: - Data
-    private let travelData = BehaviorRelay<[(location: String, country: String, date: String)]>(
-        value: [
-            ("일본", "도쿄", "2024-03-15"),
-            ("프랑스", "파리", "2024-06-10")
-        ]
-    )
+    // ViewModel을 통해 Realm 데이터를 가져오므로 하드코딩된 데이터 제거
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .background
-        
+
         configureHierarchy()
         configureUI()
         configureLayout()
         bind()
+        bindViewModel()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // ViewModel에 데이터 새로고침 요청
+        viewModel.refreshData()
     }
 }
 
 extension TravelPlanMainViewController: DesiginProtocolBind {
     func bind() {
-        // TableView 데이터 바인딩
-        travelData
-            .bind(to: tableView.rx.items(cellIdentifier: "TravelCell", cellType: TravelPlanTableViewCell.self)) { index, item, cell in
-                cell.configure(location: item.location, country: item.country, date: item.date)
-            }
-            .disposed(by: disposeBag)
-        
         // 버튼 액션
-        recordButton.rx.tap
-            .bind(with: self, onNext: { owner, _ in
-//                let vc = TravelPlanWriteViewController()
-//                owner.navigationController?.pushViewController(vc, animated: true)
-            })
-            .disposed(by: disposeBag)
-        
         addTravelButton.rx.tap
             .bind(with: self, onNext: { owner, _ in
                 let vc = TravelPlanWriteViewController()
                 owner.navigationController?.pushViewController(vc, animated: true)
             })
             .disposed(by: disposeBag)
-        
+
         manageButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 print("계획 수정하기 버튼 클릭")
             })
             .disposed(by: disposeBag)
+    }
+
+    func bindViewModel() {
+        let viewDidLoadSubject = PublishSubject<Void>()
+        let refreshDataSubject = PublishSubject<Void>()
+
+        let input = PlanMainViewModel.Input(
+            viewDidLoad: viewDidLoadSubject.asObservable(),
+            refreshData: refreshDataSubject.asObservable(),
+            recordButtonTapped: recordButton.rx.tap.asObservable()
+        )
+
+        // viewDidLoad 시점에 데이터 로드 트리거
+        DispatchQueue.main.async {
+            viewDidLoadSubject.onNext(())
+        }
+
+        let output = viewModel.transform(input: input)
+
+        // 메인 여행 데이터 바인딩
+        output.mainTravelData
+            .subscribe(onNext: { [weak self] mainData in
+                self?.updateMainTravelView(with: mainData)
+            })
+            .disposed(by: disposeBag)
+
+        // 여행 계획 리스트 바인딩
+        output.travelList
+            .bind(to: tableView.rx.items(cellIdentifier: "TravelCell", cellType: TravelPlanTableViewCell.self)) { index, item, cell in
+                cell.configure(location: item.location, country: item.country, date: item.date)
+            }
+            .disposed(by: disposeBag)
+
+        // 일정 보기 버튼 - 여행 계획 상세로 이동
+        output.navigateToDetail
+            .subscribe(onNext: { [weak self] in
+                let vc = TravelPlanDetailViewController()
+                self?.navigationController?.pushViewController(vc, animated: true)
+            })
+            .disposed(by: disposeBag)
+
+        // 에러 처리
+        output.error
+            .subscribe(onNext: { [weak self] errorMessage in
+                self?.showErrorAlert(message: errorMessage)
+            })
+            .disposed(by: disposeBag)
+    }
+
+    // MARK: - Helper Methods
+    private func updateMainTravelView(with data: PlanMainViewModel.MainTravelData?) {
+        DispatchQueue.main.async { [weak self] in
+            guard let data = data else {
+                // 데이터가 없는 경우 기본값 표시
+                self?.countryLabel.text = "여행 계획 없음"
+                self?.dateLabel.text = "날짜 미정"
+                self?.dDayLabel.text = ""
+                self?.imagePlaceholderLabel.text = "여행 사진"
+                return
+            }
+
+            self?.countryLabel.text = data.nation
+            self?.dateLabel.text = data.date
+            self?.dDayLabel.text = data.dDay
+            self?.imagePlaceholderLabel.text = "\(data.country) 여행 사진"
+
+            print("🔄 메인 여행 데이터 업데이트:")
+            print("   🌍 국가: \(data.nation)")
+            print("   📅 날짜: \(data.date)")
+            print("   📊 D-Day: \(data.dDay)")
+        }
+    }
+
+    private func showErrorAlert(message: String) {
+        DispatchQueue.main.async { [weak self] in
+            let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "확인", style: .default))
+            self?.present(alert, animated: true)
+        }
     }
     
     func configureHierarchy() {

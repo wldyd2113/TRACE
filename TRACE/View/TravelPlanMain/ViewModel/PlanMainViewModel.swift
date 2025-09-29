@@ -1,0 +1,126 @@
+//
+//  PlanMainViewModel.swift
+//  TRACE
+//
+//  Created by 차지용 on 9/29/25.
+//
+
+import Foundation
+import RxSwift
+import RxCocoa
+import RealmSwift
+
+class PlanMainViewModel: BaseViewModel {
+
+    private let disposeBag = DisposeBag()
+
+    // MARK: - Input
+    struct Input {
+        let viewDidLoad: Observable<Void>
+        let refreshData: Observable<Void>
+        let recordButtonTapped: Observable<Void>
+    }
+
+    // MARK: - Output
+    struct Output {
+        let mainTravelData: Observable<MainTravelData?>
+        let travelList: Observable<[TravelPlanData]>
+        let navigateToDetail: Observable<Void>
+        let error: Observable<String>
+    }
+
+    // MARK: - Data Models
+    struct MainTravelData {
+        let country: String
+        let nation: String
+        let date: String
+        let dDay: String
+//        let imageUrl: String?
+
+        init(from travelPlan: TravelPlan) {
+            self.country = travelPlan.travelName
+            self.nation = travelPlan.nation
+            self.date = DateManager.shared.formatToStandardString(from: travelPlan.startDate)
+            self.dDay = DateManager.shared.daysUntilTravel(travelPlan.startDate)
+//            self.imageUrl = travelPlan.imageUrl
+        }
+    }
+
+    struct TravelPlanData {
+        let location: String
+        let country: String
+        let date: String
+        let id: String
+
+        init(from travelPlan: TravelPlan) {
+            self.location = travelPlan.travelName
+            self.country = travelPlan.nation
+            self.date = DateManager.shared.formatToStandardString(from: travelPlan.startDate)
+            self.id = travelPlan.id.stringValue
+        }
+    }
+
+    // MARK: - Private Properties
+    private let mainTravelData = BehaviorRelay<MainTravelData?>(value: nil)
+    private let travelList = BehaviorRelay<[TravelPlanData]>(value: [])
+    private let errorRelay = PublishRelay<String>()
+
+    // MARK: - BaseViewModel Implementation
+    func transform(input: Input) -> Output {
+
+        // 뷰 로드 및 데이터 새로고침 시 데이터 로드
+        Observable.merge(input.viewDidLoad, input.refreshData)
+            .subscribe(onNext: { [weak self] in
+                self?.loadTravelData()
+            })
+            .disposed(by: disposeBag)
+
+        return Output(
+            mainTravelData: mainTravelData.asObservable(),
+            travelList: travelList.asObservable(),
+            navigateToDetail: input.recordButtonTapped,
+            error: errorRelay.asObservable()
+        )
+    }
+
+    // MARK: - Private Methods
+    private func loadTravelData() {
+        print("📊 여행 계획 데이터 로드 시작")
+
+        do {
+            let realm = try Realm()
+            let allPlans = realm.objects(TravelPlan.self).sorted(byKeyPath: "startDate", ascending: true)
+
+            print("📋 Realm에서 찾은 여행 계획: \(allPlans.count)개")
+
+            // 가장 빠른 날짜의 여행 계획을 메인으로 표시
+            if let earliestPlan = allPlans.first {
+                let mainData = MainTravelData(from: earliestPlan)
+                mainTravelData.accept(mainData)
+
+                print("🏆 메인 여행 계획: \(mainData.country) (\(mainData.dDay))")
+            } else {
+                print("⚠️ 저장된 여행 계획이 없습니다")
+                mainTravelData.accept(nil)
+            }
+
+            // 전체 여행 계획 리스트
+            let travelPlans = Array(allPlans).map { TravelPlanData(from: $0) }
+            travelList.accept(travelPlans)
+
+            print("📋 로드된 여행 계획 리스트: \(travelPlans.count)개")
+            for plan in travelPlans {
+                print("   • \(plan.location) (\(plan.country)) - \(plan.date)")
+            }
+
+        } catch {
+            print("❌ Realm 데이터 로드 실패: \(error.localizedDescription)")
+            errorRelay.accept("여행 계획을 불러오는데 실패했습니다.")
+        }
+    }
+
+    // MARK: - Public Methods
+    func refreshData() {
+        loadTravelData()
+    }
+}
