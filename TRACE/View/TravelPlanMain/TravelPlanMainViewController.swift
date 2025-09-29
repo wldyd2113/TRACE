@@ -124,8 +124,16 @@ class TravelPlanMainViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // 메인 화면에서는 Navigation Bar 숨기기
+        navigationController?.setNavigationBarHidden(true, animated: animated)
         // ViewModel에 데이터 새로고침 요청
         viewModel.refreshData()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // 다른 화면으로 이동할 때는 Navigation Bar 다시 보이기
+        navigationController?.setNavigationBarHidden(false, animated: animated)
     }
 }
 
@@ -250,9 +258,6 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
     func configureUI() {
         // TableView 셀 등록
         tableView.register(TravelPlanTableViewCell.self, forCellReuseIdentifier: "TravelCell")
-
-        // Navigation Bar 설정
-        navigationController?.navigationBar.isHidden = true
     }
     
     func configureLayout() {
