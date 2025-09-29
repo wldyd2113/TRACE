@@ -24,12 +24,12 @@ class TravelPlanTableViewCell: UITableViewCell {
     }
 
     private let countryLabel = UILabel().then {
-        $0.font = FontManager.onglapFont(12)
+        $0.font = FontManager.onglapFont(16)
         $0.textColor = .systemGray
     }
 
     private let dateLabel = UILabel().then {
-        $0.font = FontManager.onglapFont(12)
+        $0.font = FontManager.onglapFont(16)
         $0.textColor = .systemGray
         $0.textAlignment = .right
     }

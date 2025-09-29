@@ -73,31 +73,17 @@ class TravelPlanMainViewController: UIViewController {
         $0.contentMode = .scaleAspectFit
     }
     
-    private let recordButton = UIButton(type: .system).then {
-        $0.applySubActionStyle(title: "일정 보기")
-    }
-    
     private let addTravelButton = UIButton(type: .system).then {
         $0.applyMainActionStyle(title: "여행 추가하기", fontSize: 16)
         $0.layer.cornerRadius = 10
     }
-    
+
     private let travelListLabel = UILabel().then {
         $0.applyTitleStyle(text: "여행 계획 리스트", fontSize: 18)
     }
-    
+
     private let myTravelLabel = UILabel().then {
         $0.applyDescriptionStyle(text: "나의 여행 계획")
-    }
-    
-    private let manageButton = UIButton(type: .system).then {
-        $0.setTitle("계획 수정하기", for: .normal)
-        $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 12)
-        $0.setTitleColor(.labelLight, for: .normal)
-        $0.layer.borderWidth = 1
-        $0.layer.borderColor = UIColor.buttonDark.cgColor
-        $0.layer.cornerRadius = 5
-        $0.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
     }
     
     private let tableView = UITableView().then {
@@ -146,12 +132,6 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
                 owner.navigationController?.pushViewController(vc, animated: true)
             })
             .disposed(by: disposeBag)
-
-        manageButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                print("계획 수정하기 버튼 클릭")
-            })
-            .disposed(by: disposeBag)
     }
 
     func bindViewModel() {
@@ -161,7 +141,7 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
         let input = PlanMainViewModel.Input(
             viewDidLoad: viewDidLoadSubject.asObservable(),
             refreshData: refreshDataSubject.asObservable(),
-            recordButtonTapped: recordButton.rx.tap.asObservable()
+            recordButtonTapped: Observable.never<Void>()
         )
 
         // viewDidLoad 시점에 데이터 로드 트리거
@@ -185,11 +165,16 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
             }
             .disposed(by: disposeBag)
 
-        // 일정 보기 버튼 - 여행 계획 상세로 이동
-        output.navigateToDetail
-            .subscribe(onNext: { [weak self] in
-                let vc = TravelPlanDetailViewController()
-                self?.navigationController?.pushViewController(vc, animated: true)
+        // 테이블뷰 셀 선택 시 상세 화면으로 이동
+        tableView.rx.itemSelected
+            .withLatestFrom(output.travelList) { indexPath, travelList in
+                return travelList[indexPath.row]
+            }
+            .subscribe(onNext: { [weak self] selectedPlan in
+                let showVC = TravelPlanShowViewController()
+                showVC.travelPlanId = selectedPlan.id
+                self?.navigationController?.pushViewController(showVC, animated: true)
+                print("🏃‍♂️ 여행 계획 상세 화면으로 이동: \(selectedPlan.location)")
             })
             .disposed(by: disposeBag)
 
@@ -213,12 +198,13 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
                 return
             }
 
-            self?.countryLabel.text = data.nation
+            self?.countryLabel.text = data.country  // 여행지명 표시
             self?.dateLabel.text = data.date
             self?.dDayLabel.text = data.dDay
             self?.imagePlaceholderLabel.text = "\(data.country) 여행 사진"
 
             print("🔄 메인 여행 데이터 업데이트:")
+            print("   🏝️ 여행지: \(data.country)")
             print("   🌍 국가: \(data.nation)")
             print("   📅 날짜: \(data.date)")
             print("   📊 D-Day: \(data.dDay)")
@@ -237,11 +223,9 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
         view.addSubview(titleLabel)
         view.addSubview(subtitleLabel)
         view.addSubview(mainTravelContainerView)
-        view.addSubview(recordButton)
         view.addSubview(addTravelButton)
         view.addSubview(travelListLabel)
         view.addSubview(myTravelLabel)
-        view.addSubview(manageButton)
         view.addSubview(tableView)
         
         // 메인 컨테이너 내부 요소들
@@ -310,26 +294,15 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
             $0.width.height.equalTo(16)
         }
         
-        recordButton.snp.makeConstraints {
+        addTravelButton.snp.makeConstraints {
             $0.top.equalTo(mainTravelContainerView.snp.bottom).offset(20)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(50)
         }
-        
-        addTravelButton.snp.makeConstraints {
-            $0.top.equalTo(recordButton.snp.bottom).offset(12)
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(50)
-        }
-        
+
         travelListLabel.snp.makeConstraints {
             $0.top.equalTo(addTravelButton.snp.bottom).offset(32)
             $0.leading.equalToSuperview().offset(20)
-        }
-        
-        manageButton.snp.makeConstraints {
-            $0.centerY.equalTo(travelListLabel)
-            $0.trailing.equalToSuperview().offset(-20)
         }
         
         myTravelLabel.snp.makeConstraints {
