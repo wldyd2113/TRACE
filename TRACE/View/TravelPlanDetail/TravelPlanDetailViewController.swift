@@ -16,7 +16,7 @@ import CoreLocation
 class TravelPlanDetailViewController: UIViewController {
 
     private let disposeBag = DisposeBag()
-    private let locationManager = CLLocationManager()
+    private let mapManager = MapManger()
     
     // MARK: - Data
     private var currentDay = 1
@@ -130,11 +130,9 @@ class TravelPlanDetailViewController: UIViewController {
         $0.layer.cornerRadius = 25
     }
     
-    // MapKit 관련
-    private let mapView = MKMapView().then {
-        $0.layer.cornerRadius = 12
-        $0.showsUserLocation = true
-        $0.mapType = .standard
+    // MapKit 관련 (MapManger에서 관리)
+    private var mapView: MKMapView {
+        return mapManager.mapView
     }
     
     override func viewDidLoad() {
@@ -149,8 +147,8 @@ class TravelPlanDetailViewController: UIViewController {
         // 초기 데이터 로드 (1일차)
         loadDayData(day: currentDay)
 
-        // 맵 초기 설정 (서울 중심으로)
-        setupInitialMapRegion()
+        // 맵 관리자 설정
+        setupMapManager()
     }
     
     @objc private func backButtonTapped() {
@@ -165,51 +163,9 @@ class TravelPlanDetailViewController: UIViewController {
 //        present(navVC, animated: true)
     }
 
-    private func setupInitialMapRegion() {
-        // 위치 관리자 설정
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-
-        // 위치 권한 상태 확인
-        let authStatus = locationManager.authorizationStatus
-        print("📍 TravelPlanDetail: Current authorization status: \(authStatus.rawValue)")
-
-        switch authStatus {
-        case .notDetermined:
-            print("📍 TravelPlanDetail: Permission not determined, using default location")
-            setDefaultLocation()
-        case .denied, .restricted:
-            print("📍 TravelPlanDetail: Location access denied or restricted, using default location")
-            setDefaultLocation()
-        case .authorizedWhenInUse, .authorizedAlways:
-            print("📍 TravelPlanDetail: Location authorized, requesting current location...")
-            locationManager.requestLocation()
-        @unknown default:
-            print("📍 TravelPlanDetail: Unknown authorization status, using default location")
-            setDefaultLocation()
-        }
-    }
-
-    private func setDefaultLocation() {
-        // 기본 위치 (서울)로 설정
-        print("📍 Setting default location (Seoul)")
-        let defaultCoordinate = CLLocationCoordinate2D(latitude: 37.5665, longitude: 126.9780)
-        let region = MKCoordinateRegion(
-            center: defaultCoordinate,
-            latitudinalMeters: 10000,
-            longitudinalMeters: 10000
-        )
-        mapView.setRegion(region, animated: true)
-    }
-
-    private func setMapRegion(coordinate: CLLocationCoordinate2D) {
-        print("📍 Setting map region to: \(coordinate.latitude), \(coordinate.longitude)")
-        let region = MKCoordinateRegion(
-            center: coordinate,
-            latitudinalMeters: 5000,
-            longitudinalMeters: 5000
-        )
-        mapView.setRegion(region, animated: true)
+    private func setupMapManager() {
+        mapManager.delegate = self
+        mapManager.requestInitialLocation()
     }
 
     @objc private func timePickerDone() {
@@ -571,59 +527,18 @@ extension TravelPlanDetailViewController: MapSearchDelegate {
     }
     
     private func showRouteOnMap(coordinates: [CLLocationCoordinate2D]) {
-        // 기존 어노테이션 제거
-        mapView.removeAnnotations(mapView.annotations)
-        
-        // 좌표들을 지도에 표시
-        for (index, coordinate) in coordinates.enumerated() {
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = coordinate
-            annotation.title = "지점 \(index + 1)"
-            mapView.addAnnotation(annotation)
-        }
-        
-        // 지도 영역 설정
-        if !coordinates.isEmpty {
-            let region = MKCoordinateRegion(coordinates: coordinates)
-            mapView.setRegion(region, animated: true)
-        }
+        mapManager.showRouteOnMap(coordinates: coordinates)
     }
 }
 
-// MARK: - CLLocationManagerDelegate
-extension TravelPlanDetailViewController: CLLocationManagerDelegate {
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.first else {
-            print("📍 No location found in locations array")
-            return
-        }
-        print("📍 Location updated: \(location.coordinate.latitude), \(location.coordinate.longitude)")
-        setMapRegion(coordinate: location.coordinate)
+// MARK: - MapMangerDelegate
+extension TravelPlanDetailViewController: MapMangerDelegate {
+    func mapManagerDidUpdateLocation(_ coordinate: CLLocationCoordinate2D) {
+        print("📍 TravelPlanDetail: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
     }
 
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("📍 Location error: \(error.localizedDescription)")
-        setDefaultLocation()
-    }
-
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        let authStatus = manager.authorizationStatus
-        print("📍 TravelPlanDetail: Authorization changed to: \(authStatus.rawValue)")
-
-        switch authStatus {
-        case .authorizedWhenInUse, .authorizedAlways:
-            print("📍 TravelPlanDetail: Authorization granted, requesting location...")
-            manager.requestLocation()
-        case .denied, .restricted:
-            print("📍 TravelPlanDetail: Authorization denied/restricted, using default location")
-            setDefaultLocation()
-        case .notDetermined:
-            print("📍 TravelPlanDetail: Authorization not determined, using default location")
-            setDefaultLocation()
-        @unknown default:
-            print("📍 TravelPlanDetail: Unknown authorization status, using default location")
-            setDefaultLocation()
-        }
+    func mapManagerDidFailToGetLocation() {
+        print("📍 TravelPlanDetail: Failed to get location, using default")
     }
 }
 
@@ -646,29 +561,3 @@ protocol MapSearchDelegate: AnyObject {
     func didSelectRoute(_ route: String, coordinates: [CLLocationCoordinate2D])
 }
 
-// MARK: - MapKit Extension
-extension MKCoordinateRegion {
-    init(coordinates: [CLLocationCoordinate2D]) {
-        guard !coordinates.isEmpty else {
-            self.init()
-            return
-        }
-        
-        let minLat = coordinates.map { $0.latitude }.min()!
-        let maxLat = coordinates.map { $0.latitude }.max()!
-        let minLon = coordinates.map { $0.longitude }.min()!
-        let maxLon = coordinates.map { $0.longitude }.max()!
-        
-        let center = CLLocationCoordinate2D(
-            latitude: (minLat + maxLat) / 2,
-            longitude: (minLon + maxLon) / 2
-        )
-        
-        let span = MKCoordinateSpan(
-            latitudeDelta: (maxLat - minLat) * 1.2,
-            longitudeDelta: (maxLon - minLon) * 1.2
-        )
-        
-        self.init(center: center, span: span)
-    }
-}
