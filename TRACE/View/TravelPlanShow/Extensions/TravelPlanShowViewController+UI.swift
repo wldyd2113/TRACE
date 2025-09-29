@@ -337,13 +337,15 @@ extension TravelPlanShowViewController {
             self?.budgetTextField.text = dayData.budget
             self?.routeSearchBar.text = dayData.route
 
-            // 현재 검색된 장소들 업데이트
+            // 현재 검색된 장소들 업데이트 (편집 모드가 아닐 때만 지도 업데이트)
             self?.currentSearchedPlaces = dayData.searchedPlaces
 
-            // 지도에 검색된 장소들 표시
-            self?.mapManager.clearAllSearchResults()
-            if !dayData.searchedPlaces.isEmpty {
-                self?.mapManager.displaySearchResults(places: dayData.searchedPlaces)
+            // 편집 모드가 아닐 때만 지도 업데이트 (무한 루프 방지)
+            if self?.isEditMode == false {
+                self?.mapManager.clearAllSearchResults()
+                if !dayData.searchedPlaces.isEmpty {
+                    self?.mapManager.displaySearchResults(places: dayData.searchedPlaces)
+                }
             }
 
             print("🔄 Day \(self?.currentDay ?? 0) UI 업데이트:")

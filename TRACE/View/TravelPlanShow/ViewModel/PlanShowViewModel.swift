@@ -181,6 +181,9 @@ class PlanShowViewModel: BaseViewModel {
             dayData.budget = dayDetail.budget
             dayData.route = dayDetail.route
 
+            print("📋 Day \(dayDetail.dayNumber) 로드 중...")
+            print("   📍 저장된 좌표 개수: \(dayDetail.routeCoordinates.count)개")
+
             // 일정 아이템 로드
             let scheduleItems = dayDetail.schedules.map { schedule in
                 ScheduleItem(time: schedule.time, location: schedule.location)
@@ -189,7 +192,8 @@ class PlanShowViewModel: BaseViewModel {
 
             // 좌표 데이터를 KakaoPlace로 변환 (기본 구현)
             let places = dayDetail.routeCoordinates.map { coordinate in
-                KakaoPlace(
+                print("   📍 좌표 복원: \(coordinate.placeName) (\(coordinate.latitude), \(coordinate.longitude))")
+                return KakaoPlace(
                     id: coordinate.placeName,
                     placeName: coordinate.placeName,
                     categoryName: "",
@@ -207,6 +211,7 @@ class PlanShowViewModel: BaseViewModel {
             dayData.searchedPlaces = Array(places)
 
             storage[dayDetail.dayNumber] = dayData
+            print("   ✅ Day \(dayDetail.dayNumber) 로드 완료: 좌표 \(places.count)개")
         }
 
         dayDataStorage.accept(storage)

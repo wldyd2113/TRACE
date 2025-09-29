@@ -107,7 +107,7 @@ extension TravelPlanShowViewController: MapMangerDelegate {
         // 검색된 장소들 업데이트 (편집 모드에서만)
         if isEditMode {
             currentSearchedPlaces = places
-            // ViewModel에 검색된 장소들 업데이트
+            // 즉시 ViewModel 업데이트 (무한 루프 방지를 위해 저장 시점에 처리)
             viewModel.updateSearchedPlaces(places, forDay: currentDay)
         }
 
