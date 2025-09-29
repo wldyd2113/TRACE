@@ -11,3 +11,10 @@ struct ScheduleItem {
     let time: String
     let location: String
 }
+
+// 현재 일차별 데이터 구조
+struct DayData {
+    var budget: String = ""
+    var route: String = ""
+    var scheduleItems: [ScheduleItem] = []
+}

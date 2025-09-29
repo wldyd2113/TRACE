@@ -36,11 +36,13 @@ class PlanDetailViewModel: BaseViewModel {
         let currentDayData: Observable<DayData>
         let navigateBack: Observable<Void>
         let searchResults: Observable<[KakaoPlace]>
+        let saveResult: Observable<(success: Bool, message: String)>
     }
 
     // MARK: - Properties
     private var currentDay = BehaviorRelay<Int>(value: 1)
     private var dayDataStorage = BehaviorRelay<[Int: DayData]>(value: [:])
+    private let saveResult = PublishSubject<(success: Bool, message: String)>()
 
     // 현재 일차별 데이터 구조
     struct DayData {
@@ -160,7 +162,8 @@ class PlanDetailViewModel: BaseViewModel {
             scheduleItems: scheduleItems,
             currentDayData: currentDayData,
             navigateBack: navigateBack,
-            searchResults: searchResults
+            searchResults: searchResults,
+            saveResult: saveResult.asObservable()
         )
     }
 
@@ -271,8 +274,13 @@ class PlanDetailViewModel: BaseViewModel {
             }
             print("==============================")
 
+            // 성공 결과 emit
+            saveResult.onNext((success: true, message: "여행 계획이 성공적으로 저장되었습니다!"))
+
         } catch {
             print("❌ Realm 저장 실패: \(error.localizedDescription)")
+            // 실패 결과 emit
+            saveResult.onNext((success: false, message: "여행 계획 저장에 실패했습니다. 다시 시도해주세요."))
         }
     }
 
@@ -303,6 +311,21 @@ class PlanDetailViewModel: BaseViewModel {
 
             print("📍 좌표 저장: \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
         }
+    }
+
+    // MARK: - Public Save Method
+    func saveAllDataToRealm() {
+        print("💾 ===== ViewModel 저장 시작 =====")
+
+        let currentStorage = dayDataStorage.value
+        print("📊 저장할 데이터 개수: \(currentStorage.count)개 일차")
+
+        // 빈 데이터 제외하고 저장
+        let filteredStorage = currentStorage.filter { (day, data) in
+            return !data.budget.isEmpty || !data.route.isEmpty || !data.scheduleItems.isEmpty || !data.searchedPlaces.isEmpty
+        }
+
+        saveTravelPlan(storage: filteredStorage)
     }
 
     // MARK: - Public Methods
