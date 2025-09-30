@@ -179,9 +179,123 @@ extension TravelRecordViewController: UICollectionViewDataSource, UICollectionVi
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("📱 사진 선택: \(indexPath.item + 1)번째")
+        print("📱 여행 기록 선택: \(indexPath.item + 1)번째")
 
-        let detailVC = TravelRecordPhotoViewController()
-        navigationController?.pushViewController(detailVC, animated: true)
+        // TravelShowRecordViewController로 이동
+        let showRecordVC = TravelShowRecordViewController()
+
+        // 샘플 데이터 전달 (실제로는 Realm에서 로드)
+        let sampleData = createSampleRecordData(for: indexPath.item)
+        showRecordVC.setRecordData(
+            photos: sampleData.photos,
+            route: sampleData.route,
+            record: sampleData.record,
+            places: sampleData.places
+        )
+
+        showRecordVC.travelRecordId = "\(indexPath.item + 1)" // 실제로는 Realm ID 사용
+
+        navigationController?.pushViewController(showRecordVC, animated: true)
+    }
+
+    // MARK: - Sample Data Creation
+    private func createSampleRecordData(for index: Int) -> (photos: [UIImage], route: String, record: String, places: [KakaoPlace]) {
+
+        // 샘플 사진들 생성 (실제로는 저장된 이미지 사용)
+        let samplePhotos: [UIImage] = {
+            var photos: [UIImage] = []
+            for i in 0..<(index % 3 + 1) { // 1~3개 사진
+                if let image = createSampleImage(with: "📷 \(i + 1)", color: getSampleColor(for: index)) {
+                    photos.append(image)
+                }
+            }
+            return photos
+        }()
+
+        // 샘플 경로 데이터
+        let sampleRoutes = [
+            "서울 → 부산 여행",
+            "제주도 한 바퀴",
+            "경주 역사 탐방",
+            "강릉 바다 여행",
+            "전주 맛집 투어"
+        ]
+
+        // 샘플 기록 데이터
+        let sampleRecords = [
+            "정말 즐거운 여행이었습니다! 날씨도 좋고 음식도 맛있었어요. 다음에 또 오고 싶은 곳입니다.",
+            "아름다운 자연 경관에 감동받았습니다. 사진으로는 담을 수 없는 아름다움이었어요.",
+            "역사의 흔적을 따라 걷는 의미 있는 시간이었습니다. 많은 것을 배우고 느꼈어요.",
+            "시원한 바닷바람과 함께한 힐링 여행! 스트레스가 모두 날아갔습니다.",
+            "맛있는 음식들로 가득한 여행! 배도 마음도 모두 만족스러웠습니다."
+        ]
+
+        // 샘플 장소 데이터
+        let samplePlaces: [KakaoPlace] = {
+            let places = [
+                ("서울역", 37.5547, 126.9707),
+                ("부산역", 35.1151, 129.0416),
+                ("제주공항", 33.5120, 126.4914),
+                ("경주 불국사", 35.7898, 129.3322),
+                ("강릉 경포대", 37.7954, 128.8961)
+            ]
+
+            let selectedPlace = places[index % places.count]
+
+            return [KakaoPlace(
+                id: "\(index)",
+                placeName: selectedPlace.0,
+                categoryName: "관광지",
+                categoryGroupCode: "AT4",
+                categoryGroupName: "관광명소",
+                phone: "",
+                addressName: "\(selectedPlace.0) 주변",
+                roadAddressName: "",
+                x: String(selectedPlace.2),
+                y: String(selectedPlace.1),
+                placeUrl: "https://place.map.kakao.com/\(index)",
+                distance: "0"
+            )]
+        }()
+
+        return (
+            photos: samplePhotos,
+            route: sampleRoutes[index % sampleRoutes.count],
+            record: sampleRecords[index % sampleRecords.count],
+            places: samplePlaces
+        )
+    }
+
+    private func createSampleImage(with text: String, color: UIColor) -> UIImage? {
+        let size = CGSize(width: 300, height: 300)
+        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+
+        color.setFill()
+        UIRectFill(CGRect(origin: .zero, size: size))
+
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.boldSystemFont(ofSize: 24),
+            .foregroundColor: UIColor.white
+        ]
+
+        let textSize = text.size(withAttributes: attributes)
+        let textRect = CGRect(
+            x: (size.width - textSize.width) / 2,
+            y: (size.height - textSize.height) / 2,
+            width: textSize.width,
+            height: textSize.height
+        )
+
+        text.draw(in: textRect, withAttributes: attributes)
+
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return image
+    }
+
+    private func getSampleColor(for index: Int) -> UIColor {
+        let colors: [UIColor] = [.systemBlue, .systemGreen, .systemRed, .systemOrange, .systemPurple]
+        return colors[index % colors.count]
     }
 }
