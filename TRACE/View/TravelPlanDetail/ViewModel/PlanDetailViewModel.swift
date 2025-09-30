@@ -197,15 +197,27 @@ class PlanDetailViewModel: BaseViewModel {
             currentStorage[day] = DayData()
         }
 
+        // 기존 일정과 검색된 장소들은 유지하면서 예산과 경로만 업데이트
+        let existingScheduleItems = currentStorage[day]?.scheduleItems ?? []
+        let existingSearchedPlaces = currentStorage[day]?.searchedPlaces ?? []
+
         currentStorage[day]?.budget = budget
         currentStorage[day]?.route = route
+        currentStorage[day]?.scheduleItems = existingScheduleItems
+        currentStorage[day]?.searchedPlaces = existingSearchedPlaces
 
         dayDataStorage.accept(currentStorage)
+
+        print("💾 ViewModel: Day \(day) 데이터 저장 완료")
+        print("   💰 예산: '\(budget)'")
+        print("   🚗 경로: '\(route)'")
+        print("   📋 일정: \(existingScheduleItems.count)개 (기존 유지)")
+        print("   📍 좌표: \(existingSearchedPlaces.count)개 (기존 유지)")
     }
 
     private func saveTravelPlan(storage: [Int: DayData]) {
         print("✅ ===== 여행 계획 저장 시작 =====")
-        print("📊 저장할 데이터 개수: \(storage.count)개 일차")
+        print("📊 새로 저장할 데이터 개수: \(storage.count)개 일차")
 
         for (day, data) in storage {
             print("📅 Day \(day) 미리보기:")
@@ -225,12 +237,57 @@ class PlanDetailViewModel: BaseViewModel {
             let allPlans = realm.objects(TravelPlan.self)
             let currentPlan = allPlans.last ?? createNewTravelPlan(in: realm)
 
+            // 기존 데이터를 먼저 로드하여 병합
+            var allDaysStorage: [Int: DayData] = [:]
+
+            // 기존 Realm 데이터 로드
+            print("📋 기존 저장된 일차: \(currentPlan.travelDays.count)개")
+            for dayDetail in currentPlan.travelDays {
+                var dayData = DayData()
+                dayData.budget = dayDetail.budget
+                dayData.route = dayDetail.route
+
+                // 일정 아이템 로드
+                let scheduleItems = dayDetail.schedules.map { schedule in
+                    ScheduleItem(time: schedule.time, location: schedule.location)
+                }
+                dayData.scheduleItems = Array(scheduleItems)
+
+                // 좌표 데이터 로드
+                let places = dayDetail.routeCoordinates.map { coordinate in
+                    KakaoPlace(
+                        id: coordinate.placeName,
+                        placeName: coordinate.placeName,
+                        categoryName: "",
+                        categoryGroupCode: "",
+                        categoryGroupName: "",
+                        phone: "",
+                        addressName: "",
+                        roadAddressName: "",
+                        x: String(coordinate.longitude),
+                        y: String(coordinate.latitude),
+                        placeUrl: "",
+                        distance: "0"
+                    )
+                }
+                dayData.searchedPlaces = Array(places)
+
+                allDaysStorage[dayDetail.dayNumber] = dayData
+                print("📋 기존 데이터 복원: Day \(dayDetail.dayNumber)")
+            }
+
+            // 새로운 데이터로 업데이트 (기존 데이터 덮어쓰기)
+            for (day, data) in storage {
+                allDaysStorage[day] = data
+                print("📝 새 데이터 추가/업데이트: Day \(day)")
+            }
+
             try realm.write {
                 // 기존 일차별 데이터 삭제
                 currentPlan.travelDays.removeAll()
 
-                // 새로운 일차별 데이터 추가
-                for (day, data) in storage.sorted(by: { $0.key < $1.key }) {
+                // 병합된 모든 일차별 데이터 추가
+                for (day, data) in allDaysStorage.sorted(by: { $0.key < $1.key }) {
                     let dayDetail = TravelDayDetail()
                     dayDetail.dayNumber = day
                     dayDetail.budget = data.budget
@@ -345,6 +402,11 @@ class PlanDetailViewModel: BaseViewModel {
 
     func getCurrentDay() -> Int {
         return currentDay.value
+    }
+
+    func setCurrentDay(_ day: Int) {
+        currentDay.accept(day)
+        print("🔄 ViewModel: currentDay 업데이트 - \(day)")
     }
 
     func getDayData(for day: Int) -> DayData {

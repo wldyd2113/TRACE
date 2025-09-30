@@ -44,19 +44,28 @@ extension TravelPlanDetailViewController {
             .bind(to: addScheduleItemButton.rx.backgroundColor)
             .disposed(by: disposeBag)
 
-        // 일정 아이템 변화 감지 및 UI 업데이트
-        output.scheduleItems
-            .subscribe(onNext: { [weak self] items in
-                self?.updateScheduleUI(items: items)
-            })
-            .disposed(by: disposeBag)
+        // 일정 아이템 변화 감지 및 UI 업데이트 - 비활성화 (일차 변경 시에만 수동으로 업데이트)
+        // output.scheduleItems
+        //     .subscribe(onNext: { [weak self] items in
+        //         self?.updateScheduleUI(items: items)
+        //     })
+        //     .disposed(by: disposeBag)
 
-        // 일정 추가 성공 시 입력 필드 초기화
+        // 일정 추가 성공 시 입력 필드 초기화 및 현재 일차 UI 업데이트
         input.addScheduleButtonTapped
             .subscribe(onNext: { [weak self] in
-                self?.timeTextField.text = ""
-                self?.locationTextField.text = ""
-                print("✅ 입력 필드 초기화 완료")
+                guard let self = self else { return }
+
+                // 입력 필드 초기화
+                self.timeTextField.text = ""
+                self.locationTextField.text = ""
+
+                // 현재 일차의 최신 일정 데이터로 UI 업데이트
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    let currentDayData = self.viewModel.getDayData(for: self.currentDay)
+                    self.updateScheduleUI(items: currentDayData.scheduleItems)
+                    print("✅ 일정 추가 후 현재 일차(\(self.currentDay)) UI 업데이트 완료")
+                }
             })
             .disposed(by: disposeBag)
 

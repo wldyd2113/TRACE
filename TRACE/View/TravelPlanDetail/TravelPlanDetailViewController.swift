@@ -26,7 +26,6 @@ class TravelPlanDetailViewController: UIViewController {
 
     // MARK: - Data
     var currentDay = 1
-    var dayDataStorage: [Int: DayData] = [:]
     var totalDays = 3 // 기본값, Realm에서 계산하여 업데이트
     var startDate: Date?
     var endDate: Date?
@@ -161,6 +160,9 @@ class TravelPlanDetailViewController: UIViewController {
         configureLayout()
         bind()
 
+        // ViewModel currentDay 초기 동기화
+        viewModel.setCurrentDay(currentDay)
+
         // 초기 데이터 로드 (1일차)
         loadDayData(day: currentDay)
 
@@ -228,6 +230,9 @@ class TravelPlanDetailViewController: UIViewController {
         selectedDayIndex = index
         currentDay = index + 1 // 1-based
 
+        // ViewModel의 currentDay도 동기화
+        viewModel.setCurrentDay(currentDay)
+
         // CollectionView 셀 업데이트
         DispatchQueue.main.async { [weak self] in
             self?.dateCollectionView.reloadItems(at: [
@@ -240,22 +245,17 @@ class TravelPlanDetailViewController: UIViewController {
         loadDayData(day: currentDay)
 
         print("📅 일차 선택됨: \(currentDay)일차 (index: \(index))")
+        print("🔄 ViewController와 ViewModel currentDay 동기화 완료")
     }
 
     func saveCurrentDayData() {
-        let currentData = DayData(
-            budget: budgetTextField.text ?? "",
-            route: routeSearchBar.text ?? "",
-            scheduleItems: getCurrentScheduleItems()
-        )
-        dayDataStorage[currentDay] = currentData
-
-        // ViewModel에도 현재 일차의 예산과 경로 업데이트
+        // ViewModel에 현재 일차의 모든 데이터 업데이트
         viewModel.updateBudget(budgetTextField.text ?? "", forDay: currentDay)
         viewModel.updateRoute(routeSearchBar.text ?? "", forDay: currentDay)
-
-        // 현재 검색된 장소들도 ViewModel에 저장
         viewModel.updateSearchedPlaces(currentSearchedPlaces, forDay: currentDay)
+
+        // ViewController의 로컬 저장소는 제거하고 ViewModel만 사용
+        print("💾 Day \(currentDay) 데이터 저장됨 - ViewModel에만 저장")
     }
 
     func loadDayData(day: Int) {
@@ -264,19 +264,27 @@ class TravelPlanDetailViewController: UIViewController {
         // ViewModel에서 일차 데이터 가져오기
         let dayData = viewModel.getDayData(for: day)
 
-        // UI 직접 업데이트 - 이전 일차 데이터를 완전히 지우고 새 데이터로 교체
+        // UI 완전 초기화 및 업데이트
         DispatchQueue.main.async { [weak self] in
-            // 텍스트 필드 초기화 및 업데이트
-            self?.budgetTextField.text = dayData.budget
-            self?.routeSearchBar.text = dayData.route
+            // 1. 텍스트 필드 완전 초기화 후 새 데이터 설정
+            self?.budgetTextField.text = ""
+            self?.routeSearchBar.text = ""
 
-            // 일정 UI 업데이트 (기존 일정 제거 후 새 일정 표시)
+            // 약간의 지연 후 새 데이터 설정 (UI 업데이트 보장)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self?.budgetTextField.text = dayData.budget
+                self?.routeSearchBar.text = dayData.route
+            }
+
+            // 2. 일정 UI 완전 초기화 후 업데이트
             self?.updateScheduleUI(items: dayData.scheduleItems)
 
-            // 검색된 장소들 업데이트 (기존 지도 마커 제거 후 새 마커 표시)
-            self?.currentSearchedPlaces = dayData.searchedPlaces
+            // 3. 검색된 장소들 완전 초기화 후 업데이트
+            self?.currentSearchedPlaces.removeAll()
             self?.mapManager.clearAllSearchResults()
+
             if !dayData.searchedPlaces.isEmpty {
+                self?.currentSearchedPlaces = dayData.searchedPlaces
                 self?.mapManager.displaySearchResults(places: dayData.searchedPlaces)
             }
 
