@@ -282,8 +282,49 @@ class TravelRecordPhotoViewController: UIViewController {
         }
 
         print("📸 선택 완료: \(selectedAssets.count)개 사진 선택됨")
-        // TODO: 선택된 사진들을 여행 기록에 저장하는 로직 구현
-        navigationController?.popViewController(animated: true)
+
+        // 선택된 PHAsset들을 UIImage로 변환
+        convertSelectedAssetsToImages { [weak self] images in
+            DispatchQueue.main.async {
+                // TravelRecordWriteViewController로 이동
+                let writeVC = TravelRecordWriteViewController()
+                writeVC.setSelectedPhotos(images)
+                self?.navigationController?.pushViewController(writeVC, animated: true)
+            }
+        }
+    }
+
+    // MARK: - Image Conversion
+    private func convertSelectedAssetsToImages(completion: @escaping ([UIImage]) -> Void) {
+        let group = DispatchGroup()
+        var images: [UIImage] = []
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .highQualityFormat
+        options.isNetworkAccessAllowed = true
+        options.isSynchronous = false
+
+        let targetSize = CGSize(width: 1000, height: 1000) // 적절한 크기로 조정
+
+        for asset in selectedAssets {
+            group.enter()
+
+            imageManager.requestImage(
+                for: asset,
+                targetSize: targetSize,
+                contentMode: .aspectFill,
+                options: options
+            ) { image, _ in
+                if let image = image {
+                    images.append(image)
+                }
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            print("📸 이미지 변환 완료: \(images.count)개")
+            completion(images)
+        }
     }
 }
 

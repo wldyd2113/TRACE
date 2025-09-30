@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreLocation
 protocol MapManagerDelegate: AnyObject {
     func mapManagerDidUpdateLocation(_ coordinate: CLLocationCoordinate2D)
     func mapManagerDidFailToGetLocation()
