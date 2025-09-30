@@ -190,11 +190,12 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
     private func updateMainTravelView(with data: PlanMainViewModel.MainTravelData?) {
         DispatchQueue.main.async { [weak self] in
             guard let data = data else {
-                // 데이터가 없는 경우 기본값 표시
-                self?.countryLabel.text = "여행 계획 없음"
-                self?.dateLabel.text = "날짜 미정"
+                // 다가오는 여행 계획이 없는 경우
+                self?.countryLabel.text = "다가오는 여행 없음"
+                self?.dateLabel.text = "새로운 여행을 계획해보세요!"
                 self?.dDayLabel.text = ""
-                self?.imagePlaceholderLabel.text = "여행 사진"
+                self?.imagePlaceholderLabel.text = "✈️ 새 여행 추가하기"
+                print("📭 다가오는 여행 계획이 없어 기본 UI 표시")
                 return
             }
 
