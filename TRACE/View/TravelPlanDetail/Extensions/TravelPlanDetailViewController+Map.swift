@@ -114,6 +114,53 @@ extension TravelPlanDetailViewController {
         print("🗑️ 모든 검색 결과 및 루트 삭제")
     }
 
+    @objc func clearCurrentDayData() {
+        // 확인 alert 표시
+        let alert = UIAlertController(
+            title: "Day \(currentDay) 데이터 삭제",
+            message: "해당 일차의 모든 데이터(예산, 일정, 경로)를 삭제하시겠습니까?",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            self?.performClearCurrentDayData()
+        })
+
+        present(alert, animated: true)
+    }
+
+    private func performClearCurrentDayData() {
+        print("🗑️ ===== Day \(currentDay) 전체 데이터 삭제 시작 =====")
+
+        // ViewModel을 통해 해당 일차 데이터 초기화
+        viewModel.clearDayData(for: currentDay)
+
+        // UI 초기화
+        budgetTextField.text = ""
+        routeSearchBar.text = ""
+
+        // 일정 목록 UI 초기화 (스케줄 스택뷰 초기화)
+        scheduleStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+
+        // 지도 검색 결과 초기화
+        mapManager.clearAllSearchResults()
+
+        // 검색된 장소들 초기화
+        currentSearchedPlaces.removeAll()
+
+        print("✅ Day \(currentDay) 전체 데이터 삭제 완료")
+
+        // 성공 메시지 표시
+        let successAlert = UIAlertController(
+            title: "삭제 완료",
+            message: "Day \(currentDay)의 모든 데이터가 삭제되었습니다.",
+            preferredStyle: .alert
+        )
+        successAlert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(successAlert, animated: true)
+    }
+
     func performManualSearch(query: String) {
         print("🔍 수동 검색 실행: \(query)")
 

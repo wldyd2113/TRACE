@@ -84,7 +84,7 @@ extension TravelPlanDetailViewController: DesiginProtocolBind {
             image: UIImage(systemName: "trash"),
             style: .plain,
             target: self,
-            action: #selector(clearSearchResults)
+            action: #selector(clearCurrentDayData)
         )
 
         // RouteSearchBar 설정 - 수동 검색을 위해 delegate 활성화
@@ -267,16 +267,55 @@ extension TravelPlanDetailViewController {
 
     // MARK: - UI Update Methods
     func updateScheduleUI(items: [ScheduleItem]) {
-        // 기존 스케줄 아이템들 제거
-        scheduleStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        print("🔄 Schedule UI 업데이트 시작: \(items.count)개 일정")
 
-        // 새로운 스케줄 아이템들 추가 (인덱스와 함께)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            // 기존 스케줄 아이템들 애니메이션과 함께 제거
+            let existingViews = self.scheduleStackView.arrangedSubviews
+
+            if !existingViews.isEmpty {
+                UIView.animate(withDuration: 0.3, animations: {
+                    existingViews.forEach { view in
+                        view.alpha = 0
+                        view.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+                    }
+                }) { _ in
+                    existingViews.forEach { $0.removeFromSuperview() }
+                    self.addNewScheduleItemsWithAnimation(items: items)
+                }
+            } else {
+                self.addNewScheduleItemsWithAnimation(items: items)
+            }
+        }
+    }
+
+    private func addNewScheduleItemsWithAnimation(items: [ScheduleItem]) {
+        // 새로운 스케줄 아이템들을 애니메이션과 함께 추가
         items.enumerated().forEach { index, item in
-            let scheduleView = createScheduleItemView(item: item, index: index)
-            scheduleStackView.addArrangedSubview(scheduleView)
+            let scheduleView = self.createScheduleItemView(item: item, index: index)
+
+            // 초기 상태 설정 (애니메이션 시작점)
+            scheduleView.alpha = 0
+            scheduleView.transform = CGAffineTransform(translationX: 0, y: 30).scaledBy(x: 0.9, y: 0.9)
+
+            self.scheduleStackView.addArrangedSubview(scheduleView)
+
+            // 순차적으로 애니메이션 실행 (약간의 지연으로 부드러운 효과)
+            UIView.animate(
+                withDuration: 0.5,
+                delay: Double(index) * 0.1,
+                usingSpringWithDamping: 0.8,
+                initialSpringVelocity: 0.3,
+                options: [.curveEaseInOut]
+            ) {
+                scheduleView.alpha = 1.0
+                scheduleView.transform = .identity
+            }
         }
 
-        print("🔄 Schedule UI 업데이트: \(items.count)개 일정")
+        print("✅ Schedule UI 업데이트 완료: \(items.count)개 일정 (애니메이션 포함)")
     }
 
     func updateDayUI(dayData: PlanDetailViewModel.DayData) {

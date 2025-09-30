@@ -96,8 +96,31 @@ extension TravelPlanDetailViewController {
 extension TravelPlanDetailViewController {
     @objc func deleteScheduleItem(_ sender: UIButton) {
         let index = sender.tag
-        viewModel.removeScheduleItem(at: index)
         print("🗑️ 일정 삭제 요청: index \(index)")
+
+        // 삭제할 뷰 찾기
+        guard index < scheduleStackView.arrangedSubviews.count else {
+            print("❌ 잘못된 인덱스: \(index)")
+            return
+        }
+
+        let viewToDelete = scheduleStackView.arrangedSubviews[index]
+
+        // 삭제 애니메이션 실행
+        UIView.animate(withDuration: 0.3, animations: {
+            viewToDelete.alpha = 0
+            viewToDelete.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+        }) { [weak self] _ in
+            // 애니메이션 완료 후 ViewModel에서 삭제 및 UI 업데이트
+            self?.viewModel.removeScheduleItem(at: index)
+
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                let updatedItems = self.viewModel.getDayData(for: self.currentDay).scheduleItems
+                self.updateScheduleUI(items: updatedItems)
+                print("✅ 일정 삭제 후 UI 업데이트 완료 (애니메이션 포함)")
+            }
+        }
     }
 
     private func getCurrentScheduleItems() -> [ScheduleItem] {

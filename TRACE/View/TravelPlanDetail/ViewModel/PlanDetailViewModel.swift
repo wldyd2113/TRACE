@@ -497,4 +497,15 @@ class PlanDetailViewModel: BaseViewModel {
         print("🎯 첫 번째 결과 선택: \(firstResult.placeName)")
         return firstResult
     }
+
+    // MARK: - Clear Day Data
+    func clearDayData(for day: Int) {
+        print("🗑️ ViewModel: Day \(day) 데이터 초기화 시작")
+
+        var currentStorage = dayDataStorage.value
+        currentStorage[day] = DayData.empty
+        dayDataStorage.accept(currentStorage)
+
+        print("✅ ViewModel: Day \(day) 데이터 초기화 완료")
+    }
 }
