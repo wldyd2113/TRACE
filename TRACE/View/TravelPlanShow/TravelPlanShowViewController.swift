@@ -26,6 +26,8 @@ class TravelPlanShowViewController: UIViewController {
     var totalDays = 1
     var selectedDayIndex = 0
     var isEditMode = false
+    var isUpdatingFromViewModel = false // 무한 루프 방지 플래그
+    var isUpdatingSearchFromMap = false // 검색 업데이트 무한 루프 방지 플래그
 
     // 검색된 장소들을 저장 (좌표 정보 포함)
     var currentSearchedPlaces: [KakaoPlace] = []

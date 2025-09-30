@@ -26,7 +26,9 @@ extension TravelPlanShowViewController {
     }
 
     func performManualSearch(query: String) {
-        print("🔍 수동 검색 실행: \(query)")
+        print("🔍 ===== 수동 검색 실행 =====")
+        print("   • 검색어: '\(query)'")
+        print("   • 현재 지도의 장소 수: \(mapManager.searchedPlaces.count)개")
 
         NetworkManger.shared.searchKakaoPlaces(query: query)
             .subscribe(onNext: { [weak self] result in
@@ -34,8 +36,9 @@ extension TravelPlanShowViewController {
                 case .success(let response):
                     print("✅ 검색 성공: \(response.documents.count)개 결과")
                     if let bestMatch = self?.selectBestMatch(places: response.documents, query: query) {
-                        self?.mapManager.displaySearchResults(places: [bestMatch])
                         print("🎯 최적 결과 선택: \(bestMatch.placeName)")
+                        print("📍 기존 장소에 누적 추가 시작...")
+                        self?.mapManager.displaySearchResults(places: [bestMatch])
                     } else {
                         print("⚠️ 검색 결과 없음")
                     }
@@ -96,49 +99,92 @@ extension TravelPlanShowViewController: MapMangerDelegate {
     }
 
     func mapManagerDidSelectPlace(_ place: KakaoPlace) {
-        // 편집 모드에서만 장소 정보 표시
-        if isEditMode {
-            showPlaceInfoAlert(place: place)
-        }
+        // 읽기 모드와 편집 모드 모두에서 장소 정보 표시
+        showPlaceInfoAlert(place: place)
         print("📍 TravelPlanShow: Place selected: \(place.placeName)")
     }
 
     func mapManagerDidUpdateSearchedPlaces(_ places: [KakaoPlace]) {
-        // 검색된 장소들 업데이트 (편집 모드에서만)
-        if isEditMode {
-            currentSearchedPlaces = places
-            // 즉시 ViewModel 업데이트 (무한 루프 방지를 위해 저장 시점에 처리)
-            viewModel.updateSearchedPlaces(places, forDay: currentDay)
+        print("📍 ===== MapManager에서 검색된 장소들 업데이트 =====")
+        print("   • 편집모드: \(isEditMode)")
+        print("   • ViewModel 업데이트 중: \(isUpdatingFromViewModel)")
+        print("   • 검색 업데이트 중: \(isUpdatingSearchFromMap)")
+        print("   • 받은 장소 수: \(places.count)개")
+
+        // 검색된 장소들 업데이트 (편집 모드에서만, 무한 루프 방지)
+        if isEditMode && !isUpdatingFromViewModel && !isUpdatingSearchFromMap {
+            // 기존 장소와 새 장소가 다를 때만 업데이트
+            let currentPlaceNames = currentSearchedPlaces.map { $0.placeName }.sorted()
+            let newPlaceNames = places.map { $0.placeName }.sorted()
+
+            if currentPlaceNames != newPlaceNames {
+                print("📍 새로운 검색 결과 감지: \(currentPlaceNames) → \(newPlaceNames)")
+
+                // 검색 업데이트 플래그 설정
+                isUpdatingSearchFromMap = true
+
+                currentSearchedPlaces = places
+
+                // ViewModel 업데이트 (지연 처리로 무한 루프 방지)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+                    self?.viewModel.updateSearchedPlaces(places, forDay: self?.currentDay ?? 1)
+
+                    // 플래그 해제는 더 늦게
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        self?.isUpdatingSearchFromMap = false
+                        print("📍 ViewModel 검색 장소 업데이트 완료")
+                    }
+                }
+
+                print("📍 검색된 장소들 로컬 업데이트 완료")
+            } else {
+                print("📍 동일한 검색 결과이므로 업데이트 스킵")
+            }
+        } else {
+            print("📍 검색 업데이트 스킵 (조건 불충족)")
         }
 
         print("📍 TravelPlanShow: Searched places updated: \(places.count)개")
         for (index, place) in places.enumerated() {
             print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
         }
+        print("================================================")
     }
 
     private func showPlaceInfoAlert(place: KakaoPlace) {
-        let alert = UIAlertController(title: place.placeName, message: nil, preferredStyle: .actionSheet)
+        print("📱 ===== 장소 정보 Alert 표시 시작 =====")
+        print("   • 장소명: '\(place.placeName)'")
+        print("   • 편집모드: \(isEditMode)")
+
+        let alert = UIAlertController(title: place.placeName.isEmpty ? "장소 정보" : place.placeName, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        📍 주소: \(place.addressName)
-        🏢 카테고리: \(place.categoryName)
+        📍 위치: \(String(format: "%.6f, %.6f", place.coordinate.latitude, place.coordinate.longitude))
+        📍 주소: \(place.addressName.isEmpty ? "정보 없음" : place.addressName)
+        🏢 카테고리: \(place.categoryName.isEmpty ? "정보 없음" : place.categoryName)
         📞 전화번호: \(place.phone.isEmpty ? "정보 없음" : place.phone)
-        🌐 카카오맵: \(place.placeUrl)
-        📏 거리: \(place.distance)m
         """
 
         alert.message = infoMessage
 
-        alert.addAction(UIAlertAction(title: "카카오맵에서 보기", style: .default) { _ in
-            if let url = URL(string: place.placeUrl) {
+        // 카카오맵에서 좌표로 검색하는 버튼 추가
+        alert.addAction(UIAlertAction(title: "카카오맵에서 위치 보기", style: .default) { _ in
+            let kakaoMapURL = "kakaomap://look?p=\(place.coordinate.latitude),\(place.coordinate.longitude)"
+            let webURL = "https://map.kakao.com/link/map/\(place.placeName),\(place.coordinate.latitude),\(place.coordinate.longitude)"
+
+            if let url = URL(string: kakaoMapURL), UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+            } else if let url = URL(string: webURL) {
                 UIApplication.shared.open(url)
             }
         })
 
-        alert.addAction(UIAlertAction(title: "일정에 추가", style: .default) { [weak self] _ in
-            self?.addPlaceToSchedule(place: place)
-        })
+        // 편집 모드에서만 일정 추가 버튼 표시
+        if isEditMode {
+            alert.addAction(UIAlertAction(title: "일정에 추가", style: .default) { [weak self] _ in
+                self?.addPlaceToSchedule(place: place)
+            })
+        }
 
         alert.addAction(UIAlertAction(title: "닫기", style: .cancel))
 
@@ -151,7 +197,7 @@ extension TravelPlanShowViewController: MapMangerDelegate {
 
         present(alert, animated: true)
 
-        print("📱 장소 정보 표시: \(place.placeName)")
+        print("📱 ===== Alert 표시 완료 =====")
     }
 
     private func addPlaceToSchedule(place: KakaoPlace) {

@@ -24,7 +24,7 @@ class MapManger: NSObject {
     let mapView = MKMapView()
 
     // 검색된 장소들을 누적 저장
-    private var searchedPlaces: [KakaoPlace] = []
+    private(set) var searchedPlaces: [KakaoPlace] = []
 
     override init() {
         super.init()
@@ -113,9 +113,18 @@ class MapManger: NSObject {
         }
 
         print("📍 ===== 지도에 \(places.count)개 장소 표시 시작 =====")
+        print("📍 기존 장소 수: \(searchedPlaces.count)개")
 
-        // 기존 검색된 장소들을 완전히 대체
-        searchedPlaces = places
+        // 새로운 장소들을 기존 장소들에 누적 추가 (중복 제거)
+        for newPlace in places {
+            // 중복 검사 (같은 장소가 이미 있는지 확인)
+            if !searchedPlaces.contains(where: { $0.placeName == newPlace.placeName }) {
+                searchedPlaces.append(newPlace)
+                print("📍 새 장소 추가: \(newPlace.placeName)")
+            } else {
+                print("📍 이미 존재하는 장소 스킵: \(newPlace.placeName)")
+            }
+        }
 
         // 기존 어노테이션 제거 후 모든 장소 다시 표시
         mapView.removeAnnotations(mapView.annotations)
@@ -123,7 +132,7 @@ class MapManger: NSObject {
 
         var coordinates: [CLLocationCoordinate2D] = []
 
-        // 모든 새로운 장소들을 지도에 표시
+        // 모든 누적된 장소들을 지도에 표시
         for (index, place) in searchedPlaces.enumerated() {
             let annotation = PlaceAnnotation()
             annotation.coordinate = place.coordinate
@@ -233,10 +242,31 @@ extension MapManger: CLLocationManagerDelegate {
 // MARK: - MKMapViewDelegate
 extension MapManger: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        guard let placeAnnotation = view.annotation as? PlaceAnnotation,
-              let kakaoPlace = placeAnnotation.kakaoPlace else { return }
+        print("🎯 ===== 마커 클릭 이벤트 발생 =====")
+        print("   • 어노테이션 타이틀: \(view.annotation?.title ?? "nil")")
+        print("   • 어노테이션 타입: \(type(of: view.annotation))")
+
+        guard let placeAnnotation = view.annotation as? PlaceAnnotation else {
+            print("❌ PlaceAnnotation으로 캐스팅 실패")
+            return
+        }
+
+        print("✅ PlaceAnnotation 캐스팅 성공")
+
+        guard let kakaoPlace = placeAnnotation.kakaoPlace else {
+            print("❌ kakaoPlace 데이터가 nil")
+            return
+        }
+
+        print("✅ KakaoPlace 데이터 확인:")
+        print("   • 장소명: '\(kakaoPlace.placeName)'")
+        print("   • 주소: '\(kakaoPlace.addressName)'")
+        print("   • 카테고리: '\(kakaoPlace.categoryName)'")
+        print("   • 전화번호: '\(kakaoPlace.phone)'")
+        print("   • 좌표: (\(kakaoPlace.coordinate.latitude), \(kakaoPlace.coordinate.longitude))")
 
         delegate?.mapManagerDidSelectPlace(kakaoPlace)
+        print("🎯 ===== 델리게이트 호출 완료 =====")
     }
 
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {

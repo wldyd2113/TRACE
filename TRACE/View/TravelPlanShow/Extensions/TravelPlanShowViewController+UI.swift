@@ -12,10 +12,12 @@ import RxCocoa
 // MARK: - DesiginProtocolBind Implementation
 extension TravelPlanShowViewController: DesiginProtocolBind {
     func bind() {
-        // 수정 모드 토글
+        // 수정 모드 활성화 (토글이 아닌 무조건 편집 모드로)
         editButton.rx.tap
             .subscribe(onNext: { [weak self] in
-                self?.toggleEditMode()
+                self?.setEditMode()
+                self?.isEditMode = true
+                print("🔓 수정하기 버튼 - 편집 모드 활성화")
             })
             .disposed(by: disposeBag)
 
@@ -29,7 +31,9 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
         // 취소 버튼
         cancelButton.rx.tap
             .subscribe(onNext: { [weak self] in
-                self?.cancelEdit()
+                self?.setReadOnlyMode()
+                self?.isEditMode = false
+                print("🔒 취소 버튼 - 읽기 모드로 전환")
             })
             .disposed(by: disposeBag)
 
@@ -293,8 +297,8 @@ extension TravelPlanShowViewController {
 
     func saveChanges() {
         // ViewModel을 통해 변경사항 저장
-        print("💾 변경사항 저장")
-        setReadOnlyMode()
+        print("💾 변경사항 저장 (편집 모드 유지)")
+        // 저장 후에도 편집 모드 유지 - setReadOnlyMode() 제거
     }
 
     func cancelEdit() {
@@ -334,25 +338,48 @@ extension TravelPlanShowViewController {
 
     func updateDayUI(with dayData: PlanShowViewModel.DayData) {
         DispatchQueue.main.async { [weak self] in
-            self?.budgetTextField.text = dayData.budget
-            self?.routeSearchBar.text = dayData.route
+            guard let self = self else { return }
 
-            // 현재 검색된 장소들 업데이트
-            self?.currentSearchedPlaces = dayData.searchedPlaces
+            // 무한 루프 방지 플래그 설정
+            self.isUpdatingFromViewModel = true
 
-            // 항상 지도 업데이트 (편집 모드 상관없이)
-            self?.mapManager.clearAllSearchResults()
-            if !dayData.searchedPlaces.isEmpty {
-                self?.mapManager.displaySearchResults(places: dayData.searchedPlaces)
-                print("🗺️ 지도에 \(dayData.searchedPlaces.count)개 마커 표시")
-                for (index, place) in dayData.searchedPlaces.enumerated() {
-                    print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
+            // 텍스트 필드 업데이트 (무한 루프 방지)
+            self.budgetTextField.text = dayData.budget
+            self.routeSearchBar.text = dayData.route
+
+            // 플래그 해제
+            self.isUpdatingFromViewModel = false
+
+            // 현재 검색된 장소들 업데이트 (검색 업데이트 중이 아닐 때만)
+            if !self.isUpdatingSearchFromMap {
+                // 기존 장소와 새 장소가 다를 때만 지도 업데이트
+                let currentPlaceNames = self.currentSearchedPlaces.map { $0.placeName }.sorted()
+                let newPlaceNames = dayData.searchedPlaces.map { $0.placeName }.sorted()
+
+                if currentPlaceNames != newPlaceNames {
+                    print("🗺️ 장소 변경 감지: \(currentPlaceNames) → \(newPlaceNames)")
+
+                    self.currentSearchedPlaces = dayData.searchedPlaces
+
+                    // 지도 업데이트 (편집 모드 상관없이)
+                    self.mapManager.clearAllSearchResults()
+                    if !dayData.searchedPlaces.isEmpty {
+                        self.mapManager.displaySearchResults(places: dayData.searchedPlaces)
+                        print("🗺️ 지도에 \(dayData.searchedPlaces.count)개 마커 표시")
+                        for (index, place) in dayData.searchedPlaces.enumerated() {
+                            print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
+                        }
+                    } else {
+                        print("🗺️ 표시할 마커가 없음")
+                    }
+                } else {
+                    print("🗺️ 동일한 장소들이므로 지도 업데이트 스킵")
                 }
             } else {
-                print("🗺️ 표시할 마커가 없음")
+                print("🗺️ 검색 업데이트 중이므로 지도 업데이트 스킵")
             }
 
-            print("🔄 Day \(self?.currentDay ?? 0) UI 업데이트:")
+            print("🔄 Day \(self.currentDay) UI 업데이트:")
             print("   💰 예산: '\(dayData.budget.isEmpty ? "미설정" : dayData.budget)'")
             print("   🚗 경로: '\(dayData.route.isEmpty ? "미설정" : dayData.route)'")
             print("   📋 일정: \(dayData.scheduleItems.count)개")
@@ -362,18 +389,35 @@ extension TravelPlanShowViewController {
 
     func updateScheduleUI(with scheduleItems: [ScheduleItem]) {
         DispatchQueue.main.async { [weak self] in
-            // 기존 스케줄 아이템들 제거
-            self?.scheduleStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            guard let self = self else { return }
 
-            // 새로운 스케줄 아이템들 추가
-            scheduleItems.enumerated().forEach { index, item in
-                let scheduleView = self?.createScheduleItemView(item: item, index: index)
-                if let view = scheduleView {
-                    self?.scheduleStackView.addArrangedSubview(view)
+            // 애니메이션과 함께 기존 스케줄 아이템들 제거
+            UIView.animate(withDuration: 0.3, animations: {
+                self.scheduleStackView.arrangedSubviews.forEach { view in
+                    view.alpha = 0
+                    view.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
                 }
-            }
+            }) { _ in
+                // 애니메이션 완료 후 실제 제거
+                self.scheduleStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
 
-            print("🔄 Schedule UI 업데이트: \(scheduleItems.count)개 일정")
+                // 새로운 스케줄 아이템들 추가 (애니메이션과 함께)
+                scheduleItems.enumerated().forEach { index, item in
+                    let scheduleView = self.createScheduleItemView(item: item, index: index)
+                    scheduleView.alpha = 0
+                    scheduleView.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+
+                    self.scheduleStackView.addArrangedSubview(scheduleView)
+
+                    // 지연된 애니메이션으로 등장 효과
+                    UIView.animate(withDuration: 0.3, delay: Double(index) * 0.1, options: [.curveEaseOut], animations: {
+                        scheduleView.alpha = 1
+                        scheduleView.transform = .identity
+                    })
+                }
+
+                print("🔄 Schedule UI 업데이트: \(scheduleItems.count)개 일정 (애니메이션 적용)")
+            }
         }
     }
 
@@ -427,8 +471,36 @@ extension TravelPlanShowViewController {
 
     @objc func deleteScheduleItem(_ sender: UIButton) {
         let index = sender.tag
-        viewModel.removeScheduleItem(at: index, forDay: currentDay)
-        print("🗑️ 일정 삭제 요청: index \(index)")
+        let currentScheduleItems = viewModel.getDayData(for: currentDay).scheduleItems
+
+        // 유효한 인덱스인지 확인
+        guard index < currentScheduleItems.count else {
+            print("❌ 잘못된 인덱스: \(index)")
+            return
+        }
+
+        let itemToDelete = currentScheduleItems[index]
+
+        // 편집 모드에서만 삭제 가능
+        guard isEditMode else {
+            print("🔒 읽기 전용 모드에서는 삭제할 수 없습니다")
+            return
+        }
+
+        // 삭제 확인 알림
+        let alert = UIAlertController(
+            title: "일정 삭제",
+            message: "'\(itemToDelete.time) - \(itemToDelete.location)' 일정을 삭제하시겠습니까?",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            self?.viewModel.removeScheduleItem(at: index, forDay: self?.currentDay ?? 1)
+            print("🗑️ 일정 삭제 완료: \(itemToDelete.time) - \(itemToDelete.location)")
+        })
+
+        present(alert, animated: true)
     }
 
     func showSaveAlert(success: Bool, message: String) {
@@ -438,9 +510,10 @@ extension TravelPlanShowViewController {
             alert.addAction(UIAlertAction(title: "확인", style: .default))
             self?.present(alert, animated: true)
 
-            if success {
-                self?.setReadOnlyMode()
-            }
+            // 저장 성공 시에도 편집 모드 유지
+            // if success {
+            //     self?.setReadOnlyMode()
+            // }
         }
     }
 

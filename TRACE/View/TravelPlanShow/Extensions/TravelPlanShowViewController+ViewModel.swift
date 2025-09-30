@@ -53,10 +53,17 @@ extension TravelPlanShowViewController {
             })
             .disposed(by: disposeBag)
 
-        // 저장 결과 바인딩
+        // 저장 결과 바인딩 (alert 제거, 콘솔 로그만)
         output.saveResult
             .subscribe(onNext: { [weak self] success, message in
-                self?.showSaveAlert(success: success, message: message)
+                if success {
+                    print("✅ 저장 성공: \(message)")
+                    // 저장 성공 시 읽기 모드로 전환
+                    self?.setReadOnlyMode()
+                    self?.isEditMode = false
+                } else {
+                    print("❌ 저장 실패: \(message)")
+                }
             })
             .disposed(by: disposeBag)
 
@@ -67,17 +74,39 @@ extension TravelPlanShowViewController {
             })
             .disposed(by: disposeBag)
 
-        // 예산 텍스트 필드 변경 감지
+        // 예산 텍스트 필드 변경 감지 (사용자 입력만 감지)
         budgetTextField.rx.text.orEmpty
             .skip(1) // 초기값 스킵
-            .subscribe(onNext: { budgetChangedSubject.onNext($0) })
+            .distinctUntilChanged() // 같은 값 연속 입력 방지
+            .debounce(.milliseconds(300), scheduler: MainScheduler.instance) // 연속 입력 방지
+            .subscribe(onNext: { [weak self] text in
+                guard let self = self else { return }
+                // ViewModel 업데이트 중이거나 편집 모드가 아닐 때는 무시
+                if !self.isUpdatingFromViewModel && self.isEditMode {
+                    budgetChangedSubject.onNext(text)
+                    print("💰 사용자가 예산 변경: '\(text)'")
+                }
+            })
             .disposed(by: disposeBag)
 
-        // 경로 검색바 변경 감지
+        // 경로 검색바 변경 감지 (사용자 입력만 감지) - 비활성화
+        // 검색 기능과 경로 설정 기능이 충돌하므로 경로 자동 업데이트 비활성화
+        // 대신 저장 버튼을 누를 때만 경로 데이터 업데이트
+        /*
         routeSearchBar.rx.text.orEmpty
             .skip(1) // 초기값 스킵
-            .subscribe(onNext: { routeChangedSubject.onNext($0) })
+            .distinctUntilChanged() // 같은 값 연속 입력 방지
+            .debounce(.milliseconds(300), scheduler: MainScheduler.instance) // 연속 입력 방지
+            .subscribe(onNext: { [weak self] text in
+                guard let self = self else { return }
+                // ViewModel 업데이트 중이거나 편집 모드가 아닐 때는 무시
+                if !self.isUpdatingFromViewModel && self.isEditMode {
+                    routeChangedSubject.onNext(text)
+                    print("🚗 사용자가 경로 변경: '\(text)'")
+                }
+            })
             .disposed(by: disposeBag)
+        */
 
         // 일정 추가 버튼
         addScheduleItemButton.rx.tap
@@ -85,12 +114,37 @@ extension TravelPlanShowViewController {
                 timeTextField.rx.text.orEmpty,
                 locationTextField.rx.text.orEmpty
             ))
-            .subscribe(onNext: { addScheduleSubject.onNext($0) })
+            .subscribe(onNext: { [weak self] timeAndLocation in
+                // ViewModel에 일정 추가
+                addScheduleSubject.onNext(timeAndLocation)
+
+                // 입력 필드 초기화 (편집 모드는 유지)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    self?.timeTextField.text = ""
+                    self?.locationTextField.text = ""
+                    print("✨ 일정 추가 후 입력 필드 초기화 완료 (편집 모드 유지)")
+                }
+            })
             .disposed(by: disposeBag)
 
-        // 저장 버튼
+        // 저장 버튼 - 경로 텍스트도 함께 업데이트
         saveButton.rx.tap
-            .subscribe(onNext: { saveChangesSubject.onNext(()) })
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+
+                // 현재 입력된 텍스트들을 ViewModel에 업데이트
+                if let budgetText = self.budgetTextField.text {
+                    budgetChangedSubject.onNext(budgetText)
+                }
+                if let routeText = self.routeSearchBar.text {
+                    routeChangedSubject.onNext(routeText)
+                }
+
+                // 저장 실행
+                saveChangesSubject.onNext(())
+
+                print("💾 저장 버튼 클릭 - 현재 텍스트 필드 값들 ViewModel에 업데이트 후 저장")
+            })
             .disposed(by: disposeBag)
 
         // 일차 선택 (CollectionView에서 처리)

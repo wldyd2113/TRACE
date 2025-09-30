@@ -73,6 +73,7 @@ class PlanShowViewModel: BaseViewModel {
     private let errorRelay = PublishRelay<String>()
 
     private var currentTravelPlan: TravelPlan?
+    private var saveWorkItem: DispatchWorkItem?
 
     // MARK: - BaseViewModel Implementation
     func transform(input: Input) -> Output {
@@ -114,10 +115,10 @@ class PlanShowViewModel: BaseViewModel {
             })
             .disposed(by: disposeBag)
 
-        // 변경사항 저장
+        // 변경사항 저장 (수동 저장)
         input.saveChanges
             .subscribe(onNext: { [weak self] in
-                self?.saveAllChangesToRealm()
+                self?.saveAllChangesToRealm(isManualSave: true)
             })
             .disposed(by: disposeBag)
 
@@ -264,6 +265,12 @@ class PlanShowViewModel: BaseViewModel {
         }
         currentStorage[day]?.searchedPlaces = places
         dayDataStorage.accept(currentStorage)
+
+        print("📍 검색된 장소 업데이트됨 - Day \(day): \(places.count)개")
+
+        // 검색된 장소 업데이트 후 지연된 자동 저장 (디바운싱)
+        scheduleAutoSave()
+        print("💾 검색된 장소 업데이트 후 자동 저장 예약")
     }
 
     func addScheduleItem(_ item: ScheduleItem, forDay day: Int) {
@@ -275,6 +282,10 @@ class PlanShowViewModel: BaseViewModel {
         dayDataStorage.accept(currentStorage)
 
         print("➕ 일정 추가됨 - Day \(day): \(item.time) \(item.location)")
+
+        // 추가 후 지연된 자동 저장 (디바운싱)
+        scheduleAutoSave()
+        print("💾 일정 추가 후 자동 저장 예약")
     }
 
     func removeScheduleItem(at index: Int, forDay day: Int) {
@@ -287,12 +298,32 @@ class PlanShowViewModel: BaseViewModel {
         dayDataStorage.accept(currentStorage)
 
         print("🗑️ 일정 삭제됨 - Day \(day): \(removedItem.time) \(removedItem.location)")
+
+        // 삭제 후 지연된 자동 저장 (디바운싱)
+        scheduleAutoSave()
+        print("💾 일정 삭제 후 자동 저장 예약")
     }
 
-    private func saveAllChangesToRealm() {
+    // MARK: - Auto Save with Debouncing
+    private func scheduleAutoSave() {
+        // 기존 저장 작업 취소
+        saveWorkItem?.cancel()
+
+        // 새로운 저장 작업 예약 (1초 지연)
+        saveWorkItem = DispatchWorkItem { [weak self] in
+            self?.saveAllChangesToRealm()
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: saveWorkItem!)
+        print("📅 자동 저장 예약됨 (1초 후 실행)")
+    }
+
+    private func saveAllChangesToRealm(isManualSave: Bool = false) {
         guard let travelPlan = currentTravelPlan else {
             print("❌ 저장할 여행 계획이 없습니다")
-            saveResult.onNext((success: false, message: "저장할 여행 계획이 없습니다."))
+            if isManualSave {
+                saveResult.onNext((success: false, message: "저장할 여행 계획이 없습니다."))
+            }
             return
         }
 
@@ -338,11 +369,15 @@ class PlanShowViewModel: BaseViewModel {
             }
 
             print("✅ 여행 계획 변경사항 저장 완료!")
-            saveResult.onNext((success: true, message: "여행 계획이 성공적으로 저장되었습니다!"))
+            if isManualSave {
+                saveResult.onNext((success: true, message: "여행 계획이 성공적으로 저장되었습니다!"))
+            }
 
         } catch {
             print("❌ 여행 계획 저장 실패: \(error.localizedDescription)")
-            saveResult.onNext((success: false, message: "여행 계획 저장에 실패했습니다. 다시 시도해주세요."))
+            if isManualSave {
+                saveResult.onNext((success: false, message: "여행 계획 저장에 실패했습니다. 다시 시도해주세요."))
+            }
         }
     }
 }
