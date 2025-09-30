@@ -17,9 +17,14 @@ class TravelRecordWriteViewController: UIViewController {
 
     let disposeBag = DisposeBag()
     let mapManager = MapManager()
+    private let viewModel = RecordWriteViewModel()
 
     // 검색된 장소들을 저장 (좌표 정보 포함)
     var currentSearchedPlaces: [KakaoPlace] = []
+
+    // ViewModel Input Relays
+    private let photosRelay = BehaviorRelay<[Data]>(value: [])
+    let searchedPlacesRelay = BehaviorRelay<[KakaoPlace]>(value: [])
 
     // MARK: - UI Components
     private let scrollView = UIScrollView().then {
@@ -29,10 +34,10 @@ class TravelRecordWriteViewController: UIViewController {
 
     private let contentView = UIView()
 
-    // 사진 추가 섹션
+    // 사진 표시 섹션 (추가 기능 없이 보기만)
     private let photoSectionLabel = UILabel().then {
-        $0.text = "여기에서 여행 사진을 추가하세요."
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
+        $0.text = "선택된 여행 사진"
+        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.textColor = .label
         $0.textAlignment = .center
     }
@@ -45,8 +50,7 @@ class TravelRecordWriteViewController: UIViewController {
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.delegate = self
         collectionView.dataSource = self
-        collectionView.register(PhotoAddCell.self, forCellWithReuseIdentifier: "PhotoAddCell")
-        collectionView.register(PhotoDisplayCell.self, forCellWithReuseIdentifier: "PhotoDisplayCell")
+        collectionView.register(PhotoDisplayOnlyCollectionViewCell.self, forCellWithReuseIdentifier: "PhotoDisplayOnlyCollectionViewCell")
         return collectionView
     }()
 
@@ -82,7 +86,7 @@ class TravelRecordWriteViewController: UIViewController {
 
     // 여행 일기 섹션
     private let diarySectionLabel = UILabel().then {
-        $0.text = "여행 일기"
+        $0.text = "여행 일지 작성"
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.textColor = .label
     }
@@ -134,10 +138,21 @@ class TravelRecordWriteViewController: UIViewController {
         selectedPhotos = photos
         print("📸 TravelRecordWrite: \(photos.count)개 사진 받음")
 
-        // 뷰가 로드된 후에 CollectionView 업데이트
+        // UIImage를 Data로 변환하여 ViewModel에 전달
+        let photoDataArray = photos.compactMap { $0.jpegData(compressionQuality: 0.8) }
+        photosRelay.accept(photoDataArray)
+
+        // 사진이 있을 때만 섹션 표시
         DispatchQueue.main.async { [weak self] in
+            self?.updatePhotoSectionVisibility()
             self?.photoCollectionView.reloadData()
         }
+    }
+
+    private func updatePhotoSectionVisibility() {
+        let hasPhotos = !selectedPhotos.isEmpty
+        photoSectionLabel.isHidden = !hasPhotos
+        photoCollectionView.isHidden = !hasPhotos
     }
 
     override func viewDidLoad() {
@@ -148,9 +163,13 @@ class TravelRecordWriteViewController: UIViewController {
         configureUI()
         configureLayout()
         bind()
+        bindViewModel()
 
         // 맵 관리자 설정
         setupMapManager()
+
+        // 초기 사진 섹션 숨김
+        updatePhotoSectionVisibility()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -195,37 +214,81 @@ class TravelRecordWriteViewController: UIViewController {
     }
 
     @objc private func saveButtonTapped() {
-        print("📝 여행 기록 저장")
-
-        // 여행 기록 데이터 수집
-        let route = routeSearchBar.text ?? ""
-        let diary = diaryTextView.text ?? ""
-        let searchedPlaces = getCurrentSearchedPlaces()
-
-        print("📝 저장할 데이터:")
-        print("   🗺️ 경로: '\(route)'")
-        print("   📖 일기: '\(diary.prefix(50))...'")
-        print("   📸 사진: \(selectedPhotos.count)개")
-        print("   📍 장소: \(searchedPlaces.count)개")
-
-        // TODO: 여행 기록 저장 로직 구현 (Realm 등)
-
-        navigationController?.popViewController(animated: true)
+        // ViewModel을 통한 저장은 bindViewModel에서 처리됨
+        print("📝 저장 버튼 탭됨")
     }
 
-    @objc private func photoAddButtonTapped() {
-        let photoVC = TravelRecordPhotoViewController()
-        navigationController?.pushViewController(photoVC, animated: true)
+    // MARK: - ViewModel Binding
+    private func bindViewModel() {
+        // Input 생성
+        let input = RecordWriteViewModel.Input(
+            routeText: routeSearchBar.rx.text.orEmpty.asDriver(),
+            diaryText: diaryTextView.rx.text.orEmpty.asDriver(),
+            saveButtonTapped: saveButton.rx.tap.asDriver(),
+            photos: photosRelay,
+            searchedPlaces: searchedPlacesRelay
+        )
+
+        // Transform
+        let output = viewModel.transform(input: input)
+
+        // Output 바인딩
+        // 저장 버튼 활성화/비활성화
+        output.isSaveEnabled
+            .drive(saveButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+
+        output.isSaveEnabled
+            .drive(onNext: { [weak self] isEnabled in
+                self?.saveButton.alpha = isEnabled ? 1.0 : 0.6
+            })
+            .disposed(by: disposeBag)
+
+        // 로딩 상태 처리
+        output.isLoading
+            .drive(onNext: { [weak self] isLoading in
+                self?.view.isUserInteractionEnabled = !isLoading
+                if isLoading {
+                    // 로딩 인디케이터 표시 (선택사항)
+                    print("📝 저장 중...")
+                }
+            })
+            .disposed(by: disposeBag)
+
+        // 저장 결과 처리
+        output.saveResult
+            .drive(onNext: { [weak self] result in
+                switch result {
+                case .success:
+                    self?.navigateToTravelRecord()
+                case .failure(let message):
+                    print("❌ 저장 실패: \(message)")
+                }
+            })
+            .disposed(by: disposeBag)
+
+        // 검색된 장소들 변경 시 ViewModel에 전달
+        Driver.just(currentSearchedPlaces)
+            .drive(onNext: { [weak self] places in
+                self?.searchedPlacesRelay.accept(places)
+            })
+            .disposed(by: disposeBag)
     }
 
-    private func removePhoto(at index: Int) {
-        guard index < selectedPhotos.count else { return }
+    private func navigateToTravelRecord() {
+        // TravelRecordViewController로 이동 (네비게이션 스택에서 찾기)
+        for viewController in navigationController?.viewControllers ?? [] {
+            if let travelRecordVC = viewController as? TravelRecordViewController {
+                navigationController?.popToViewController(travelRecordVC, animated: true)
+                return
+            }
+        }
 
-        selectedPhotos.remove(at: index)
-        photoCollectionView.reloadData()
-
-        print("📸 사진 삭제: \(index)번째 사진, 남은 사진 \(selectedPhotos.count)개")
+        // 만약 TravelRecordViewController가 스택에 없다면 새로 생성하여 이동
+        let travelRecordVC = TravelRecordViewController()
+        navigationController?.setViewControllers([travelRecordVC], animated: true)
     }
+
 }
 
 // MARK: - DesiginProtocolBind
@@ -238,12 +301,7 @@ extension TravelRecordWriteViewController: DesiginProtocolBind {
             })
             .disposed(by: disposeBag)
 
-        // 저장 버튼 바인딩
-        saveButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.saveButtonTapped()
-            })
-            .disposed(by: disposeBag)
+        // 저장 버튼은 ViewModel에서 처리됨
 
         // 텍스트뷰 플레이스홀더 처리
         diaryTextView.rx.text
@@ -315,12 +373,6 @@ extension TravelRecordWriteViewController: DesiginProtocolBind {
                 style: .plain,
                 target: self,
                 action: #selector(clearSearchResults)
-            ),
-            UIBarButtonItem(
-                image: UIImage(systemName: "photo"),
-                style: .plain,
-                target: self,
-                action: #selector(photoAddButtonTapped)
             )
         ]
 
@@ -421,137 +473,12 @@ extension TravelRecordWriteViewController: DesiginProtocolBind {
 // MARK: - UICollectionViewDataSource & Delegate
 extension TravelRecordWriteViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return selectedPhotos.count + 1 // +1 for add button
+        return selectedPhotos.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if indexPath.item == 0 {
-            // 사진 추가 버튼 셀
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoAddCell", for: indexPath) as! PhotoAddCell
-            cell.configure()
-            return cell
-        } else {
-            // 사진 표시 셀
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoDisplayCell", for: indexPath) as! PhotoDisplayCell
-            let photo = selectedPhotos[indexPath.item - 1]
-            cell.configure(with: photo)
-
-            // 삭제 버튼 액션 설정
-            cell.deleteHandler = { [weak self] in
-                self?.removePhoto(at: indexPath.item - 1)
-            }
-
-            return cell
-        }
-    }
-
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if indexPath.item == 0 {
-            // 사진 추가 버튼 탭
-            photoAddButtonTapped()
-        }
-    }
-}
-
-// MARK: - Collection View Cells
-class PhotoAddCell: UICollectionViewCell {
-    private let addImageView = UIImageView().then {
-        $0.image = UIImage(systemName: "plus")
-        $0.tintColor = .systemGray2
-        $0.contentMode = .scaleAspectFit
-    }
-
-    private let addLabel = UILabel().then {
-        $0.text = "사진 추가"
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 12)
-        $0.textColor = .systemGray2
-        $0.textAlignment = .center
-    }
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupUI()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupUI() {
-        backgroundColor = .systemGray5
-        layer.cornerRadius = 8
-        layer.borderWidth = 2
-        layer.borderColor = UIColor.systemGray4.cgColor
-
-        addSubview(addImageView)
-        addSubview(addLabel)
-
-        addImageView.snp.makeConstraints {
-            $0.centerX.equalToSuperview()
-            $0.centerY.equalToSuperview().offset(-10)
-            $0.width.height.equalTo(30)
-        }
-
-        addLabel.snp.makeConstraints {
-            $0.top.equalTo(addImageView.snp.bottom).offset(4)
-            $0.centerX.equalToSuperview()
-        }
-    }
-
-    func configure() {
-        // 필요시 추가 설정
-    }
-}
-
-class PhotoDisplayCell: UICollectionViewCell {
-    private let imageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFill
-        $0.clipsToBounds = true
-    }
-
-    private let deleteButton = UIButton(type: .system).then {
-        $0.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
-        $0.tintColor = .systemRed
-        $0.backgroundColor = .white
-        $0.layer.cornerRadius = 10
-    }
-
-    var deleteHandler: (() -> Void)?
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupUI()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupUI() {
-        layer.cornerRadius = 8
-        clipsToBounds = true
-
-        addSubview(imageView)
-        addSubview(deleteButton)
-
-        imageView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-
-        deleteButton.snp.makeConstraints {
-            $0.top.trailing.equalToSuperview().inset(4)
-            $0.width.height.equalTo(20)
-        }
-
-        // 삭제 버튼 액션 추가
-        deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
-    }
-
-    @objc private func deleteButtonTapped() {
-        deleteHandler?()
-    }
-
-    func configure(with image: UIImage) {
-        imageView.image = image
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoDisplayOnlyCollectionViewCell", for: indexPath) as! PhotoDisplayOnlyCollectionViewCell
+        cell.configure(with: selectedPhotos[indexPath.item])
+        return cell
     }
 }

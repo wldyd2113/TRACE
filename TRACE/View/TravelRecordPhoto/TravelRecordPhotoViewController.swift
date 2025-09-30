@@ -285,32 +285,39 @@ class TravelRecordPhotoViewController: UIViewController {
 
         // 선택된 PHAsset들을 UIImage로 변환
         convertSelectedAssetsToImages { [weak self] images in
-            DispatchQueue.main.async {
-                // TravelRecordWriteViewController로 이동
-                let writeVC = TravelRecordWriteViewController()
-                writeVC.setSelectedPhotos(images)
-                self?.navigationController?.pushViewController(writeVC, animated: true)
-            }
+            guard let self = self else { return }
+
+            // TravelRecordWriteViewController로 이동하면서 사진 전달
+            let writeVC = TravelRecordWriteViewController()
+            writeVC.setSelectedPhotos(images)
+            self.navigationController?.pushViewController(writeVC, animated: true)
+
+            print("📸 사진 전달 완료: \(images.count)개")
         }
     }
 
-    // MARK: - Image Conversion
     private func convertSelectedAssetsToImages(completion: @escaping ([UIImage]) -> Void) {
-        let group = DispatchGroup()
         var images: [UIImage] = []
-        let options = PHImageRequestOptions()
-        options.deliveryMode = .highQualityFormat
-        options.isNetworkAccessAllowed = true
-        options.isSynchronous = false
+        let group = DispatchGroup()
 
-        let targetSize = CGSize(width: 1000, height: 1000) // 적절한 크기로 조정
+        let sortedAssets = selectedAssets.sorted { asset1, asset2 in
+            guard let date1 = asset1.creationDate, let date2 = asset2.creationDate else {
+                return false
+            }
+            return date1 < date2
+        }
 
-        for asset in selectedAssets {
+        for asset in sortedAssets {
             group.enter()
+
+            let options = PHImageRequestOptions()
+            options.deliveryMode = .highQualityFormat
+            options.isNetworkAccessAllowed = true
+            options.isSynchronous = false
 
             imageManager.requestImage(
                 for: asset,
-                targetSize: targetSize,
+                targetSize: CGSize(width: 300, height: 300),
                 contentMode: .aspectFill,
                 options: options
             ) { image, _ in
@@ -322,10 +329,10 @@ class TravelRecordPhotoViewController: UIViewController {
         }
 
         group.notify(queue: .main) {
-            print("📸 이미지 변환 완료: \(images.count)개")
             completion(images)
         }
     }
+
 }
 
 // MARK: - DesiginProtocolBind

@@ -27,6 +27,9 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
         // currentSearchedPlaces 업데이트
         currentSearchedPlaces = places
 
+        // ViewModel에 검색된 장소들 전달
+        searchedPlacesRelay.accept(places)
+
         print("📍 검색된 장소들 업데이트: \(places.count)개")
         for (index, place) in places.enumerated() {
             print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
