@@ -10,6 +10,10 @@
 	<string>여행 계획을 위해 현재 위치를 지도에 표시합니다.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>여행 계획을 위해 현재 위치를 지도에 표시합니다.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>여행 기록에 사진을 추가하기 위해 사진 라이브러리에 접근합니다.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>여행 기록 사진을 저장하기 위해 사진 라이브러리에 접근합니다.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
