@@ -21,6 +21,9 @@ class PlanWriteViewModel {
     let startDate = BehaviorRelay<Date>(value: Date())
     let endDate = BehaviorRelay<Date>(value: Date())
 
+    // MARK: - Auto Save Prevention
+    private var shouldPreventAutoSave = false
+
     // MARK: - Outputs
     let isFormValid: Observable<Bool>
     let buttonBackgroundColor: Observable<UIColor>
@@ -66,6 +69,12 @@ class PlanWriteViewModel {
 
     // MARK: - Methods
     func createTravelPlan() {
+        // 자동 저장 방지 플래그 확인
+        if shouldPreventAutoSave {
+            print("🚫 자동 저장이 방지되어 여행 계획 생성을 건너뜁니다")
+            return
+        }
+
         let country = countryText.value
         let destination = destinationText.value
         let start = startDate.value
@@ -136,5 +145,16 @@ class PlanWriteViewModel {
             print("================================")
             showAlert.accept((title: "오류", message: "여행 계획 저장에 실패했습니다.", completion: nil))
         }
+    }
+
+    // MARK: - Auto Save Prevention
+    func enableAutoSavePrevention() {
+        shouldPreventAutoSave = true
+        print("🚫 자동 저장 방지 활성화")
+    }
+
+    func disableAutoSavePrevention() {
+        shouldPreventAutoSave = false
+        print("✅ 자동 저장 방지 비활성화")
     }
 }

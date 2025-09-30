@@ -91,14 +91,26 @@ class TravelPlanWriteViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .background
-        
+
         configureHierarchy()
         configureUI()
         configureLayout()
         bind()
     }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // 명시적으로 자동 저장 방지
+        print("🚫 TravelPlanWrite: viewWillDisappear - 자동 저장 비활성화")
+        // 여기서는 의도적으로 아무것도 저장하지 않음
+    }
  
     @objc private func backButtonTapped() {
+        // 명시적으로 자동 저장 방지 활성화
+        viewModel.enableAutoSavePrevention()
+        print("🔙 Back 버튼 클릭 - 자동 저장 없이 바로 뒤로가기")
+
+        // Alert 없이 바로 뒤로가기
         navigationController?.popViewController(animated: true)
     }
     

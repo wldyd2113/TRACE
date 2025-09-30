@@ -44,6 +44,9 @@ class PlanDetailViewModel: BaseViewModel {
     private var dayDataStorage = BehaviorRelay<[Int: DayData]>(value: [:])
     private let saveResult = PublishSubject<(success: Bool, message: String)>()
 
+    // MARK: - Auto Save Prevention
+    var shouldPreventAutoSave = false
+
     // 현재 일차별 데이터 구조
     struct DayData {
         var budget: String = ""
@@ -216,6 +219,12 @@ class PlanDetailViewModel: BaseViewModel {
     }
 
     private func saveTravelPlan(storage: [Int: DayData]) {
+        // 자동 저장 방지 플래그 확인
+        if shouldPreventAutoSave {
+            print("🚫 ViewModel: saveTravelPlan - 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
+            return
+        }
+
         print("✅ ===== 여행 계획 저장 시작 =====")
         print("📊 새로 저장할 데이터 개수: \(storage.count)개 일차")
 
@@ -280,6 +289,12 @@ class PlanDetailViewModel: BaseViewModel {
             for (day, data) in storage {
                 allDaysStorage[day] = data
                 print("📝 새 데이터 추가/업데이트: Day \(day)")
+            }
+
+            // Realm write 직전에도 한번 더 확인
+            if shouldPreventAutoSave {
+                print("🚫 ViewModel: realm.write 직전 - 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
+                return
             }
 
             try realm.write {
@@ -372,6 +387,12 @@ class PlanDetailViewModel: BaseViewModel {
 
     // MARK: - Public Save Method
     func saveAllDataToRealm() {
+        // 자동 저장 방지 플래그 확인
+        if shouldPreventAutoSave {
+            print("🚫 ViewModel: 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
+            return
+        }
+
         print("💾 ===== ViewModel 저장 시작 =====")
 
         let currentStorage = dayDataStorage.value

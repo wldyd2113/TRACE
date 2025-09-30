@@ -30,6 +30,7 @@ class TravelPlanDetailViewController: UIViewController {
     var startDate: Date?
     var endDate: Date?
     var selectedDayIndex = 0 // 현재 선택된 일차 인덱스 (0-based)
+    var shouldPreventAutoSave = false // 자동 저장 방지 플래그
 
     // MARK: - UI Components
     let scrollView = UIScrollView().then {
@@ -173,6 +174,17 @@ class TravelPlanDetailViewController: UIViewController {
         bindViewModel()
     }
 
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        print("🚫 TravelPlanDetail: viewWillDisappear - 자동 저장 비활성화")
+
+        // ViewController와 ViewModel 모두 명시적으로 자동 저장 방지
+        shouldPreventAutoSave = true
+        viewModel.shouldPreventAutoSave = true
+
+        // back 버튼으로 나갈 때 데이터 저장하지 않음
+    }
+
     // MARK: - Travel Plan Loading and Day Calculation
     private func loadTravelPlanAndCalculateDays() {
         do {
@@ -249,6 +261,12 @@ class TravelPlanDetailViewController: UIViewController {
     }
 
     func saveCurrentDayData() {
+        // 자동 저장 방지 플래그 확인
+        if shouldPreventAutoSave {
+            print("🚫 자동 저장이 방지되어 데이터 저장을 건너뜁니다")
+            return
+        }
+
         // ViewModel에 현재 일차의 모든 데이터 업데이트
         viewModel.updateBudget(budgetTextField.text ?? "", forDay: currentDay)
         viewModel.updateRoute(routeSearchBar.text ?? "", forDay: currentDay)
