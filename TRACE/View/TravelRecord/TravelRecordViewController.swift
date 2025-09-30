@@ -15,6 +15,12 @@ import RealmSwift
 class TravelRecordViewController: UIViewController {
 
     private let disposeBag = DisposeBag()
+    private let viewModel = RecordViewModel()
+
+    // ViewModel Input Triggers
+    private let viewDidLoadTrigger = PublishRelay<Void>()
+    private let refreshTrigger = PublishRelay<Void>()
+    private let recordSelectedTrigger = PublishRelay<IndexPath>()
 
     // MARK: - UI Components
     private let titleLabel = UILabel().then {
@@ -47,16 +53,10 @@ class TravelRecordViewController: UIViewController {
     }()
 
     // MARK: - Cell Registration
-    var registration: UICollectionView.CellRegistration<UICollectionViewListCell, String>!
+    var registration: UICollectionView.CellRegistration<TravelRecordCell, TravelRecordDisplayModel>!
 
     // MARK: - Data
-    private let samplePhotos = [
-        "사진 1",
-        "사진 2",
-        "사진 3",
-        "사진 4",
-        "사진 5"
-    ]
+    private var displayModels: [TravelRecordDisplayModel] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -66,12 +66,16 @@ class TravelRecordViewController: UIViewController {
         configureUI()
         configureLayout()
         bind()
+        bindViewModel()
         configureDataSource()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
+
+        // 데이터 새로고침
+        refreshTrigger.accept(())
     }
 
     // MARK: - Compositional Layout
@@ -96,6 +100,119 @@ class TravelRecordViewController: UIViewController {
         print("📝 새 여행 기록 추가")
         let writeVC = TravelRecordPhotoViewController()
         navigationController?.pushViewController(writeVC, animated: true)
+    }
+
+    // MARK: - ViewModel Binding
+    private func bindViewModel() {
+        // Input 생성
+        let input = RecordViewModel.Input(
+            viewDidLoad: viewDidLoadTrigger.asDriver(onErrorJustReturn: ()),
+            refreshTriggered: refreshTrigger.asDriver(onErrorJustReturn: ()),
+            recordSelected: recordSelectedTrigger.asDriver(onErrorJustReturn: IndexPath(item: 0, section: 0))
+        )
+
+        // Transform
+        let output = viewModel.transform(input: input)
+
+        // Output 바인딩
+        // 여행 기록 목록 업데이트
+        output.records
+            .drive(onNext: { [weak self] models in
+                self?.displayModels = models
+                self?.collectionView.reloadData()
+            })
+            .disposed(by: disposeBag)
+
+        // 기록 개수 업데이트
+        output.recordCount
+            .drive(onNext: { [weak self] count in
+                self?.recordCountLabel.text = count
+            })
+            .disposed(by: disposeBag)
+
+        // 선택된 기록 처리 (TravelShowRecordViewController로 이동)
+        output.selectedRecordId
+            .compactMap { $0 }
+            .drive(onNext: { [weak self] recordId in
+                self?.navigateToShowRecord(with: recordId)
+            })
+            .disposed(by: disposeBag)
+
+        // 초기 로드 트리거
+        viewDidLoadTrigger.accept(())
+    }
+
+    private func navigateToShowRecord(with recordId: String) {
+        // 메인 스레드에서 새로운 Realm 인스턴스로 기록 로드
+        do {
+            let realm = try Realm()
+            guard let objectId = try? ObjectId(string: recordId),
+                  let record = realm.object(ofType: TravelRecord.self, forPrimaryKey: objectId) else {
+                print("❌ 기록을 찾을 수 없습니다: \(recordId)")
+                return
+            }
+
+            let showRecordVC = TravelShowRecordViewController()
+
+            // 실제 저장된 데이터를 TravelShowRecordViewController에 전달
+            let photos = loadPhotosFromRecord(record)
+            let route = record.travelName
+            let recordText = record.recordLog
+            let places = createPlacesFromRecord(record)
+
+            showRecordVC.setRecordData(
+                photos: photos,
+                route: route,
+                record: recordText,
+                places: places
+            )
+
+            showRecordVC.travelRecordId = recordId
+
+            navigationController?.pushViewController(showRecordVC, animated: true)
+        } catch {
+            print("❌ 기록 로드 실패: \(error)")
+        }
+    }
+
+    private func loadPhotosFromRecord(_ record: TravelRecord) -> [UIImage] {
+        guard let photoFileNames = record.photo?.photos else { return [] }
+
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        var images: [UIImage] = []
+
+        for fileName in photoFileNames {
+            let photoPath = documentsPath.appendingPathComponent(fileName)
+            do {
+                let data = try Data(contentsOf: photoPath)
+                if let image = UIImage(data: data) {
+                    images.append(image)
+                }
+            } catch {
+                print("❌ 사진 로드 실패: \(fileName)")
+            }
+        }
+
+        return images
+    }
+
+    private func createPlacesFromRecord(_ record: TravelRecord) -> [KakaoPlace] {
+        guard let location = record.location else { return [] }
+
+        return [KakaoPlace(
+            id: record.id.stringValue,
+            placeName: location.location,
+            categoryName: "여행지",
+            categoryGroupCode: "AT4",
+            categoryGroupName: "관광명소",
+            phone: "",
+            addressName: location.location,
+            roadAddressName: "",
+            x: String(location.longitude),
+            y: String(location.latitude),
+            placeUrl: "",
+            distance: "0"
+        )]
     }
 }
 
@@ -122,23 +239,8 @@ extension TravelRecordViewController: DesiginProtocolBind {
     }
 
     func configureDataSource() {
-        registration = UICollectionView.CellRegistration(handler: { cell, indexPath, itemIdentifier in
-            var content = UIListContentConfiguration.valueCell()
-            content.text = itemIdentifier
-            content.textProperties.color = .white
-            content.textProperties.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16) ?? .boldSystemFont(ofSize: 16)
-            content.textProperties.alignment = .center
-
-            cell.contentConfiguration = content
-
-            var background = UIBackgroundConfiguration.listGroupedCell()
-
-            // 인덱스에 따른 다른 색상 설정
-            let colors: [UIColor] = [.systemBlue, .systemGreen, .systemRed, .systemOrange, .systemPurple]
-            background.backgroundColor = colors[indexPath.item % colors.count]
-            background.cornerRadius = 8
-
-            cell.backgroundConfiguration = background
+        registration = UICollectionView.CellRegistration(handler: { cell, indexPath, model in
+            cell.configure(with: model)
         })
     }
 
@@ -170,132 +272,18 @@ extension TravelRecordViewController: DesiginProtocolBind {
 // MARK: - UICollectionViewDataSource & Delegate
 extension TravelRecordViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return samplePhotos.count
+        return displayModels.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueConfiguredReusableCell(using: registration, for: indexPath, item: samplePhotos[indexPath.item])
+        let model = displayModels[indexPath.item]
+        let cell = collectionView.dequeueConfiguredReusableCell(using: registration, for: indexPath, item: model)
         return cell
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         print("📱 여행 기록 선택: \(indexPath.item + 1)번째")
-
-        // TravelShowRecordViewController로 이동
-        let showRecordVC = TravelShowRecordViewController()
-
-        // 샘플 데이터 전달 (실제로는 Realm에서 로드)
-        let sampleData = createSampleRecordData(for: indexPath.item)
-        showRecordVC.setRecordData(
-            photos: sampleData.photos,
-            route: sampleData.route,
-            record: sampleData.record,
-            places: sampleData.places
-        )
-
-        showRecordVC.travelRecordId = "\(indexPath.item + 1)" // 실제로는 Realm ID 사용
-
-        navigationController?.pushViewController(showRecordVC, animated: true)
+        recordSelectedTrigger.accept(indexPath)
     }
 
-    // MARK: - Sample Data Creation
-    private func createSampleRecordData(for index: Int) -> (photos: [UIImage], route: String, record: String, places: [KakaoPlace]) {
-
-        // 샘플 사진들 생성 (실제로는 저장된 이미지 사용)
-        let samplePhotos: [UIImage] = {
-            var photos: [UIImage] = []
-            for i in 0..<(index % 3 + 1) { // 1~3개 사진
-                if let image = createSampleImage(with: "📷 \(i + 1)", color: getSampleColor(for: index)) {
-                    photos.append(image)
-                }
-            }
-            return photos
-        }()
-
-        // 샘플 경로 데이터
-        let sampleRoutes = [
-            "서울 → 부산 여행",
-            "제주도 한 바퀴",
-            "경주 역사 탐방",
-            "강릉 바다 여행",
-            "전주 맛집 투어"
-        ]
-
-        // 샘플 기록 데이터
-        let sampleRecords = [
-            "정말 즐거운 여행이었습니다! 날씨도 좋고 음식도 맛있었어요. 다음에 또 오고 싶은 곳입니다.",
-            "아름다운 자연 경관에 감동받았습니다. 사진으로는 담을 수 없는 아름다움이었어요.",
-            "역사의 흔적을 따라 걷는 의미 있는 시간이었습니다. 많은 것을 배우고 느꼈어요.",
-            "시원한 바닷바람과 함께한 힐링 여행! 스트레스가 모두 날아갔습니다.",
-            "맛있는 음식들로 가득한 여행! 배도 마음도 모두 만족스러웠습니다."
-        ]
-
-        // 샘플 장소 데이터
-        let samplePlaces: [KakaoPlace] = {
-            let places = [
-                ("서울역", 37.5547, 126.9707),
-                ("부산역", 35.1151, 129.0416),
-                ("제주공항", 33.5120, 126.4914),
-                ("경주 불국사", 35.7898, 129.3322),
-                ("강릉 경포대", 37.7954, 128.8961)
-            ]
-
-            let selectedPlace = places[index % places.count]
-
-            return [KakaoPlace(
-                id: "\(index)",
-                placeName: selectedPlace.0,
-                categoryName: "관광지",
-                categoryGroupCode: "AT4",
-                categoryGroupName: "관광명소",
-                phone: "",
-                addressName: "\(selectedPlace.0) 주변",
-                roadAddressName: "",
-                x: String(selectedPlace.2),
-                y: String(selectedPlace.1),
-                placeUrl: "https://place.map.kakao.com/\(index)",
-                distance: "0"
-            )]
-        }()
-
-        return (
-            photos: samplePhotos,
-            route: sampleRoutes[index % sampleRoutes.count],
-            record: sampleRecords[index % sampleRecords.count],
-            places: samplePlaces
-        )
-    }
-
-    private func createSampleImage(with text: String, color: UIColor) -> UIImage? {
-        let size = CGSize(width: 300, height: 300)
-        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-
-        color.setFill()
-        UIRectFill(CGRect(origin: .zero, size: size))
-
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.boldSystemFont(ofSize: 24),
-            .foregroundColor: UIColor.white
-        ]
-
-        let textSize = text.size(withAttributes: attributes)
-        let textRect = CGRect(
-            x: (size.width - textSize.width) / 2,
-            y: (size.height - textSize.height) / 2,
-            width: textSize.width,
-            height: textSize.height
-        )
-
-        text.draw(in: textRect, withAttributes: attributes)
-
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-
-        return image
-    }
-
-    private func getSampleColor(for index: Int) -> UIColor {
-        let colors: [UIColor] = [.systemBlue, .systemGreen, .systemRed, .systemOrange, .systemPurple]
-        return colors[index % colors.count]
-    }
 }
