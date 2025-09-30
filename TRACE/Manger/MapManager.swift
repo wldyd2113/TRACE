@@ -107,17 +107,15 @@ class MapManger: NSObject {
 
     // MARK: - Search Results Display
     func displaySearchResults(places: [KakaoPlace]) {
-        guard let newPlace = places.first else { return }
-
-        // 중복 검사 (같은 장소가 이미 있는지 확인)
-        if !searchedPlaces.contains(where: { $0.id == newPlace.id }) {
-            // 새로운 장소를 목록에 추가
-            searchedPlaces.append(newPlace)
-            print("📍 새 장소 추가: \(newPlace.placeName)")
-        } else {
-            print("📍 이미 존재하는 장소: \(newPlace.placeName)")
+        guard !places.isEmpty else {
+            print("📍 표시할 장소가 없음")
             return
         }
+
+        print("📍 ===== 지도에 \(places.count)개 장소 표시 시작 =====")
+
+        // 기존 검색된 장소들을 완전히 대체
+        searchedPlaces = places
 
         // 기존 어노테이션 제거 후 모든 장소 다시 표시
         mapView.removeAnnotations(mapView.annotations)
@@ -125,7 +123,7 @@ class MapManger: NSObject {
 
         var coordinates: [CLLocationCoordinate2D] = []
 
-        // 모든 검색된 장소들을 지도에 표시
+        // 모든 새로운 장소들을 지도에 표시
         for (index, place) in searchedPlaces.enumerated() {
             let annotation = PlaceAnnotation()
             annotation.coordinate = place.coordinate
@@ -136,12 +134,13 @@ class MapManger: NSObject {
             mapView.addAnnotation(annotation)
             coordinates.append(place.coordinate)
 
-            print("📍 POI 표시: \(index + 1). \(place.placeName)")
+            print("📍 POI 표시: \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
         }
 
         // 2개 이상의 장소가 있으면 루트 그리기
         if coordinates.count > 1 {
             drawRoute(coordinates: coordinates)
+            print("🗺️ \(coordinates.count)개 지점을 연결하는 루트 표시")
         }
 
         // 지도 영역 조정
@@ -149,6 +148,8 @@ class MapManger: NSObject {
 
         // 델리게이트에 검색된 장소들 업데이트 알림
         delegate?.mapManagerDidUpdateSearchedPlaces(searchedPlaces)
+
+        print("📍 ===== 지도 표시 완료: 총 \(searchedPlaces.count)개 마커 =====")
     }
 
     func clearAllSearchResults() {

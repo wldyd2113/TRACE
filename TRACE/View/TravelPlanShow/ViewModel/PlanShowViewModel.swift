@@ -176,13 +176,19 @@ class PlanShowViewModel: BaseViewModel {
     private func loadDayDataFromRealm(travelPlan: TravelPlan) {
         var storage: [Int: DayData] = [:]
 
+        print("📋 ===== Realm 데이터 로드 시작 =====")
+        print("   • 전체 일차 개수: \(travelPlan.travelDays.count)개")
+
         for dayDetail in travelPlan.travelDays {
             var dayData = DayData()
             dayData.budget = dayDetail.budget
             dayData.route = dayDetail.route
 
             print("📋 Day \(dayDetail.dayNumber) 로드 중...")
+            print("   💰 예산: '\(dayDetail.budget)'")
+            print("   🚗 경로: '\(dayDetail.route)'")
             print("   📍 저장된 좌표 개수: \(dayDetail.routeCoordinates.count)개")
+            print("   📋 일정 개수: \(dayDetail.schedules.count)개")
 
             // 일정 아이템 로드
             let scheduleItems = dayDetail.schedules.map { schedule in
@@ -190,10 +196,12 @@ class PlanShowViewModel: BaseViewModel {
             }
             dayData.scheduleItems = Array(scheduleItems)
 
-            // 좌표 데이터를 KakaoPlace로 변환 (기본 구현)
-            let places = dayDetail.routeCoordinates.map { coordinate in
-                print("   📍 좌표 복원: \(coordinate.placeName) (\(coordinate.latitude), \(coordinate.longitude))")
-                return KakaoPlace(
+            // 좌표 데이터를 KakaoPlace로 변환 (모든 좌표 출력)
+            var places: [KakaoPlace] = []
+            for (index, coordinate) in dayDetail.routeCoordinates.enumerated() {
+                print("   📍 좌표 \(index + 1): \(coordinate.placeName) (\(coordinate.latitude), \(coordinate.longitude))")
+
+                let place = KakaoPlace(
                     id: coordinate.placeName,
                     placeName: coordinate.placeName,
                     categoryName: "",
@@ -207,15 +215,20 @@ class PlanShowViewModel: BaseViewModel {
                     placeUrl: "",
                     distance: "0"
                 )
+                places.append(place)
             }
-            dayData.searchedPlaces = Array(places)
+            dayData.searchedPlaces = places
 
             storage[dayDetail.dayNumber] = dayData
-            print("   ✅ Day \(dayDetail.dayNumber) 로드 완료: 좌표 \(places.count)개")
+            print("   ✅ Day \(dayDetail.dayNumber) 로드 완료: \(places.count)개 좌표")
         }
 
         dayDataStorage.accept(storage)
-        print("📋 일차별 데이터 로드 완료: \(storage.count)개 일차")
+        print("📋 ===== 일차별 데이터 로드 완료: \(storage.count)개 일차 =====")
+
+        // 전체 저장된 좌표 개수 요약
+        let totalCoordinates = storage.values.reduce(0) { $0 + $1.searchedPlaces.count }
+        print("📍 전체 저장된 좌표: \(totalCoordinates)개")
     }
 
     func getCurrentDay() -> Int {
