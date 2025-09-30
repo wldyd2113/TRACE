@@ -17,7 +17,7 @@ import RealmSwift
 class TravelPlanShowViewController: UIViewController {
 
     let disposeBag = DisposeBag()
-    let mapManager = MapManger()
+    let mapManager = MapManager()
     let viewModel = PlanShowViewModel()
 
     // MARK: - Data

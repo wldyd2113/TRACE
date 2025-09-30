@@ -18,7 +18,7 @@ import RealmSwift
 class TravelPlanDetailViewController: UIViewController {
 
     let disposeBag = DisposeBag()
-    let mapManager = MapManger()
+    let mapManager = MapManager()
     let viewModel = PlanDetailViewModel()
 
     // 검색된 장소들을 저장 (좌표 정보 포함)
@@ -144,7 +144,7 @@ class TravelPlanDetailViewController: UIViewController {
         $0.layer.cornerRadius = 25
     }
 
-    // MapKit 관련 (MapManger에서 관리)
+    // MapKit 관련 (MapManager에서 관리)
     var mapView: MKMapView {
         return mapManager.mapView
     }

@@ -1,5 +1,5 @@
 //
-//  MapManger.swift
+//  MapManager.swift
 //  TRACE
 //
 //  Created by 차지용 on 9/29/25.
@@ -9,16 +9,11 @@ import Foundation
 import MapKit
 import CoreLocation
 
-protocol MapMangerDelegate: AnyObject {
-    func mapManagerDidUpdateLocation(_ coordinate: CLLocationCoordinate2D)
-    func mapManagerDidFailToGetLocation()
-    func mapManagerDidSelectPlace(_ place: KakaoPlace)
-    func mapManagerDidUpdateSearchedPlaces(_ places: [KakaoPlace])
-}
 
-class MapManger: NSObject {
 
-    weak var delegate: MapMangerDelegate?
+class MapManager: NSObject {
+
+    weak var delegate: MapManagerDelegate?
 
     private let locationManager = CLLocationManager()
     let mapView = MKMapView()
@@ -48,20 +43,20 @@ class MapManger: NSObject {
     // MARK: - Public Methods
     func requestInitialLocation() {
         let authStatus = locationManager.authorizationStatus
-        print("📍 MapManger: Current authorization status: \(authStatus.rawValue)")
+        print("📍 MapManager: Current authorization status: \(authStatus.rawValue)")
 
         switch authStatus {
         case .notDetermined:
-            print("📍 MapManger: Permission not determined, using default location")
+            print("📍 MapManager: Permission not determined, using default location")
             setDefaultLocation()
         case .denied, .restricted:
-            print("📍 MapManger: Location access denied or restricted, using default location")
+            print("📍 MapManager: Location access denied or restricted, using default location")
             setDefaultLocation()
         case .authorizedWhenInUse, .authorizedAlways:
-            print("📍 MapManger: Location authorized, requesting current location...")
+            print("📍 MapManager: Location authorized, requesting current location...")
             locationManager.requestLocation()
         @unknown default:
-            print("📍 MapManger: Unknown authorization status, using default location")
+            print("📍 MapManager: Unknown authorization status, using default location")
             setDefaultLocation()
         }
     }
@@ -201,7 +196,7 @@ class MapManger: NSObject {
 }
 
 // MARK: - CLLocationManagerDelegate
-extension MapManger: CLLocationManagerDelegate {
+extension MapManager: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else {
             print("📍 No location found in locations array")
@@ -220,27 +215,27 @@ extension MapManger: CLLocationManagerDelegate {
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         let authStatus = manager.authorizationStatus
-        print("📍 MapManger: Authorization changed to: \(authStatus.rawValue)")
+        print("📍 MapManager: Authorization changed to: \(authStatus.rawValue)")
 
         switch authStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            print("📍 MapManger: Authorization granted, requesting location...")
+            print("📍 MapManager: Authorization granted, requesting location...")
             manager.requestLocation()
         case .denied, .restricted:
-            print("📍 MapManger: Authorization denied/restricted, using default location")
+            print("📍 MapManager: Authorization denied/restricted, using default location")
             setDefaultLocation()
         case .notDetermined:
-            print("📍 MapManger: Authorization not determined, using default location")
+            print("📍 MapManager: Authorization not determined, using default location")
             setDefaultLocation()
         @unknown default:
-            print("📍 MapManger: Unknown authorization status, using default location")
+            print("📍 MapManager: Unknown authorization status, using default location")
             setDefaultLocation()
         }
     }
 }
 
 // MARK: - MKMapViewDelegate
-extension MapManger: MKMapViewDelegate {
+extension MapManager: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         print("🎯 ===== 마커 클릭 이벤트 발생 =====")
         print("   • 어노테이션 타이틀: \(view.annotation?.title ?? "nil")")

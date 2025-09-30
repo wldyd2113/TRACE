@@ -46,19 +46,7 @@ class PlanMainViewModel: BaseViewModel {
         }
     }
 
-    struct TravelPlanData {
-        let location: String
-        let country: String
-        let date: String
-        let id: String
 
-        init(from travelPlan: TravelPlan) {
-            self.location = travelPlan.travelName
-            self.country = travelPlan.nation
-            self.date = DateManager.shared.formatToStandardString(from: travelPlan.startDate)
-            self.id = travelPlan.id.stringValue
-        }
-    }
 
     // MARK: - Private Properties
     private let mainTravelData = BehaviorRelay<MainTravelData?>(value: nil)

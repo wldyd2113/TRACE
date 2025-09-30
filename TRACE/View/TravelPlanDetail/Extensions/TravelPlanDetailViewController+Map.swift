@@ -21,8 +21,8 @@ extension TravelPlanDetailViewController: MapSearchDelegate {
     }
 }
 
-// MARK: - MapMangerDelegate
-extension TravelPlanDetailViewController: MapMangerDelegate {
+// MARK: - MapManagerDelegate
+extension TravelPlanDetailViewController: MapManagerDelegate {
     func mapManagerDidUpdateLocation(_ coordinate: CLLocationCoordinate2D) {
         print("📍 TravelPlanDetail: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
     }

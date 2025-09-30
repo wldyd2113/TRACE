@@ -88,8 +88,8 @@ extension TravelPlanShowViewController {
     }
 }
 
-// MARK: - MapMangerDelegate
-extension TravelPlanShowViewController: MapMangerDelegate {
+// MARK: - MapManagerDelegate
+extension TravelPlanShowViewController: MapManagerDelegate {
     func mapManagerDidUpdateLocation(_ coordinate: CLLocationCoordinate2D) {
         print("📍 TravelPlanShow: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
     }
@@ -209,3 +209,4 @@ extension TravelPlanShowViewController: MapMangerDelegate {
         print("➕ 일정에 장소 추가: \(place.placeName)")
     }
 }
+
