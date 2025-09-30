@@ -34,7 +34,9 @@ class TravelPlanWriteViewController: UIViewController {
     }
     
     private let countryTextField = UITextField().then {
-        $0.applyTravelStyle(placeholder: "예) 국내/ 해외")
+        $0.applyTravelStyle(placeholder: "국내/해외 선택")
+        $0.isUserInteractionEnabled = true
+        $0.isEnabled = true
     }
     
     private let countryDescriptionLabel = UILabel().then {
@@ -61,10 +63,14 @@ class TravelPlanWriteViewController: UIViewController {
 
     private let startDateTextField = UITextField().then {
         $0.applyTravelStyle(placeholder: "여행 시작일")
+        $0.isUserInteractionEnabled = true
+        $0.isEnabled = true
     }
 
     private let endDateTextField = UITextField().then {
         $0.applyTravelStyle(placeholder: "여행 종료일")
+        $0.isUserInteractionEnabled = true
+        $0.isEnabled = true
     }
 
     private let startDatePicker = UIDatePicker().then {
@@ -78,6 +84,25 @@ class TravelPlanWriteViewController: UIViewController {
         $0.preferredDatePickerStyle = .wheels
         $0.minimumDate = DateManager.shared.today()
     }
+
+    // 국가 선택 ActionSheet
+    private lazy var countryActionSheet: UIAlertController = {
+        let alert = UIAlertController(title: "여행 국가 선택", message: "여행 지역을 선택해주세요", preferredStyle: .actionSheet)
+
+        alert.addAction(UIAlertAction(title: "국내", style: .default) { [weak self] _ in
+            self?.countryTextField.text = "국내"
+            self?.viewModel.countryText.accept("국내")
+        })
+
+        alert.addAction(UIAlertAction(title: "해외", style: .default) { [weak self] _ in
+            self?.countryTextField.text = "해외"
+            self?.viewModel.countryText.accept("해외")
+        })
+
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+
+        return alert
+    }()
 
     private let dateDescriptionLabel = UILabel().then {
         $0.applyDescriptionStyle(text: "여행 시작일과 종료일을 입력해주세요.")
@@ -121,11 +146,42 @@ class TravelPlanWriteViewController: UIViewController {
     
 }
 
+// MARK: - UITextFieldDelegate
+extension TravelPlanWriteViewController: UITextFieldDelegate {
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        // countryTextField, startDateTextField, endDateTextField는 직접 입력 방지
+        if textField == countryTextField || textField == startDateTextField || textField == endDateTextField {
+            return false
+        }
+        return true
+    }
+
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        if textField == countryTextField {
+            present(countryActionSheet, animated: true)
+            return false
+        }
+        return true
+    }
+}
+
 extension TravelPlanWriteViewController: DesiginProtocolBind {
     func bind() {
-        // Input: TextField -> ViewModel
-        countryTextField.rx.text.orEmpty
-            .bind(to: viewModel.countryText)
+        // 국가 선택 TextField 탭 이벤트
+        let countryTapGesture = UITapGestureRecognizer()
+        countryTextField.addGestureRecognizer(countryTapGesture)
+        countryTapGesture.rx.event
+            .subscribe(onNext: { [weak self] _ in
+                self?.present(self?.countryActionSheet ?? UIAlertController(), animated: true)
+            })
+            .disposed(by: disposeBag)
+
+        // 국가 TextField 직접 입력 방지
+        countryTextField.rx.controlEvent(.editingDidBegin)
+            .subscribe(onNext: { [weak self] in
+                self?.countryTextField.resignFirstResponder()
+                self?.present(self?.countryActionSheet ?? UIAlertController(), animated: true)
+            })
             .disposed(by: disposeBag)
 
         destinationTextField.rx.text.orEmpty
@@ -205,9 +261,14 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
             UIBarButtonItem(image: UIImage(systemName: "map"), style: .plain, target: nil, action: nil)
         ]
 
-        // DatePicker 설정
+        // TextField 직접 입력 방지 및 DatePicker 설정
         startDateTextField.inputView = startDatePicker
         endDateTextField.inputView = endDatePicker
+
+        // 텍스트 직접 입력 방지
+        countryTextField.delegate = self
+        startDateTextField.delegate = self
+        endDateTextField.delegate = self
 
         // 키보드 툴바 설정
         let toolbar = UIToolbar()
