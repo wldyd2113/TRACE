@@ -8,6 +8,7 @@
 import UIKit
 import RxSwift
 import RxCocoa
+import RealmSwift
 
 // MARK: - DesiginProtocolBind Implementation
 extension TravelPlanShowViewController: DesiginProtocolBind {
@@ -537,12 +538,18 @@ extension TravelPlanShowViewController {
 
     func deleteTravelPlan() {
         // ViewModel을 통해 여행 계획 삭제
-        guard let planId = travelPlanId else {
+        guard let planIdString = travelPlanId else {
             showErrorAlert(message: "삭제할 여행 계획을 찾을 수 없습니다.")
             return
         }
 
         do {
+            // String을 ObjectId로 변환
+            guard let objectId = try? ObjectId(string: planIdString) else {
+                showErrorAlert(message: "잘못된 여행 계획 ID입니다.")
+                return
+            }
+
             // Realm에서 여행 계획 삭제
             guard let realm = try RealmManager.shared.getRealm() else {
                 showErrorAlert(message: "데이터베이스 연결에 실패했습니다.")
@@ -550,9 +557,9 @@ extension TravelPlanShowViewController {
             }
 
             try realm.write {
-                if let planToDelete = realm.object(ofType: TravelPlan.self, forPrimaryKey: planId) {
+                if let planToDelete = realm.object(ofType: TravelPlan.self, forPrimaryKey: objectId) {
                     realm.delete(planToDelete)
-                    print("🗑️ 여행 계획 삭제 완료: \(planId)")
+                    print("🗑️ 여행 계획 삭제 완료: \(planIdString)")
                 }
             }
 
