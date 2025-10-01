@@ -79,16 +79,24 @@ final class RecordViewModel: BaseViewModel {
     private func loadRecords() {
         isLoadingRelay.accept(true)
 
-        // 메인 스레드에서 직접 로드
+        // 안전한 Realm 로드
+        guard let realm = RealmManager.shared.safeRealm() else {
+            print("❌ Realm 인스턴스를 생성할 수 없습니다")
+            isLoadingRelay.accept(false)
+            recordsRelay.accept([])
+            return
+        }
+
         do {
-            let realm = try Realm()
-            let records = Array(realm.objects(TravelRecord.self).sorted(byKeyPath: "travelDate", ascending: false))
+            let results = realm.objects(TravelRecord.self).sorted(byKeyPath: "travelDate", ascending: false)
+            let records = Array(results)
 
             recordsRelay.accept(records)
             isLoadingRelay.accept(false)
             print("📝 여행 기록 로드 완료: \(records.count)개")
         } catch {
             isLoadingRelay.accept(false)
+            recordsRelay.accept([])
             print("❌ 여행 기록 로드 실패: \(error)")
         }
     }
@@ -104,7 +112,7 @@ final class RecordViewModel: BaseViewModel {
             travelDate: record.travelDate,
             firstPhotoData: firstPhotoData,
             photoCount: record.photo?.photos.count ?? 0,
-            hasLocation: record.location != nil
+            hasLocation: !record.locations.isEmpty
         )
     }
 
@@ -168,6 +176,20 @@ final class RecordViewModel: BaseViewModel {
         } catch {
             print("❌ 사진 삭제 실패: \(error)")
         }
+    }
+
+    func getRecord(by id: String) -> TravelRecord? {
+        guard let realm = RealmManager.shared.safeRealm() else {
+            print("❌ Realm 인스턴스를 생성할 수 없습니다")
+            return nil
+        }
+
+        guard let objectId = try? ObjectId(string: id) else {
+            print("❌ 잘못된 ObjectId: \(id)")
+            return nil
+        }
+
+        return realm.object(ofType: TravelRecord.self, forPrimaryKey: objectId)
     }
 }
 

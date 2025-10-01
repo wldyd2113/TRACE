@@ -60,6 +60,14 @@ class TravelRecordViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("📱 TravelRecordViewController viewDidLoad 시작")
+
+        // Realm 초기화 체크
+        if RealmManager.shared.safeRealm() == nil {
+            print("❌ Realm 초기화 실패 - 앱을 종료합니다")
+            return
+        }
+
         view.backgroundColor = .background
 
         configureHierarchy()
@@ -118,8 +126,10 @@ class TravelRecordViewController: UIViewController {
         // 여행 기록 목록 업데이트
         output.records
             .drive(onNext: { [weak self] models in
-                self?.displayModels = models
-                self?.collectionView.reloadData()
+                DispatchQueue.main.async {
+                    self?.displayModels = models
+                    self?.collectionView.reloadData()
+                }
             })
             .disposed(by: disposeBag)
 
@@ -138,41 +148,39 @@ class TravelRecordViewController: UIViewController {
             })
             .disposed(by: disposeBag)
 
-        // 초기 로드 트리거
-        viewDidLoadTrigger.accept(())
+        // 초기 로드 트리거 (안전하게 지연)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.viewDidLoadTrigger.accept(())
+        }
     }
 
     private func navigateToShowRecord(with recordId: String) {
-        // 메인 스레드에서 새로운 Realm 인스턴스로 기록 로드
-        do {
-            let realm = try Realm()
-            guard let objectId = try? ObjectId(string: recordId),
-                  let record = realm.object(ofType: TravelRecord.self, forPrimaryKey: objectId) else {
-                print("❌ 기록을 찾을 수 없습니다: \(recordId)")
-                return
-            }
+        print("📱 기록 상세보기 이동: \(recordId)")
 
-            let showRecordVC = TravelShowRecordViewController()
-
-            // 실제 저장된 데이터를 TravelShowRecordViewController에 전달
-            let photos = loadPhotosFromRecord(record)
-            let route = record.travelName
-            let recordText = record.recordLog
-            let places = createPlacesFromRecord(record)
-
-            showRecordVC.setRecordData(
-                photos: photos,
-                route: route,
-                record: recordText,
-                places: places
-            )
-
-            showRecordVC.travelRecordId = recordId
-
-            navigationController?.pushViewController(showRecordVC, animated: true)
-        } catch {
-            print("❌ 기록 로드 실패: \(error)")
+        // ViewModel에서 기록 조회
+        guard let record = viewModel.getRecord(by: recordId) else {
+            print("❌ 기록을 찾을 수 없습니다: \(recordId)")
+            return
         }
+
+        let showRecordVC = TravelShowRecordViewController()
+
+        // 실제 저장된 데이터를 TravelShowRecordViewController에 전달
+        let photos = loadPhotosFromRecord(record)
+        let route = record.travelName
+        let recordText = record.recordLog
+        let places = createPlacesFromRecord(record)
+
+        showRecordVC.setRecordData(
+            photos: photos,
+            route: route,
+            record: recordText,
+            places: places
+        )
+
+        showRecordVC.travelRecordId = recordId
+
+        navigationController?.pushViewController(showRecordVC, animated: true)
     }
 
     private func loadPhotosFromRecord(_ record: TravelRecord) -> [UIImage] {
@@ -197,22 +205,24 @@ class TravelRecordViewController: UIViewController {
     }
 
     private func createPlacesFromRecord(_ record: TravelRecord) -> [KakaoPlace] {
-        guard let location = record.location else { return [] }
+        guard !record.locations.isEmpty else { return [] }
 
-        return [KakaoPlace(
-            id: record.id.stringValue,
-            placeName: location.location,
-            categoryName: "여행지",
-            categoryGroupCode: "AT4",
-            categoryGroupName: "관광명소",
-            phone: "",
-            addressName: location.location,
-            roadAddressName: "",
-            x: String(location.longitude),
-            y: String(location.latitude),
-            placeUrl: "",
-            distance: "0"
-        )]
+        return record.locations.map { location in
+            KakaoPlace(
+                id: record.id.stringValue,
+                placeName: location.location,
+                categoryName: "여행지",
+                categoryGroupCode: "AT4",
+                categoryGroupName: "관광명소",
+                phone: "",
+                addressName: location.location,
+                roadAddressName: "",
+                x: String(location.longitude),
+                y: String(location.latitude),
+                placeUrl: "",
+                distance: "0"
+            )
+        }
     }
 }
 
@@ -272,10 +282,20 @@ extension TravelRecordViewController: DesiginProtocolBind {
 // MARK: - UICollectionViewDataSource & Delegate
 extension TravelRecordViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return displayModels.count
+        let count = displayModels.count
+        print("📱 CollectionView numberOfItems: \(count)")
+        return count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        print("📱 CollectionView cellForItemAt: \(indexPath.item)")
+
+        guard indexPath.item < displayModels.count else {
+            print("❌ IndexPath out of bounds: \(indexPath.item) >= \(displayModels.count)")
+            // 임시로 빈 셀 반환
+            return UICollectionViewCell()
+        }
+
         let model = displayModels[indexPath.item]
         let cell = collectionView.dequeueConfiguredReusableCell(using: registration, for: indexPath, item: model)
         return cell

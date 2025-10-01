@@ -20,7 +20,7 @@ class TravelRecordCell: UICollectionViewCell {
     }
 
     private let titleLabel = UILabel().then {
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
+        $0.font = FontManager.onglapUIyeon.font(size: 14)
         $0.textColor = .white
         $0.textAlignment = .center
         $0.numberOfLines = 2
@@ -30,7 +30,7 @@ class TravelRecordCell: UICollectionViewCell {
     }
 
     private let photoCountLabel = UILabel().then {
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 12)
+        $0.font = FontManager.onglapUIyeon.font(size: 12)
         $0.textColor = .white
         $0.textAlignment = .center
         $0.backgroundColor = UIColor.black.withAlphaComponent(0.8)

@@ -14,25 +14,25 @@ class TravelRecord: Object {
     @Persisted var travelName: String
     @Persisted var recordLog: String
     @Persisted var travelDate: Date
-    @Persisted var photo: TravelPhoto? // optional로 변경
-    @Persisted var location: RecordPlace? // optional로 변경
+    @Persisted var photo: TravelPhoto?
+    @Persisted var locations: List<RecordPlace> = List<RecordPlace>()
 
-    convenience init(id: ObjectId, nation: String, travelName: String, recordLog: String, TravelDate: Date, photo: TravelPhoto?, location: RecordPlace?) {
+    convenience init(id: ObjectId, nation: String, travelName: String, recordLog: String, TravelDate: Date, photo: TravelPhoto?, locations: [RecordPlace]) {
         self.init()
         self.nation = nation
         self.travelName = travelName
         self.recordLog = recordLog
         self.travelDate = travelDate
         self.photo = photo
-        self.location = location
+        self.locations.append(objectsIn: locations)
     }
 }
 
-class TravelPhoto: EmbeddedObject {
+class TravelPhoto: Object {
     @Persisted var photos: List<String> = List<String>()
 }
 
-class RecordPlace: EmbeddedObject {
+class RecordPlace: Object {
     @Persisted var location: String //가는곳
     @Persisted var latitude: Double //위도
     @Persisted var longitude: Double //경도

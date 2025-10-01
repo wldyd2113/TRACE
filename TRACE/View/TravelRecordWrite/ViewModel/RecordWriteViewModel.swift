@@ -90,23 +90,45 @@ final class RecordWriteViewModel: BaseViewModel {
 
             // 메인 스레드에서 Realm 작업 수행
             DispatchQueue.main.async {
+                guard let realm = RealmManager.shared.safeRealm() else {
+                    self.isLoadingRelay.accept(false)
+                    self.saveResultRelay.accept(.failure("데이터베이스 연결에 실패했습니다"))
+                    print("❌ Realm 인스턴스 생성 실패")
+                    return
+                }
+
                 do {
-                    let realm = try Realm()
-
-                    let record = self.createTravelRecordWithSavedPhotos(
-                        route: route,
-                        diary: diary,
-                        photoFileNames: photoFileNames,
-                        places: places
-                    )
-
+                    var recordId: String = ""
                     try realm.write {
+                        let record = TravelRecord()
+                        record.travelName = route.isEmpty ? "여행 기록" : route
+                        record.nation = self.extractNationFromRoute(route) ?? "대한민국"
+                        record.recordLog = diary
+                        record.travelDate = Date()
+
+                        // 사진 저장
+                        if !photoFileNames.isEmpty {
+                            let travelPhoto = TravelPhoto()
+                            travelPhoto.photos.append(objectsIn: photoFileNames)
+                            record.photo = travelPhoto
+                        }
+
+                        // 위치 정보 저장
+                        for place in places {
+                            let recordPlace = RecordPlace()
+                            recordPlace.location = place.placeName
+                            recordPlace.latitude = place.coordinate.latitude
+                            recordPlace.longitude = place.coordinate.longitude
+                            record.locations.append(recordPlace)
+                        }
+
                         realm.add(record)
+                        recordId = record.id.stringValue
                     }
 
                     self.isLoadingRelay.accept(false)
                     self.saveResultRelay.accept(.success)
-                    print("📝 여행 기록 저장 완료: \(record.id)")
+                    print("📝 여행 기록 저장 완료: \(recordId)")
 
                 } catch {
                     self.isLoadingRelay.accept(false)
@@ -117,33 +139,6 @@ final class RecordWriteViewModel: BaseViewModel {
         }
     }
 
-    private func createTravelRecordWithSavedPhotos(route: String, diary: String, photoFileNames: [String], places: [KakaoPlace]) -> TravelRecord {
-        let record = TravelRecord()
-
-        // 기본 정보 설정
-        record.travelName = route.isEmpty ? "여행 기록" : route
-        record.nation = extractNationFromRoute(route) ?? "대한민국"
-        record.recordLog = diary
-        record.travelDate = Date()
-
-        // 이미 저장된 사진 파일명들 사용
-        if !photoFileNames.isEmpty {
-            let travelPhoto = TravelPhoto()
-            travelPhoto.photos.append(objectsIn: photoFileNames)
-            record.photo = travelPhoto
-        }
-
-        // 위치 정보 저장 (첫 번째 장소 사용)
-        if let firstPlace = places.first {
-            let recordPlace = RecordPlace()
-            recordPlace.location = firstPlace.placeName
-            recordPlace.latitude = firstPlace.coordinate.latitude
-            recordPlace.longitude = firstPlace.coordinate.longitude
-            record.location = recordPlace
-        }
-
-        return record
-    }
 
     private func extractNationFromRoute(_ route: String) -> String? {
         // 간단한 국가 추출 로직 (필요에 따라 확장)

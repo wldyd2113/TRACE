@@ -12,6 +12,7 @@ import RxCocoa
 import Then
 import MapKit
 import CoreLocation
+import RealmSwift
 
 class TravelShowRecordViewController: UIViewController {
 
@@ -45,7 +46,6 @@ class TravelShowRecordViewController: UIViewController {
         collectionView.backgroundColor = .systemGray6
         collectionView.layer.cornerRadius = 12
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(RecordPhotoCell.self, forCellWithReuseIdentifier: "RecordPhotoCell")
         return collectionView
@@ -109,14 +109,6 @@ class TravelShowRecordViewController: UIViewController {
         $0.textColor = .secondaryLabel
     }
 
-    // 하단 버튼
-    private let routeButton = UIButton(type: .system).then {
-        $0.setTitle("경로보러가기", for: .normal)
-        $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
-        $0.backgroundColor = .black
-        $0.setTitleColor(.white, for: .normal)
-        $0.layer.cornerRadius = 25
-    }
 
     // 편집 모드 버튼들
     private let editButton = UIButton(type: .system).then {
@@ -170,34 +162,98 @@ class TravelShowRecordViewController: UIViewController {
     // MARK: - Collection Layout
     private func createPhotoCollectionLayout() -> UICollectionViewCompositionalLayout {
         let itemSize = NSCollectionLayoutSize(
-            widthDimension: .absolute(120),
-            heightDimension: .absolute(120)
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .fractionalHeight(1.0)
         )
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
 
         let groupSize = NSCollectionLayoutSize(
-            widthDimension: .estimated(120),
-            heightDimension: .absolute(120)
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .absolute(300)
         )
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
         let section = NSCollectionLayoutSection(group: group)
-        section.orthogonalScrollingBehavior = .continuous
-        section.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
+        section.orthogonalScrollingBehavior = .groupPaging
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
 
         return UICollectionViewCompositionalLayout(section: section)
     }
 
     // MARK: - Data Loading
     private func loadRecordData() {
-        // TODO: Realm에서 여행 기록 데이터 로드
-        print("📖 여행 기록 데이터 로드")
+        guard let recordId = travelRecordId else {
+            print("❌ 여행 기록 ID가 없습니다.")
+            return
+        }
 
-        // 샘플 데이터
-        routeTextField.text = "정말놀라운 여행이었어요"
-        recordTextView.text = "여행의 정말 좋은 기록하세요..."
-        recordPlaceholderLabel.isHidden = !recordTextView.text.isEmpty
+        guard let realm = RealmManager.shared.getRealm() else {
+            print("❌ Realm 접근 실패")
+            return
+        }
+
+        do {
+            let objectId = try ObjectId(string: recordId)
+            if let record = realm.object(ofType: TravelRecord.self, forPrimaryKey: objectId) {
+                DispatchQueue.main.async { [weak self] in
+                    self?.updateUI(with: record)
+                }
+                print("📖 여행 기록 데이터 로드 성공: \(record.travelName)")
+            } else {
+                print("❌ 해당 ID의 여행 기록을 찾을 수 없습니다: \(recordId)")
+            }
+        } catch {
+            print("❌ ObjectId 변환 실패: \(error)")
+        }
+    }
+
+    private func updateUI(with record: TravelRecord) {
+        routeTextField.text = record.travelName
+        recordTextView.text = record.recordLog
+        recordPlaceholderLabel.isHidden = !record.recordLog.isEmpty
+
+        if let travelPhoto = record.photo {
+            let images = travelPhoto.photos.compactMap { [weak self] photoPath in
+                return self?.loadImageFromPath(photoPath)
+            }
+            recordPhotos = Array(images)
+            photoCollectionView.reloadData()
+        }
+
+        if !record.locations.isEmpty {
+            let places = Array(record.locations.map { location in
+                KakaoPlace(
+                    id: "",
+                    placeName: location.location,
+                    categoryName: "",
+                    categoryGroupCode: "",
+                    categoryGroupName: "",
+                    phone: "",
+                    addressName: "",
+                    roadAddressName: "",
+                    x: String(location.longitude),
+                    y: String(location.latitude),
+                    placeUrl: "",
+                    distance: ""
+                )
+            })
+            currentSearchedPlaces = places
+            mapManager.displaySearchResults(places: places)
+        }
+    }
+
+    private func loadImageFromPath(_ fileName: String) -> UIImage? {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let photoPath = documentsPath.appendingPathComponent(fileName)
+
+        do {
+            let photoData = try Data(contentsOf: photoPath)
+            return UIImage(data: photoData)
+        } catch {
+            print("❌ 사진 로드 실패: \(error) - 경로: \(photoPath.path)")
+            return nil
+        }
     }
 
     // MARK: - Actions
@@ -207,20 +263,37 @@ class TravelShowRecordViewController: UIViewController {
 
     @objc private func saveButtonTapped() {
         print("💾 여행 기록 저장")
-        // TODO: 수정된 데이터 저장
+        saveUpdatedRecord()
         toggleEditMode(false)
+    }
+
+    private func saveUpdatedRecord() {
+        guard let recordId = travelRecordId,
+              let realm = RealmManager.shared.getRealm() else {
+            print("❌ 저장 실패: Realm 접근 불가")
+            return
+        }
+
+        do {
+            let objectId = try ObjectId(string: recordId)
+            if let record = realm.object(ofType: TravelRecord.self, forPrimaryKey: objectId) {
+                try realm.write {
+                    record.travelName = routeTextField.text ?? ""
+                    record.recordLog = recordTextView.text ?? ""
+                }
+                print("✅ 여행 기록 수정 완료")
+            }
+        } catch {
+            print("❌ 여행 기록 저장 실패: \(error)")
+        }
     }
 
     @objc private func cancelButtonTapped() {
         print("❌ 편집 취소")
-        // TODO: 원래 데이터로 복원
+        loadRecordData()
         toggleEditMode(false)
     }
 
-    @objc private func routeButtonTapped() {
-        print("🗺️ 경로보러가기")
-        handleRouteButtonTapped()
-    }
 
     private func toggleEditMode(_ edit: Bool) {
         isEditMode = edit
@@ -283,12 +356,6 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
             })
             .disposed(by: disposeBag)
 
-        // 경로보러가기 버튼 바인딩
-        routeButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.routeButtonTapped()
-            })
-            .disposed(by: disposeBag)
 
         // 텍스트뷰 플레이스홀더 처리
         recordTextView.rx.text
@@ -331,7 +398,6 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
         contentView.addSubview(recordPlaceholderLabel)
         contentView.addSubview(recordDescriptionLabel)
 
-        view.addSubview(routeButton)
         view.addSubview(editButton)
         view.addSubview(saveButton)
         view.addSubview(cancelButton)
@@ -346,20 +412,6 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
             target: self,
             action: #selector(backButtonTapped)
         )
-        navigationItem.rightBarButtonItems = [
-            UIBarButtonItem(
-                image: UIImage(systemName: "square.and.arrow.up"),
-                style: .plain,
-                target: self,
-                action: #selector(shareButtonTapped)
-            ),
-            UIBarButtonItem(
-                image: UIImage(systemName: "folder"),
-                style: .plain,
-                target: self,
-                action: #selector(saveToAlbumTapped)
-            )
-        ]
 
         // TextView 설정
         recordTextView.textContainer.lineFragmentPadding = 0
@@ -370,7 +422,7 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
         scrollView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(routeButton.snp.top).offset(-20)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide)
         }
 
         contentView.snp.makeConstraints {
@@ -386,8 +438,8 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
 
         photoCollectionView.snp.makeConstraints {
             $0.top.equalTo(photoSectionLabel.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(150)
+            $0.leading.trailing.equalToSuperview()
+            $0.height.equalTo(300)
         }
 
         // 여행 경로 섹션
@@ -438,31 +490,24 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
             $0.bottom.equalToSuperview().offset(-40)
         }
 
-        // 하단 버튼들
-        routeButton.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
-            $0.height.equalTo(50)
-        }
-
         // 편집 모드 버튼들
         editButton.snp.makeConstraints {
             $0.trailing.equalToSuperview().offset(-20)
-            $0.bottom.equalTo(routeButton.snp.top).offset(-16)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
             $0.width.equalTo(60)
             $0.height.equalTo(40)
         }
 
         saveButton.snp.makeConstraints {
             $0.trailing.equalToSuperview().offset(-20)
-            $0.bottom.equalTo(routeButton.snp.top).offset(-16)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
             $0.width.equalTo(60)
             $0.height.equalTo(40)
         }
 
         cancelButton.snp.makeConstraints {
             $0.trailing.equalTo(saveButton.snp.leading).offset(-12)
-            $0.bottom.equalTo(routeButton.snp.top).offset(-16)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
             $0.width.equalTo(60)
             $0.height.equalTo(40)
         }
@@ -475,19 +520,10 @@ extension TravelShowRecordViewController {
         navigationController?.popViewController(animated: true)
     }
 
-    @objc private func shareButtonTapped() {
-        print("📤 여행 기록 공유")
-        // TODO: 여행 기록 공유 기능 구현
-    }
-
-    @objc private func saveToAlbumTapped() {
-        print("📁 앨범에 저장")
-        // TODO: 사진 앨범에 저장 기능 구현
-    }
 }
 
 // MARK: - UICollectionViewDataSource & Delegate
-extension TravelShowRecordViewController: UICollectionViewDataSource, UICollectionViewDelegate {
+extension TravelShowRecordViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return recordPhotos.count
     }
@@ -499,16 +535,6 @@ extension TravelShowRecordViewController: UICollectionViewDataSource, UICollecti
         return cell
     }
 
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // 사진 확대 보기
-        let photo = recordPhotos[indexPath.item]
-        showPhotoDetail(photo: photo, at: indexPath.item)
-    }
-
-    private func showPhotoDetail(photo: UIImage, at index: Int) {
-        print("🖼️ 사진 상세 보기: \(index + 1)번째 사진")
-        // TODO: 사진 상세 보기 화면 구현
-    }
 }
 
 // MARK: - Collection View Cell

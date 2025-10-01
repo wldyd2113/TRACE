@@ -17,18 +17,13 @@ enum FontManager {
             let possibleNames = ["온글잎 의연체", "OngleafUiyeon", "Ongleaf-Uiyeon"]
             for name in possibleNames {
                 if UIFont(name: name, size: 12) != nil {
+                    print("✅ 커스텀 폰트 찾음: \(name)")
                     return name
                 }
             }
-            // 모든 폰트 이름을 출력해서 디버깅
-            print("Available fonts:")
-            for family in UIFont.familyNames {
-                print("Family: \(family)")
-                for font in UIFont.fontNames(forFamilyName: family) {
-                    print("  Font: \(font)")
-                }
-            }
-            return "온글잎 의연체"
+
+            print("⚠️ 커스텀 폰트를 찾을 수 없어서 시스템 폰트를 사용합니다")
+            return UIFont.systemFont(ofSize: 12).fontName
         }
     }
 
@@ -36,23 +31,25 @@ enum FontManager {
         let font = UIFont(name: fontName, size: size)
         if font == nil {
             print("⚠️ Font '\(fontName)' not found, using system font")
+            return UIFont.systemFont(ofSize: size)
         }
-        return font ?? UIFont.systemFont(ofSize: size)
+        return font!
     }
 
     func boldFont(size: CGFloat) -> UIFont {
-        // 커스텀 폰트에 bold가 없으면 시스템 bold 폰트 사용
-        if let customFont = UIFont(name: fontName, size: size) {
-            // 커스텀 폰트의 bold 버전을 시도
-            let boldNames = ["\(fontName)-Bold", "\(fontName)Bold", "\(fontName)-Regular", fontName]
-            for boldName in boldNames {
-                if let boldFont = UIFont(name: boldName, size: size) {
-                    return boldFont
-                }
+        // 커스텀 폰트의 bold 버전을 시도
+        let boldNames = ["\(fontName)-Bold", "\(fontName)Bold", "\(fontName)-Regular", fontName]
+        for boldName in boldNames {
+            if let boldFont = UIFont(name: boldName, size: size) {
+                return boldFont
             }
-            // bold 버전이 없으면 원본 폰트 반환
+        }
+
+        // bold 버전이 없으면 일반 폰트 시도
+        if let customFont = UIFont(name: fontName, size: size) {
             return customFont
         }
+
         print("⚠️ Font '\(fontName)' not found for bold, using system bold font")
         return UIFont.boldSystemFont(ofSize: size)
     }

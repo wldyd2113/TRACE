@@ -114,20 +114,3 @@ extension TravelShowRecordViewController {
     }
 }
 
-// MARK: - Map Interaction Methods
-extension TravelShowRecordViewController {
-    func handleRouteButtonTapped() {
-        // 경로보러가기 버튼 클릭 시 지도 관련 동작
-        if !currentSearchedPlaces.isEmpty {
-            showFullScreenMap()
-        } else {
-            let alert = UIAlertController(
-                title: "경로 정보 없음",
-                message: "표시할 여행 경로가 없습니다.",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "확인", style: .default))
-            present(alert, animated: true)
-        }
-    }
-}
