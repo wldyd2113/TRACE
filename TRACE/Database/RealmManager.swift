@@ -19,7 +19,7 @@ class RealmManager {
     private func initializeRealm() {
         do {
             let config = Realm.Configuration(
-                schemaVersion: 3,
+                schemaVersion: 4,
                 migrationBlock: { migration, oldSchemaVersion in
                     if oldSchemaVersion < 2 {
                         migration.enumerateObjects(ofType: TravelRecord.className()) { oldObject, newObject in

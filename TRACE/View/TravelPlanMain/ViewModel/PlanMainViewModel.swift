@@ -75,8 +75,13 @@ class PlanMainViewModel: BaseViewModel {
     private func loadTravelData() {
         print("📊 여행 계획 데이터 로드 시작")
 
+        guard let realm = RealmManager.shared.getRealm() else {
+            print("❌ Realm 인스턴스를 가져올 수 없습니다")
+            errorRelay.accept("데이터베이스 연결에 실패했습니다")
+            return
+        }
+
         do {
-            let realm = try Realm()
             let allPlans = realm.objects(TravelPlan.self).sorted(byKeyPath: "startDate", ascending: true)
 
             print("📋 Realm에서 찾은 여행 계획: \(allPlans.count)개")
