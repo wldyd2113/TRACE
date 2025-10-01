@@ -12,16 +12,15 @@ import RxCocoa
 import Then
 import MapKit
 import CoreLocation
-import RealmSwift
 
 class TravelShowRecordViewController: UIViewController {
 
     private let disposeBag = DisposeBag()
     let mapManager = MapManager()
+    private let viewModel = TravelShowRecordViewModel()
 
     // MARK: - Data
     var travelRecordId: String?
-    var isEditMode = false
     var currentSearchedPlaces: [KakaoPlace] = []
     private var recordPhotos: [UIImage] = []
 
@@ -47,7 +46,7 @@ class TravelShowRecordViewController: UIViewController {
         collectionView.layer.cornerRadius = 12
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.dataSource = self
-        collectionView.register(RecordPhotoCell.self, forCellWithReuseIdentifier: "RecordPhotoCell")
+        collectionView.register(RecordPhotoCollectionCell.self, forCellWithReuseIdentifier: "RecordPhotoCollectionCell")
         return collectionView
     }()
 
@@ -112,7 +111,7 @@ class TravelShowRecordViewController: UIViewController {
 
     // 편집 모드 버튼들
     private let editButton = UIButton(type: .system).then {
-        $0.setTitle("편집", for: .normal)
+        $0.setTitle("수정", for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .systemBlue
         $0.setTitleColor(.white, for: .normal)
@@ -149,9 +148,6 @@ class TravelShowRecordViewController: UIViewController {
 
         // 맵 관리자 설정
         setupMapManager()
-
-        // 초기 데이터 로드
-        loadRecordData()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -181,138 +177,120 @@ class TravelShowRecordViewController: UIViewController {
         return UICollectionViewCompositionalLayout(section: section)
     }
 
-    // MARK: - Data Loading
-    private func loadRecordData() {
-        guard let recordId = travelRecordId else {
-            print("❌ 여행 기록 ID가 없습니다.")
-            return
-        }
+    // MARK: - ViewModel Binding
+    private func bindViewModel() {
+        let editButtonTapped = editButton.rx.tap.asObservable()
+        let saveButtonTapped = saveButton.rx.tap
+            .withLatestFrom(Observable.combineLatest(
+                routeTextField.rx.text.orEmpty,
+                recordTextView.rx.text.orEmpty
+            ))
+            .map { (route: $0.0, record: $0.1) }
+            .asObservable()
+        let cancelButtonTapped = cancelButton.rx.tap.asObservable()
 
-        guard let realm = RealmManager.shared.getRealm() else {
-            print("❌ Realm 접근 실패")
-            return
-        }
+        let input = TravelShowRecordViewModel.Input(
+            recordId: travelRecordId,
+            viewDidLoad: Observable.just(()),
+            editButtonTapped: editButtonTapped,
+            saveButtonTapped: saveButtonTapped,
+            cancelButtonTapped: cancelButtonTapped
+        )
 
-        do {
-            let objectId = try ObjectId(string: recordId)
-            if let record = realm.object(ofType: TravelRecord.self, forPrimaryKey: objectId) {
-                DispatchQueue.main.async { [weak self] in
-                    self?.updateUI(with: record)
-                }
-                print("📖 여행 기록 데이터 로드 성공: \(record.travelName)")
-            } else {
-                print("❌ 해당 ID의 여행 기록을 찾을 수 없습니다: \(recordId)")
-            }
-        } catch {
-            print("❌ ObjectId 변환 실패: \(error)")
-        }
-    }
+        let output = viewModel.transform(input: input)
 
-    private func updateUI(with record: TravelRecord) {
-        routeTextField.text = record.travelName
-        recordTextView.text = record.recordLog
-        recordPlaceholderLabel.isHidden = !record.recordLog.isEmpty
-
-        if let travelPhoto = record.photo {
-            let images = travelPhoto.photos.compactMap { [weak self] photoPath in
-                return self?.loadImageFromPath(photoPath)
-            }
-            recordPhotos = Array(images)
-            photoCollectionView.reloadData()
-        }
-
-        if !record.locations.isEmpty {
-            let places = Array(record.locations.map { location in
-                KakaoPlace(
-                    id: "",
-                    placeName: location.location,
-                    categoryName: "",
-                    categoryGroupCode: "",
-                    categoryGroupName: "",
-                    phone: "",
-                    addressName: "",
-                    roadAddressName: "",
-                    x: String(location.longitude),
-                    y: String(location.latitude),
-                    placeUrl: "",
-                    distance: ""
-                )
+        // 데이터 바인딩
+        output.recordData
+            .drive(onNext: { [weak self] data in
+                self?.updateUI(with: data)
             })
-            currentSearchedPlaces = places
-            mapManager.displaySearchResults(places: places)
+            .disposed(by: disposeBag)
+
+        // 편집 모드 바인딩
+        output.isEditMode
+            .drive(onNext: { [weak self] isEdit in
+                self?.updateEditMode(isEdit)
+            })
+            .disposed(by: disposeBag)
+
+        // 알림 바인딩
+        output.showAlert
+            .drive(onNext: { [weak self] alertData in
+                self?.showAlert(title: alertData.title, message: alertData.message, completion: alertData.completion)
+            })
+            .disposed(by: disposeBag)
+
+        // 로딩 상태 바인딩
+        output.isLoading
+            .drive(onNext: { [weak self] isLoading in
+                // TODO: 로딩 인디케이터 표시/숨김
+                print("🔄 로딩 상태: \(isLoading)")
+            })
+            .disposed(by: disposeBag)
+
+        // 네비게이션 바인딩
+        output.navigateBack
+            .drive(onNext: { [weak self] in
+                self?.navigationController?.popViewController(animated: true)
+            })
+            .disposed(by: disposeBag)
+    }
+
+    private func updateUI(with data: TravelShowRecordViewModel.RecordDisplayData?) {
+        guard let data = data else { return }
+
+        routeTextField.text = data.travelName
+        recordTextView.text = data.recordLog
+        recordPlaceholderLabel.isHidden = !data.hasPlaceholder
+
+        // 사진 데이터를 UIImage로 변환
+        recordPhotos = data.photos.compactMap { UIImage(data: $0) }
+        photoCollectionView.reloadData()
+
+        // 지도에 장소 표시
+        let places = data.places.map { place in
+            KakaoPlace(
+                id: place.id,
+                placeName: place.placeName,
+                categoryName: "",
+                categoryGroupCode: "",
+                categoryGroupName: "",
+                phone: "",
+                addressName: "",
+                roadAddressName: "",
+                x: String(place.longitude),
+                y: String(place.latitude),
+                placeUrl: "",
+                distance: ""
+            )
         }
+        currentSearchedPlaces = places
+        mapManager.displaySearchResults(places: places)
     }
 
-    private func loadImageFromPath(_ fileName: String) -> UIImage? {
-        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let photoPath = documentsPath.appendingPathComponent(fileName)
+    private func updateEditMode(_ isEdit: Bool) {
+        recordTextView.isEditable = isEdit
+        routeTextField.isUserInteractionEnabled = isEdit
 
-        do {
-            let photoData = try Data(contentsOf: photoPath)
-            return UIImage(data: photoData)
-        } catch {
-            print("❌ 사진 로드 실패: \(error) - 경로: \(photoPath.path)")
-            return nil
-        }
-    }
+        editButton.isHidden = isEdit
+        saveButton.isHidden = !isEdit
+        cancelButton.isHidden = !isEdit
 
-    // MARK: - Actions
-    @objc private func editButtonTapped() {
-        toggleEditMode(true)
-    }
-
-    @objc private func saveButtonTapped() {
-        print("💾 여행 기록 저장")
-        saveUpdatedRecord()
-        toggleEditMode(false)
-    }
-
-    private func saveUpdatedRecord() {
-        guard let recordId = travelRecordId,
-              let realm = RealmManager.shared.getRealm() else {
-            print("❌ 저장 실패: Realm 접근 불가")
-            return
-        }
-
-        do {
-            let objectId = try ObjectId(string: recordId)
-            if let record = realm.object(ofType: TravelRecord.self, forPrimaryKey: objectId) {
-                try realm.write {
-                    record.travelName = routeTextField.text ?? ""
-                    record.recordLog = recordTextView.text ?? ""
-                }
-                print("✅ 여행 기록 수정 완료")
-            }
-        } catch {
-            print("❌ 여행 기록 저장 실패: \(error)")
-        }
-    }
-
-    @objc private func cancelButtonTapped() {
-        print("❌ 편집 취소")
-        loadRecordData()
-        toggleEditMode(false)
-    }
-
-
-    private func toggleEditMode(_ edit: Bool) {
-        isEditMode = edit
-
-        recordTextView.isEditable = edit
-        routeTextField.isUserInteractionEnabled = edit
-
-        editButton.isHidden = edit
-        saveButton.isHidden = !edit
-        cancelButton.isHidden = !edit
-
-        if edit {
+        if isEdit {
             recordTextView.becomeFirstResponder()
         } else {
             view.endEditing(true)
         }
-
-        print("🔄 편집 모드: \(edit ? "ON" : "OFF")")
     }
+
+    private func showAlert(title: String, message: String, completion: (() -> Void)?) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default) { _ in
+            completion?()
+        })
+        present(alert, animated: true)
+    }
+
 
     // MARK: - Public Methods
     func setRecordData(photos: [UIImage], route: String, record: String, places: [KakaoPlace]) {
@@ -335,27 +313,8 @@ class TravelShowRecordViewController: UIViewController {
 // MARK: - DesiginProtocolBind
 extension TravelShowRecordViewController: DesiginProtocolBind {
     func bind() {
-        // 편집 버튼 바인딩
-        editButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.editButtonTapped()
-            })
-            .disposed(by: disposeBag)
-
-        // 저장 버튼 바인딩
-        saveButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.saveButtonTapped()
-            })
-            .disposed(by: disposeBag)
-
-        // 취소 버튼 바인딩
-        cancelButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.cancelButtonTapped()
-            })
-            .disposed(by: disposeBag)
-
+        // ViewModel 바인딩
+        bindViewModel()
 
         // 텍스트뷰 플레이스홀더 처리
         recordTextView.rx.text
@@ -529,42 +488,11 @@ extension TravelShowRecordViewController: UICollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "RecordPhotoCell", for: indexPath) as! RecordPhotoCell
-        let photo = recordPhotos[indexPath.item]
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "RecordPhotoCollectionCell", for: indexPath) as! RecordPhotoCollectionCell
+        let photo = indexPath.item < recordPhotos.count ? recordPhotos[indexPath.item] : nil
         cell.configure(with: photo)
         return cell
     }
 
 }
 
-// MARK: - Collection View Cell
-class RecordPhotoCell: UICollectionViewCell {
-    private let imageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFill
-        $0.clipsToBounds = true
-    }
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupUI()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupUI() {
-        layer.cornerRadius = 8
-        clipsToBounds = true
-
-        addSubview(imageView)
-
-        imageView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-    }
-
-    func configure(with image: UIImage) {
-        imageView.image = image
-    }
-}
