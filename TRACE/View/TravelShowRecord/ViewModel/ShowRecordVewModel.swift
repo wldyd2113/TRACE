@@ -7,6 +7,6 @@
 
 import Foundation
 
-final class ShowRecordVewModel: BaseViewModel {
-    
-}
+//final class ShowRecordVewModel: BaseViewModel {
+//
+//}

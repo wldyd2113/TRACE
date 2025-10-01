@@ -109,8 +109,18 @@ class PlanWriteViewModel {
     }
 
     private func saveTravelPlan(_ travelPlan: TravelPlan) {
+        guard let realm = RealmManager.shared.getRealm() else {
+            print("❌ ===== Realm 저장 실패 =====")
+            print("오류 내용: Realm 인스턴스를 가져올 수 없습니다")
+            showAlert.accept((
+                title: "저장 실패",
+                message: "데이터베이스 연결에 실패했습니다",
+                completion: nil
+            ))
+            return
+        }
+
         do {
-            let realm = try Realm()
 
             // Realm 파일 경로 출력
             print("📁 Realm 파일 경로: \(realm.configuration.fileURL?.path ?? "경로를 찾을 수 없음")")
