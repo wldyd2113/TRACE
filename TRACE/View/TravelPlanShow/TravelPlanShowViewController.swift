@@ -132,27 +132,32 @@ class TravelPlanShowViewController: UIViewController {
 
     // 하단 버튼들
     let editButton = UIButton(type: .system).then {
-        $0.applyMainActionStyle(title: "수정하기")
-        $0.layer.cornerRadius = 25
+        $0.setTitle("수정", for: .normal)
+        $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .systemBlue
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        $0.setTitleColor(.white, for: .normal)
+        $0.layer.cornerRadius = 20
+        $0.isHidden = false
     }
 
     let saveButton = UIButton(type: .system).then {
-        $0.applyMainActionStyle(title: "저장하기")
-        $0.layer.cornerRadius = 25
+        $0.setTitle("저장", for: .normal)
+        $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .darkBlue
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        $0.setTitleColor(.white, for: .normal)
+        $0.layer.cornerRadius = 20
         $0.isHidden = true
     }
 
     let cancelButton = UIButton(type: .system).then {
-        $0.applyMainActionStyle(title: "취소")
-        $0.layer.cornerRadius = 25
+        $0.setTitle("취소", for: .normal)
+        $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .systemGray
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        $0.setTitleColor(.white, for: .normal)
+        $0.layer.cornerRadius = 20
         $0.isHidden = true
     }
+
 
     // MapKit 관련
     var mapView: MKMapView {

@@ -89,25 +89,6 @@ extension TravelPlanShowViewController {
             })
             .disposed(by: disposeBag)
 
-        // 경로 검색바 변경 감지 (사용자 입력만 감지) - 비활성화
-        // 검색 기능과 경로 설정 기능이 충돌하므로 경로 자동 업데이트 비활성화
-        // 대신 저장 버튼을 누를 때만 경로 데이터 업데이트
-        /*
-        routeSearchBar.rx.text.orEmpty
-            .skip(1) // 초기값 스킵
-            .distinctUntilChanged() // 같은 값 연속 입력 방지
-            .debounce(.milliseconds(300), scheduler: MainScheduler.instance) // 연속 입력 방지
-            .subscribe(onNext: { [weak self] text in
-                guard let self = self else { return }
-                // ViewModel 업데이트 중이거나 편집 모드가 아닐 때는 무시
-                if !self.isUpdatingFromViewModel && self.isEditMode {
-                    routeChangedSubject.onNext(text)
-                    print("🚗 사용자가 경로 변경: '\(text)'")
-                }
-            })
-            .disposed(by: disposeBag)
-        */
-
         // 일정 추가 버튼
         addScheduleItemButton.rx.tap
             .withLatestFrom(Observable.combineLatest(

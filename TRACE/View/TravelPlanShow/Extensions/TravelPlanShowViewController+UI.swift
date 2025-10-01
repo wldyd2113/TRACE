@@ -73,6 +73,7 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
                 self?.addScheduleItem()
             })
             .disposed(by: disposeBag)
+
     }
 
     func configureHierarchy() {
@@ -82,9 +83,14 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
         [dateCollectionView, budgetTitleLabel, budgetTextField, budgetDescriptionLabel,
          scheduleTitleLabel, timeTextField, locationTextField, addScheduleItemButton, scheduleDescriptionLabel,
          scheduleStackView, routeTitleLabel, routeSearchBar, routeDescriptionLabel,
-         mapView, editButton, saveButton, cancelButton].forEach {
+         mapView].forEach {
             contentView.addSubview($0)
         }
+
+        // 편집 관련 버튼들은 contentView가 아닌 view에 직접 추가 (TravelShowRecordViewController처럼)
+        view.addSubview(editButton)
+        view.addSubview(saveButton)
+        view.addSubview(cancelButton)
     }
 
     func configureUI() {
@@ -100,7 +106,7 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
             image: UIImage(systemName: "trash"),
             style: .plain,
             target: self,
-            action: #selector(clearSearchResults)
+            action: #selector(showDeleteConfirmation)
         )
 
         // RouteSearchBar 설정
@@ -206,28 +212,29 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
             $0.top.equalTo(routeDescriptionLabel.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(200)
+            $0.bottom.equalToSuperview().offset(-30)
         }
 
+        // editButton은 TravelShowRecordViewController처럼 오른쪽 하단에 작게 배치
         editButton.snp.makeConstraints {
-            $0.top.equalTo(mapView.snp.bottom).offset(30)
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(50)
+            $0.trailing.equalToSuperview().offset(-20)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            $0.width.equalTo(60)
+            $0.height.equalTo(40)
         }
 
         saveButton.snp.makeConstraints {
-            $0.top.equalTo(mapView.snp.bottom).offset(30)
-            $0.leading.equalToSuperview().inset(20)
-            $0.trailing.equalTo(contentView.snp.centerX).offset(-6)
-            $0.height.equalTo(50)
-            $0.bottom.equalToSuperview().offset(-30)
+            $0.trailing.equalToSuperview().offset(-20)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            $0.width.equalTo(60)
+            $0.height.equalTo(40)
         }
 
         cancelButton.snp.makeConstraints {
-            $0.top.equalTo(mapView.snp.bottom).offset(30)
-            $0.leading.equalTo(contentView.snp.centerX).offset(6)
-            $0.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(50)
-            $0.bottom.equalToSuperview().offset(-30)
+            $0.trailing.equalTo(saveButton.snp.leading).offset(-12)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            $0.width.equalTo(60)
+            $0.height.equalTo(40)
         }
     }
 }
@@ -266,13 +273,6 @@ extension TravelPlanShowViewController {
         editButton.isHidden = false
         saveButton.isHidden = true
         cancelButton.isHidden = true
-
-        editButton.snp.remakeConstraints {
-            $0.top.equalTo(mapView.snp.bottom).offset(30)
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(50)
-            $0.bottom.equalToSuperview().offset(-30)
-        }
 
         print("🔒 읽기 전용 모드 활성화")
     }
@@ -509,11 +509,6 @@ extension TravelPlanShowViewController {
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "확인", style: .default))
             self?.present(alert, animated: true)
-
-            // 저장 성공 시에도 편집 모드 유지
-            // if success {
-            //     self?.setReadOnlyMode()
-            // }
         }
     }
 
@@ -523,5 +518,72 @@ extension TravelPlanShowViewController {
             alert.addAction(UIAlertAction(title: "확인", style: .default))
             self?.present(alert, animated: true)
         }
+    }
+
+    @objc func showDeleteConfirmation() {
+        let alert = UIAlertController(
+            title: "여행 계획 삭제",
+            message: "이 여행 계획을 완전히 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: "완료", style: .destructive) { [weak self] _ in
+            self?.deleteTravelPlan()
+        })
+
+        present(alert, animated: true)
+    }
+
+    func deleteTravelPlan() {
+        // ViewModel을 통해 여행 계획 삭제
+        guard let planId = travelPlanId else {
+            showErrorAlert(message: "삭제할 여행 계획을 찾을 수 없습니다.")
+            return
+        }
+
+        do {
+            // Realm에서 여행 계획 삭제
+            guard let realm = try RealmManager.shared.getRealm() else {
+                showErrorAlert(message: "데이터베이스 연결에 실패했습니다.")
+                return
+            }
+
+            try realm.write {
+                if let planToDelete = realm.object(ofType: TravelPlan.self, forPrimaryKey: planId) {
+                    realm.delete(planToDelete)
+                    print("🗑️ 여행 계획 삭제 완료: \(planId)")
+                }
+            }
+
+            // 성공 알림 후 메인 화면으로 이동
+            let successAlert = UIAlertController(
+                title: "삭제 완료",
+                message: "여행 계획이 성공적으로 삭제되었습니다.",
+                preferredStyle: .alert
+            )
+            successAlert.addAction(UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+                self?.navigateToMainScreen()
+            })
+            present(successAlert, animated: true)
+
+        } catch {
+            showErrorAlert(message: "삭제 중 오류가 발생했습니다: \(error.localizedDescription)")
+        }
+    }
+
+    func navigateToMainScreen() {
+        // TravelPlanMainViewController로 이동
+        if let navigationController = navigationController {
+            for viewController in navigationController.viewControllers {
+                if viewController is TravelPlanMainViewController {
+                    navigationController.popToViewController(viewController, animated: true)
+                    return
+                }
+            }
+        }
+
+        // 만약 스택에 없다면 루트로 이동
+        navigationController?.popToRootViewController(animated: true)
     }
 }
