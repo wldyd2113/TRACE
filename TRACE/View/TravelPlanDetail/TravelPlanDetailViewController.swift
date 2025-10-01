@@ -318,4 +318,20 @@ class TravelPlanDetailViewController: UIViewController {
         return viewModel.getDayData(for: currentDay).scheduleItems
     }
 
+
+    func navigateToTravelPlanMain() {
+        // TravelPlanMainViewController로 이동
+        if let navigationController = navigationController {
+            for viewController in navigationController.viewControllers {
+                if viewController is TravelPlanMainViewController {
+                    navigationController.popToViewController(viewController, animated: true)
+                    return
+                }
+            }
+        }
+
+        // 만약 스택에 없다면 새로 생성해서 이동
+        navigationController?.popToRootViewController(animated: true)
+    }
+
 }

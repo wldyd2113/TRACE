@@ -22,7 +22,7 @@ extension TravelPlanDetailViewController {
             locationText: locationTextField.rx.text.orEmpty.asObservable(),
             addScheduleButtonTapped: addScheduleItemButton.rx.tap.asObservable(),
             dayButtonTapped: createDayButtonObservable(),
-            saveButtonTapped: Observable.never<Void>(), // 사용하지 않음
+            saveButtonTapped: saveButton.rx.tap.asObservable(),
             searchQuery: searchQuery
         )
 
@@ -40,8 +40,10 @@ extension TravelPlanDetailViewController {
             .bind(to: addScheduleItemButton.rx.isEnabled)
             .disposed(by: disposeBag)
 
-        output.addScheduleButtonColor
-            .bind(to: addScheduleItemButton.rx.backgroundColor)
+        output.isAddScheduleButtonEnabled
+            .subscribe(onNext: { [weak self] isEnabled in
+                self?.addScheduleItemButton.backgroundColor = isEnabled ? .darkBlue : .systemGray4
+            })
             .disposed(by: disposeBag)
 
         // 일정 아이템 변화 감지 및 UI 업데이트 - 비활성화 (일차 변경 시에만 수동으로 업데이트)
@@ -76,14 +78,13 @@ extension TravelPlanDetailViewController {
         //     })
         //     .disposed(by: disposeBag)
 
-        // 저장 결과 처리
-        output.saveResult
-            .subscribe(onNext: { [weak self] success, message in
-                self?.showSaveAlert(success: success, message: message)
+
+        // 메인 화면으로 이동
+        output.navigateToMain
+            .subscribe(onNext: { [weak self] in
+                self?.navigateToTravelPlanMain()
             })
             .disposed(by: disposeBag)
-
-        // navigateBack은 사용하지 않음 - 저장 후 수동으로 화면 제어
     }
 
     private func createDayButtonObservable() -> Observable<Int> {

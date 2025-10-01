@@ -10,7 +10,6 @@ import RxSwift
 import RxCocoa
 import RealmSwift
 import CoreLocation
-import UIKit
 
 class PlanDetailViewModel: BaseViewModel {
 
@@ -31,10 +30,10 @@ class PlanDetailViewModel: BaseViewModel {
     // MARK: - Output
     struct Output {
         let isAddScheduleEnabled: Observable<Bool>
-        let addScheduleButtonColor: Observable<UIColor>
+        let isAddScheduleButtonEnabled: Observable<Bool>
         let scheduleItems: Observable<[ScheduleItem]>
         let currentDayData: Observable<DayData>
-        let navigateBack: Observable<Void>
+        let navigateToMain: Observable<Void>
         let searchResults: Observable<[KakaoPlace]>
         let saveResult: Observable<(success: Bool, message: String)>
     }
@@ -43,6 +42,7 @@ class PlanDetailViewModel: BaseViewModel {
     private var currentDay = BehaviorRelay<Int>(value: 1)
     private var dayDataStorage = BehaviorRelay<[Int: DayData]>(value: [:])
     private let saveResult = PublishSubject<(success: Bool, message: String)>()
+    private let navigateToMainRelay = PublishRelay<Void>()
 
     // MARK: - Auto Save Prevention
     var shouldPreventAutoSave = false
@@ -68,9 +68,8 @@ class PlanDetailViewModel: BaseViewModel {
             return !time.isEmpty && !location.isEmpty
         }
 
-        // 일정 추가 버튼 색상
-        let addScheduleButtonColor = isAddScheduleEnabled
-            .map { $0 ? UIColor.buttonDark : UIColor.systemGray4 }
+        // 일정 추가 버튼 활성화 상태 (UI 색상은 View에서 처리)
+        let isAddScheduleButtonEnabled = isAddScheduleEnabled
 
         // 일정 추가 처리
         input.addScheduleButtonTapped
@@ -161,10 +160,10 @@ class PlanDetailViewModel: BaseViewModel {
 
         return Output(
             isAddScheduleEnabled: isAddScheduleEnabled,
-            addScheduleButtonColor: addScheduleButtonColor,
+            isAddScheduleButtonEnabled: isAddScheduleButtonEnabled,
             scheduleItems: scheduleItems,
             currentDayData: currentDayData,
-            navigateBack: navigateBack,
+            navigateToMain: navigateToMainRelay.asObservable(),
             searchResults: searchResults,
             saveResult: saveResult.asObservable()
         )
@@ -346,8 +345,8 @@ class PlanDetailViewModel: BaseViewModel {
             }
             print("==============================")
 
-            // 성공 결과 emit
-            saveResult.onNext((success: true, message: "여행 계획이 성공적으로 저장되었습니다!"))
+            // 저장 완료 후 메인 화면으로 이동
+            navigateToMainRelay.accept(())
 
         } catch {
             print("❌ Realm 저장 실패: \(error.localizedDescription)")
