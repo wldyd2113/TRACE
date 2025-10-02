@@ -15,7 +15,7 @@ extension UIButton {
         self.titleLabel?.font = FontManager.onglapFont(fontSize)
         self.setTitleColor(.white, for: .normal)
         self.backgroundColor = .skyBlue
-        self.layer.cornerRadius = 25
+        self.layer.cornerRadius = 10
     }
 
     /// 서브 액션 버튼 스타일 설정
@@ -60,6 +60,6 @@ extension UIButton {
         self.titleLabel?.font = FontManager.onglapFont(fontSize)
         self.setTitleColor(.white, for: .normal)
         self.backgroundColor = .buttonLight
-        self.layer.cornerRadius = 25
+        self.layer.cornerRadius = 10
     }
 }

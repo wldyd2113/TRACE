@@ -17,35 +17,35 @@ extension UILabel {
     }
 
     /// 섹션 제목용 라벨 스타일 설정
-    func applySectionTitleStyle(text: String, fontSize: CGFloat = 16) {
+    func applySectionTitleStyle(text: String, fontSize: CGFloat = 22) {
         self.text = text
         self.font = FontManager.onglapFont(fontSize)
         self.textColor = .labelLight
     }
 
     /// 부제목용 라벨 스타일 설정
-    func applySubtitleStyle(text: String, fontSize: CGFloat = 14) {
+    func applySubtitleStyle(text: String, fontSize: CGFloat = 20) {
         self.text = text
         self.font = FontManager.onglapFont(fontSize)
         self.textColor = .systemGray
     }
 
     /// 설명용 라벨 스타일 설정
-    func applyDescriptionStyle(text: String, fontSize: CGFloat = 12) {
+    func applyDescriptionStyle(text: String, fontSize: CGFloat = 18) {
         self.text = text
         self.font = FontManager.onglapFont(fontSize)
         self.textColor = .systemGray
     }
 
     /// 캡션용 라벨 스타일 설정
-    func applyCaptionStyle(text: String, fontSize: CGFloat = 10) {
+    func applyCaptionStyle(text: String, fontSize: CGFloat = 16) {
         self.text = text
         self.font = FontManager.onglapFont(fontSize)
         self.textColor = .systemGray2
     }
 
     /// 날짜 표시용 라벨 스타일 설정
-    func applyDateStyle(text: String, fontSize: CGFloat = 12) {
+    func applyDateStyle(text: String, fontSize: CGFloat = 18) {
         self.text = text
         self.font = FontManager.onglapFont(fontSize)
         self.textColor = .systemGray

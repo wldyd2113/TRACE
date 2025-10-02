@@ -7,9 +7,9 @@
 		<string>온글잎 의연체.ttf</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>여행 계획을 위해 현재 위치를 지도에 표시합니다.</string>
+	<string>여행 계획/기록을 위해 현재 위치를 지도에 표시합니다.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>여행 계획을 위해 현재 위치를 지도에 표시합니다.</string>
+	<string>여행 계획/기록을 위해 현재 위치를 지도에 표시합니다.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>여행 기록에 사진을 추가하기 위해 사진 라이브러리에 접근합니다.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
