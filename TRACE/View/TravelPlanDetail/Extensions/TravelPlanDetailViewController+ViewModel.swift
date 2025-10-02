@@ -42,7 +42,7 @@ extension TravelPlanDetailViewController {
 
         output.isAddScheduleButtonEnabled
             .subscribe(onNext: { [weak self] isEnabled in
-                self?.addScheduleItemButton.backgroundColor = isEnabled ? .darkBlue : .systemGray4
+                self?.addScheduleItemButton.backgroundColor = isEnabled ? .skyBlue : .systemGray4
             })
             .disposed(by: disposeBag)
 

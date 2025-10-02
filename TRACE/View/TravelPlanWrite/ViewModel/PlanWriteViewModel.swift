@@ -55,7 +55,7 @@ class PlanWriteViewModel {
 
         // 버튼 배경색
         buttonBackgroundColor = isFormValid
-            .map { $0 ? UIColor.buttonDark : UIColor.systemGray4 }
+            .map { $0 ? UIColor.skyBlue : UIColor.systemGray4 }
 
         // 시작일이 변경되면 종료일 자동 조정
         startDate

@@ -31,15 +31,54 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
         tabBarController.viewControllers = [plan, record]
-        tabBarController.tabBar.tintColor = .darkBlue
+        tabBarController.tabBar.tintColor = .skyBlue
         tabBarController.tabBar.unselectedItemTintColor = .skyBlue
-        
+
+        // Navigation Bar 전역 스타일 설정
+        configureNavigationBarAppearance()
+
         window = UIWindow(windowScene: windowScene)
 
         window?.rootViewController = tabBarController
         window?.makeKeyAndVisible()
     }
 
+    // MARK: - Navigation Bar Configuration
+    private func configureNavigationBarAppearance() {
+        // iOS 15+ 대응
+        if #available(iOS 15.0, *) {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .background
+            appearance.titleTextAttributes = [
+                .foregroundColor: UIColor.label,
+                .font: UIFont(name: FontManager.onglapUIyeon.fontName, size: 18) ?? UIFont.systemFont(ofSize: 18, weight: .medium)
+            ]
+            appearance.largeTitleTextAttributes = [
+                .foregroundColor: UIColor.label,
+                .font: UIFont(name: FontManager.onglapUIyeon.fontName, size: 24) ?? UIFont.systemFont(ofSize: 24, weight: .bold)
+            ]
+
+            // 버튼과 아이콘 색상
+            UINavigationBar.appearance().tintColor = .skyBlue
+            UINavigationBar.appearance().standardAppearance = appearance
+            UINavigationBar.appearance().scrollEdgeAppearance = appearance
+            UINavigationBar.appearance().compactAppearance = appearance
+        } else {
+            // iOS 14 이하 대응
+            UINavigationBar.appearance().backgroundColor = .background
+            UINavigationBar.appearance().barTintColor = .background
+            UINavigationBar.appearance().tintColor = .skyBlue
+            UINavigationBar.appearance().titleTextAttributes = [
+                .foregroundColor: UIColor.label,
+                .font: UIFont(name: FontManager.onglapUIyeon.fontName, size: 18) ?? UIFont.systemFont(ofSize: 18, weight: .medium)
+            ]
+            UINavigationBar.appearance().largeTitleTextAttributes = [
+                .foregroundColor: UIColor.label,
+                .font: UIFont(name: FontManager.onglapUIyeon.fontName, size: 24) ?? UIFont.systemFont(ofSize: 24, weight: .bold)
+            ]
+        }
+    }
 
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.

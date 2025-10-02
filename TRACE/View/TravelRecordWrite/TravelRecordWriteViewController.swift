@@ -125,7 +125,7 @@ class TravelRecordWriteViewController: UIViewController {
     private let saveButton = UIButton(type: .system).then {
         $0.setTitle("저장", for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
-        $0.backgroundColor = .darkBlue
+        $0.backgroundColor = .skyBlue
         $0.setTitleColor(.white, for: .normal)
         $0.layer.cornerRadius = 25
     }

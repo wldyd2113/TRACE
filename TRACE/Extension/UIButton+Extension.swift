@@ -14,7 +14,7 @@ extension UIButton {
         self.setTitle(title, for: .normal)
         self.titleLabel?.font = FontManager.onglapFont(fontSize)
         self.setTitleColor(.white, for: .normal)
-        self.backgroundColor = .buttonDark
+        self.backgroundColor = .skyBlue
         self.layer.cornerRadius = 25
     }
 
@@ -35,7 +35,7 @@ extension UIButton {
         self.titleLabel?.font = FontManager.onglapFont(fontSize)
         self.setTitleColor(.labelLight, for: .normal)
         self.layer.borderWidth = 1
-        self.layer.borderColor = UIColor.buttonDark.cgColor
+        self.layer.borderColor = UIColor.skyBlue.cgColor
         self.layer.cornerRadius = 5
 
         // iOS 15+ 지원

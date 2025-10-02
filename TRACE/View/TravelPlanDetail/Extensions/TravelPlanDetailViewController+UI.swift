@@ -40,7 +40,7 @@ extension TravelPlanDetailViewController: DesiginProtocolBind {
             locationTextField.rx.text.orEmpty
         )
         .map { !$0.isEmpty && !$1.isEmpty }
-        .map { $0 ? UIColor.buttonDark : UIColor.systemGray4 }
+        .map { $0 ? UIColor.skyBlue : UIColor.systemGray4 }
         .bind(to: addScheduleItemButton.rx.backgroundColor)
         .disposed(by: disposeBag)
 

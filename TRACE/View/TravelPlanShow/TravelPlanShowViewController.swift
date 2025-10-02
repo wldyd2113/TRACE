@@ -134,7 +134,7 @@ class TravelPlanShowViewController: UIViewController {
     let editButton = UIButton(type: .system).then {
         $0.setTitle("수정", for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.backgroundColor = .systemBlue
+        $0.backgroundColor = .skyBlue
         $0.setTitleColor(.white, for: .normal)
         $0.layer.cornerRadius = 20
         $0.isHidden = false
@@ -143,7 +143,7 @@ class TravelPlanShowViewController: UIViewController {
     let saveButton = UIButton(type: .system).then {
         $0.setTitle("저장", for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.backgroundColor = .darkBlue
+        $0.backgroundColor = .skyBlue
         $0.setTitleColor(.white, for: .normal)
         $0.layer.cornerRadius = 20
         $0.isHidden = true

@@ -79,8 +79,8 @@ class TravelDayCell: UICollectionViewCell, BaseCellProtocol, DesiginProtocol {
 
     private func updateSelectionState(isSelected: Bool) {
         if isSelected {
-            containerView.backgroundColor = .buttonDark
-            containerView.layer.borderColor = UIColor.buttonDark.cgColor
+            containerView.backgroundColor = .skyBlue
+            containerView.layer.borderColor = UIColor.skyBlue.cgColor
             dayLabel.textColor = .white
             dayLabel.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)?.withWeight(.bold)
         } else {

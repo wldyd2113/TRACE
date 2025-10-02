@@ -135,7 +135,7 @@ class TravelPlanDetailViewController: UIViewController {
     let saveButton = UIButton(type: .system).then {
         $0.applyMainActionStyle(title: "여행 계획 저장하기")
         $0.layer.cornerRadius = 25
-        $0.backgroundColor = .darkBlue
+        $0.backgroundColor = .skyBlue
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
     }
 

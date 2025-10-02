@@ -24,7 +24,7 @@ class PhotoCollectionViewCell: UICollectionViewCell {
     }
 
     private let selectionOverlay = UIView().then {
-        $0.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.3)
+        $0.backgroundColor = UIColor.skyBlue.withAlphaComponent(0.3)
         $0.isHidden = true
     }
 
