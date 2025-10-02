@@ -189,12 +189,15 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
     // MARK: - Helper Methods
     private func updateMainTravelView(with data: PlanMainViewModel.MainTravelData?) {
         DispatchQueue.main.async { [weak self] in
+            // 랜덤 햄토리 이미지 설정 (1~15번)
+            self?.setRandomHamtoriImage()
+
             guard let data = data else {
                 // 다가오는 여행 계획이 없는 경우
                 self?.countryLabel.text = "다가오는 여행 없음"
                 self?.dateLabel.text = "새로운 여행을 계획해보세요!"
                 self?.dDayLabel.text = ""
-                self?.imagePlaceholderLabel.text = "✈️ 새 여행 추가하기"
+                self?.imagePlaceholderLabel.isHidden = true // 이미지가 있으므로 텍스트 숨김
                 print("📭 다가오는 여행 계획이 없어 기본 UI 표시")
                 return
             }
@@ -202,13 +205,29 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
             self?.countryLabel.text = data.country  // 여행지명 표시
             self?.dateLabel.text = data.date
             self?.dDayLabel.text = data.dDay
-            self?.imagePlaceholderLabel.text = "\(data.country) 여행 사진"
+            self?.imagePlaceholderLabel.isHidden = true // 이미지가 있으므로 텍스트 숨김
 
             print("🔄 메인 여행 데이터 업데이트:")
             print("   🏝️ 여행지: \(data.country)")
             print("   🌍 국가: \(data.nation)")
             print("   📅 날짜: \(data.date)")
             print("   📊 D-Day: \(data.dDay)")
+        }
+    }
+
+    private func setRandomHamtoriImage() {
+        // 1~15 중 랜덤 숫자 생성
+        let randomNumber = Int.random(in: 1...15)
+        let imageName = "햄토리\(randomNumber)"
+
+        if let hamtoriImage = UIImage(named: imageName) {
+            mainImageView.image = hamtoriImage
+            imagePlaceholderLabel.isHidden = true
+            print("🐹 랜덤 햄토리 이미지 설정: \(imageName)")
+        } else {
+            print("⚠️ 햄토리 이미지를 찾을 수 없음: \(imageName)")
+            // 이미지가 없으면 기본 상태 유지
+            imagePlaceholderLabel.isHidden = false
         }
     }
 
