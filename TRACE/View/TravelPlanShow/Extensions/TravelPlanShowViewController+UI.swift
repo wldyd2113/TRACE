@@ -109,6 +109,7 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
             target: self,
             action: #selector(showDeleteConfirmation)
         )
+        navigationItem.rightBarButtonItem?.tintColor = .skyBlue
 
         // RouteSearchBar 설정
         routeSearchBar.delegate = self
