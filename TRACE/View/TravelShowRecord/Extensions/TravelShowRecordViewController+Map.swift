@@ -154,6 +154,7 @@ extension TravelShowRecordViewController: UISearchBarDelegate {
                         print("📍 총 \(self?.currentSearchedPlaces.count ?? 0)개 장소가 지도에 표시됨")
                     } else {
                         print("🔍 '\(query)'에 대한 검색 결과가 없습니다")
+                        self?.showNoSearchResultsAlert(query: query)
                     }
                 case .failure(let error):
                     print("❌ 검색 실패: \(error.localizedDescription)")
@@ -162,6 +163,21 @@ extension TravelShowRecordViewController: UISearchBarDelegate {
                 print("❌ 네트워크 오류: \(error.localizedDescription)")
             })
             .disposed(by: disposeBag)
+    }
+
+    // MARK: - Alert Methods
+    private func showNoSearchResultsAlert(query: String) {
+        DispatchQueue.main.async { [weak self] in
+            let alert = UIAlertController(
+                title: "검색 결과 없음",
+                message: "'\(query)'에 대한 검색 결과가 없습니다.\n다른 키워드로 검색해보세요.",
+                preferredStyle: .alert
+            )
+
+            alert.addAction(UIAlertAction(title: "확인", style: .default))
+
+            self?.present(alert, animated: true)
+        }
     }
 }
 

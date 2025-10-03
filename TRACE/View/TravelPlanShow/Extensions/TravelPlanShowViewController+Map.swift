@@ -41,6 +41,7 @@ extension TravelPlanShowViewController {
                         self?.mapManager.displaySearchResults(places: [bestMatch])
                     } else {
                         print("⚠️ 검색 결과 없음")
+                        self?.showNoSearchResultsAlert(query: query)
                     }
                 case .failure(let error):
                     print("❌ 검색 실패: \(error.localizedDescription)")
@@ -207,6 +208,21 @@ extension TravelPlanShowViewController: MapManagerDelegate {
         locationTextField.text = place.placeName
 
         print("➕ 일정에 장소 추가: \(place.placeName)")
+    }
+
+    // MARK: - Alert Methods
+    private func showNoSearchResultsAlert(query: String) {
+        DispatchQueue.main.async { [weak self] in
+            let alert = UIAlertController(
+                title: "검색 결과 없음",
+                message: "'\(query)'에 대한 검색 결과가 없습니다.\n다른 키워드로 검색해보세요.",
+                preferredStyle: .alert
+            )
+
+            alert.addAction(UIAlertAction(title: "확인", style: .default))
+
+            self?.present(alert, animated: true)
+        }
     }
 }
 

@@ -9,8 +9,6 @@ import Foundation
 import MapKit
 import CoreLocation
 
-
-
 class MapManager: NSObject {
 
     weak var delegate: MapManagerDelegate?

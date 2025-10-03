@@ -126,6 +126,7 @@ extension TravelRecordWriteViewController {
                         print("🎯 최적 결과 선택: \(bestMatch.placeName)")
                     } else {
                         print("⚠️ 검색 결과 없음")
+                        self?.showNoSearchResultsAlert(query: query)
                     }
                 case .failure(let error):
                     print("❌ 검색 실패: \(error.localizedDescription)")
@@ -163,5 +164,20 @@ extension TravelRecordWriteViewController {
     // 현재 검색된 장소들의 좌표를 가져오는 메서드
     func getCurrentSearchedPlaces() -> [KakaoPlace] {
         return currentSearchedPlaces
+    }
+
+    // MARK: - Alert Methods
+    private func showNoSearchResultsAlert(query: String) {
+        DispatchQueue.main.async { [weak self] in
+            let alert = UIAlertController(
+                title: "검색 결과 없음",
+                message: "'\(query)'에 대한 검색 결과가 없습니다.\n다른 키워드로 검색해보세요.",
+                preferredStyle: .alert
+            )
+
+            alert.addAction(UIAlertAction(title: "확인", style: .default))
+
+            self?.present(alert, animated: true)
+        }
     }
 }
