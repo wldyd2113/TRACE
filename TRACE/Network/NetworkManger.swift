@@ -28,6 +28,35 @@ final class NetworkManger {
                     observable.onNext(.success(value))
                 case .failure(let error):
                     print("🌐 Request failed with error: \(error)")
+
+                    // 네트워크 연결 오류인지 확인
+                    if let urlError = error.underlyingError as? URLError {
+                        switch urlError.code {
+                        case .notConnectedToInternet, .networkConnectionLost, .dataNotAllowed:
+                            // 네트워크 연결 문제인 경우 NetworkAlertManager로 처리
+                            NetworkAlertManager.shared.showManualNetworkError(
+                                message: "네트워크 연결을 확인해주세요.\n인터넷 연결 상태를 확인해보세요."
+                            )
+                        case .timedOut:
+                            NetworkAlertManager.shared.showManualNetworkError(
+                                message: "요청 시간이 초과되었습니다.\n잠시 후 다시 시도해주세요."
+                            )
+                        case .cannotConnectToHost, .cannotFindHost:
+                            NetworkAlertManager.shared.showManualNetworkError(
+                                message: "서버에 연결할 수 없습니다.\n잠시 후 다시 시도해주세요."
+                            )
+                        default:
+                            NetworkAlertManager.shared.showManualNetworkError(
+                                message: "네트워크 오류가 발생했습니다.\n(\(urlError.localizedDescription))"
+                            )
+                        }
+                    } else {
+                        // 기타 Alamofire 오류
+                        NetworkAlertManager.shared.showManualNetworkError(
+                            message: "요청 처리 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요."
+                        )
+                    }
+
                     observable.onNext(.failure(error))
                 }
                 observable.onCompleted()

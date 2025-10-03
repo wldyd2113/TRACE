@@ -19,15 +19,6 @@ class TravelRecordCell: UICollectionViewCell {
         $0.layer.cornerRadius = 8
     }
 
-    private let titleLabel = UILabel().then {
-        $0.font = FontManager.onglapUIyeon.font(size: 14)
-        $0.textColor = .white
-        $0.textAlignment = .center
-        $0.numberOfLines = 2
-        $0.backgroundColor = UIColor.black.withAlphaComponent(0.6)
-        $0.layer.cornerRadius = 4
-        $0.clipsToBounds = true
-    }
 
     private let photoCountLabel = UILabel().then {
         $0.font = FontManager.onglapUIyeon.font(size: 12)
@@ -52,7 +43,6 @@ class TravelRecordCell: UICollectionViewCell {
     // MARK: - Setup
     private func setupUI() {
         contentView.addSubview(imageView)
-        contentView.addSubview(titleLabel)
         contentView.addSubview(photoCountLabel)
 
         contentView.layer.cornerRadius = 8
@@ -62,11 +52,6 @@ class TravelRecordCell: UICollectionViewCell {
             $0.edges.equalToSuperview()
         }
 
-        titleLabel.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(4)
-            $0.bottom.equalToSuperview().offset(-4)
-            $0.height.greaterThanOrEqualTo(20)
-        }
 
         photoCountLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(4)
@@ -78,8 +63,6 @@ class TravelRecordCell: UICollectionViewCell {
 
     // MARK: - Configuration
     func configure(with model: TravelRecordDisplayModel) {
-        // 제목 설정
-        titleLabel.text = model.displayTitle
 
         // 첫 번째 사진 표시
         if let photoData = model.firstPhotoData,
@@ -91,13 +74,9 @@ class TravelRecordCell: UICollectionViewCell {
             imageView.backgroundColor = getDefaultColor(for: model.id)
         }
 
-        // 사진 개수 표시
-        if model.photoCount > 1 {
-            photoCountLabel.text = "\(model.photoCount)"
-            photoCountLabel.isHidden = false
-        } else {
-            photoCountLabel.isHidden = true
-        }
+        // 사진 개수 표시 (1개일 때도 표시)
+        photoCountLabel.text = "\(model.photoCount)"
+        photoCountLabel.isHidden = false
     }
 
     private func getDefaultColor(for id: String) -> UIColor {
@@ -109,7 +88,6 @@ class TravelRecordCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         imageView.image = nil
-        titleLabel.text = nil
         photoCountLabel.text = nil
         photoCountLabel.isHidden = true
         imageView.backgroundColor = .systemGray5

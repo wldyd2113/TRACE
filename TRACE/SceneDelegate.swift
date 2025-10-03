@@ -93,6 +93,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // 위치 권한 요청
         requestLocationPermissionIfNeeded()
+
+        // 네트워크 모니터링 시작
+        NetworkAlertManager.shared.startMonitoring()
     }
 
     private func requestLocationPermissionIfNeeded() {
@@ -125,6 +128,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
+
+        // 네트워크 모니터링 중지
+        NetworkAlertManager.shared.stopMonitoring()
     }
 
 
