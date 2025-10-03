@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3B33D35A2E8FB1050034DD6E /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3B33D3592E8FB1050034DD6E /* FirebaseAnalyticsCore */; };
+		3B33D35C2E8FB1050034DD6E /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3B33D35B2E8FB1050034DD6E /* FirebaseCrashlytics */; };
+		3B33D35E2E8FB1050034DD6E /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 3B33D35D2E8FB1050034DD6E /* FirebaseMessaging */; };
 		3B6AB3AB2E85354800FBADF6 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3AA2E85354800FBADF6 /* RxCocoa */; };
 		3B6AB3AD2E85354800FBADF6 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3AC2E85354800FBADF6 /* RxSwift */; };
 		3B6AB3B02E85355A00FBADF6 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3AF2E85355A00FBADF6 /* SnapKit */; };
@@ -48,11 +51,14 @@
 			files = (
 				3B6AB3B92E85359700FBADF6 /* Kingfisher in Frameworks */,
 				3B6AB3B62E85358700FBADF6 /* Alamofire in Frameworks */,
+				3B33D35E2E8FB1050034DD6E /* FirebaseMessaging in Frameworks */,
 				3B6AB3B32E85357700FBADF6 /* RealmSwift in Frameworks */,
 				3B6AB46B2E8577A500FBADF6 /* Then in Frameworks */,
 				3B6AB3AD2E85354800FBADF6 /* RxSwift in Frameworks */,
 				3B6AB3B02E85355A00FBADF6 /* SnapKit in Frameworks */,
+				3B33D35C2E8FB1050034DD6E /* FirebaseCrashlytics in Frameworks */,
 				3B6AB3AB2E85354800FBADF6 /* RxCocoa in Frameworks */,
+				3B33D35A2E8FB1050034DD6E /* FirebaseAnalyticsCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,6 +108,9 @@
 				3B6AB3B52E85358700FBADF6 /* Alamofire */,
 				3B6AB3B82E85359700FBADF6 /* Kingfisher */,
 				3B6AB46A2E8577A500FBADF6 /* Then */,
+				3B33D3592E8FB1050034DD6E /* FirebaseAnalyticsCore */,
+				3B33D35B2E8FB1050034DD6E /* FirebaseCrashlytics */,
+				3B33D35D2E8FB1050034DD6E /* FirebaseMessaging */,
 			);
 			productName = TRACE;
 			productReference = 3B6AB3112E8532DF00FBADF6 /* TRACE.app */;
@@ -140,6 +149,7 @@
 				3B6AB3B42E85358700FBADF6 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				3B6AB3B72E85359700FBADF6 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				3B6AB4692E8577A500FBADF6 /* XCRemoteSwiftPackageReference "Then" */,
+				3B33D3582E8FB1050034DD6E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3B6AB3122E8532DF00FBADF6 /* Products */;
@@ -375,6 +385,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3B33D3582E8FB1050034DD6E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.3.0;
+			};
+		};
 		3B6AB3A92E85354800FBADF6 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ReactiveX/RxSwift";
@@ -426,6 +444,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3B33D3592E8FB1050034DD6E /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B33D3582E8FB1050034DD6E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		3B33D35B2E8FB1050034DD6E /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B33D3582E8FB1050034DD6E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		3B33D35D2E8FB1050034DD6E /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B33D3582E8FB1050034DD6E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
 		3B6AB3AA2E85354800FBADF6 /* RxCocoa */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3B6AB3A92E85354800FBADF6 /* XCRemoteSwiftPackageReference "RxSwift" */;
