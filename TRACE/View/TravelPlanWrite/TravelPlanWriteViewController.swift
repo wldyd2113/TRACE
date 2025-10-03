@@ -101,6 +101,8 @@ class TravelPlanWriteViewController: UIViewController {
 
         alert.addAction(UIAlertAction(title: "취소", style: .cancel))
 
+        // iPad 대응은 present 시점에 설정
+
         return alert
     }()
 
@@ -159,7 +161,7 @@ extension TravelPlanWriteViewController: UITextFieldDelegate {
 
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         if textField == countryTextField {
-            present(countryActionSheet, animated: true)
+            presentActionSheet(countryActionSheet, sourceView: countryTextField)
             return false
         }
         return true
@@ -173,15 +175,17 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
         countryTextField.addGestureRecognizer(countryTapGesture)
         countryTapGesture.rx.event
             .subscribe(onNext: { [weak self] _ in
-                self?.present(self?.countryActionSheet ?? UIAlertController(), animated: true)
+                guard let self = self else { return }
+                self.presentActionSheet(self.countryActionSheet, sourceView: self.countryTextField)
             })
             .disposed(by: disposeBag)
 
         // 국가 TextField 직접 입력 방지
         countryTextField.rx.controlEvent(.editingDidBegin)
             .subscribe(onNext: { [weak self] in
-                self?.countryTextField.resignFirstResponder()
-                self?.present(self?.countryActionSheet ?? UIAlertController(), animated: true)
+                guard let self = self else { return }
+                self.countryTextField.resignFirstResponder()
+                self.presentActionSheet(self.countryActionSheet, sourceView: self.countryTextField)
             })
             .disposed(by: disposeBag)
 
