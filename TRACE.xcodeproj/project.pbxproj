@@ -15,7 +15,6 @@
 		3B6AB3B02E85355A00FBADF6 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3AF2E85355A00FBADF6 /* SnapKit */; };
 		3B6AB3B32E85357700FBADF6 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3B22E85357700FBADF6 /* RealmSwift */; };
 		3B6AB3B62E85358700FBADF6 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3B52E85358700FBADF6 /* Alamofire */; };
-		3B6AB3B92E85359700FBADF6 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3B82E85359700FBADF6 /* Kingfisher */; };
 		3B6AB46B2E8577A500FBADF6 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB46A2E8577A500FBADF6 /* Then */; };
 /* End PBXBuildFile section */
 
@@ -49,7 +48,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B6AB3B92E85359700FBADF6 /* Kingfisher in Frameworks */,
 				3B6AB3B62E85358700FBADF6 /* Alamofire in Frameworks */,
 				3B33D35E2E8FB1050034DD6E /* FirebaseMessaging in Frameworks */,
 				3B6AB3B32E85357700FBADF6 /* RealmSwift in Frameworks */,
@@ -91,6 +89,7 @@
 				3B6AB30D2E8532DF00FBADF6 /* Sources */,
 				3B6AB30E2E8532DF00FBADF6 /* Frameworks */,
 				3B6AB30F2E8532DF00FBADF6 /* Resources */,
+				3B33D3912E8FB27A0034DD6E /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -106,7 +105,6 @@
 				3B6AB3AF2E85355A00FBADF6 /* SnapKit */,
 				3B6AB3B22E85357700FBADF6 /* RealmSwift */,
 				3B6AB3B52E85358700FBADF6 /* Alamofire */,
-				3B6AB3B82E85359700FBADF6 /* Kingfisher */,
 				3B6AB46A2E8577A500FBADF6 /* Then */,
 				3B33D3592E8FB1050034DD6E /* FirebaseAnalyticsCore */,
 				3B33D35B2E8FB1050034DD6E /* FirebaseCrashlytics */,
@@ -147,7 +145,6 @@
 				3B6AB3AE2E85355A00FBADF6 /* XCRemoteSwiftPackageReference "SnapKit" */,
 				3B6AB3B12E85357700FBADF6 /* XCRemoteSwiftPackageReference "realm-swift" */,
 				3B6AB3B42E85358700FBADF6 /* XCRemoteSwiftPackageReference "Alamofire" */,
-				3B6AB3B72E85359700FBADF6 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				3B6AB4692E8577A500FBADF6 /* XCRemoteSwiftPackageReference "Then" */,
 				3B33D3582E8FB1050034DD6E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
@@ -171,6 +168,31 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		3B33D3912E8FB27A0034DD6E /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		3B6AB30D2E8532DF00FBADF6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -189,6 +211,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 5CKD3N685F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TRACE/Info.plist;
@@ -425,14 +448,6 @@
 				minimumVersion = 5.10.2;
 			};
 		};
-		3B6AB3B72E85359700FBADF6 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/onevcat/Kingfisher";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 8.5.0;
-			};
-		};
 		3B6AB4692E8577A500FBADF6 /* XCRemoteSwiftPackageReference "Then" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/devxoul/Then.git";
@@ -483,11 +498,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3B6AB3B42E85358700FBADF6 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
-		};
-		3B6AB3B82E85359700FBADF6 /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3B6AB3B72E85359700FBADF6 /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
 		};
 		3B6AB46A2E8577A500FBADF6 /* Then */ = {
 			isa = XCSwiftPackageProductDependency;
