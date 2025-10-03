@@ -15,7 +15,7 @@ import CoreLocation
 
 class TravelShowRecordViewController: UIViewController {
 
-    private let disposeBag = DisposeBag()
+    let disposeBag = DisposeBag()
     let mapManager = MapManager()
     private let viewModel = TravelShowRecordViewModel()
 
@@ -57,18 +57,22 @@ class TravelShowRecordViewController: UIViewController {
         $0.textColor = .label
     }
 
-    private let routeTextField = UITextField().then {
-        $0.placeholder = "정말놀라운 여행이었어요"
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.borderStyle = .roundedRect
-        $0.backgroundColor = .systemGray6
-        $0.layer.cornerRadius = 8
-        $0.isUserInteractionEnabled = false
-    }
 
     // MapKit 관련 (MapManager에서 관리)
     private var mapView: MKMapView {
         return mapManager.mapView
+    }
+
+    let routeSearchBar = UISearchBar().then {
+        $0.placeholder = "여행지를 검색해보세요"
+        $0.searchBarStyle = .minimal
+        $0.backgroundColor = .systemGray6
+        $0.layer.cornerRadius = 8
+        $0.clipsToBounds = true
+        $0.searchTextField.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
+        $0.searchTextField.backgroundColor = .systemGray6
+        $0.isUserInteractionEnabled = true
+        $0.searchTextField.isUserInteractionEnabled = true
     }
 
     private let mapDescriptionLabel = UILabel().then {
@@ -182,10 +186,12 @@ class TravelShowRecordViewController: UIViewController {
         let editButtonTapped = editButton.rx.tap.asObservable()
         let saveButtonTapped = saveButton.rx.tap
             .withLatestFrom(Observable.combineLatest(
-                routeTextField.rx.text.orEmpty,
+                Observable.just(""),
                 recordTextView.rx.text.orEmpty
             ))
-            .map { (route: $0.0, record: $0.1) }
+            .map { [weak self] in
+                (route: $0.0, record: $0.1, places: self?.currentSearchedPlaces ?? [])
+            }
             .asObservable()
         let cancelButtonTapped = cancelButton.rx.tap.asObservable()
 
@@ -215,14 +221,14 @@ class TravelShowRecordViewController: UIViewController {
 
         // 알림 바인딩
         output.showAlert
-            .drive(onNext: { [weak self] alertData in
+            .drive(onNext: { [weak self] (alertData: AlertData) in
                 self?.showAlert(title: alertData.title, message: alertData.message, completion: alertData.completion)
             })
             .disposed(by: disposeBag)
 
         // 로딩 상태 바인딩
         output.isLoading
-            .drive(onNext: { [weak self] isLoading in
+            .drive(onNext: { [weak self] (isLoading: Bool) in
                 // TODO: 로딩 인디케이터 표시/숨김
                 print("🔄 로딩 상태: \(isLoading)")
             })
@@ -236,10 +242,9 @@ class TravelShowRecordViewController: UIViewController {
             .disposed(by: disposeBag)
     }
 
-    private func updateUI(with data: TravelShowRecordViewModel.RecordDisplayData?) {
+    private func updateUI(with data: RecordDisplayData?) {
         guard let data = data else { return }
 
-        routeTextField.text = data.travelName
         recordTextView.text = data.recordLog
         recordPlaceholderLabel.isHidden = !data.hasPlaceholder
 
@@ -270,7 +275,7 @@ class TravelShowRecordViewController: UIViewController {
 
     private func updateEditMode(_ isEdit: Bool) {
         recordTextView.isEditable = isEdit
-        routeTextField.isUserInteractionEnabled = isEdit
+        routeSearchBar.isUserInteractionEnabled = isEdit
 
         editButton.isHidden = isEdit
         saveButton.isHidden = !isEdit
@@ -295,7 +300,6 @@ class TravelShowRecordViewController: UIViewController {
     // MARK: - Public Methods
     func setRecordData(photos: [UIImage], route: String, record: String, places: [KakaoPlace]) {
         recordPhotos = photos
-        routeTextField.text = route
         recordTextView.text = record
         currentSearchedPlaces = places
 
@@ -347,8 +351,8 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
         contentView.addSubview(photoCollectionView)
 
         contentView.addSubview(routeTitleLabel)
-        contentView.addSubview(routeTextField)
 
+        contentView.addSubview(routeSearchBar)
         contentView.addSubview(mapView)
         contentView.addSubview(mapDescriptionLabel)
 
@@ -407,7 +411,7 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
             $0.leading.trailing.equalToSuperview().inset(20)
         }
 
-        routeTextField.snp.makeConstraints {
+        routeSearchBar.snp.makeConstraints {
             $0.top.equalTo(routeTitleLabel.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(44)
@@ -415,7 +419,7 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
 
         // 지도 영역
         mapView.snp.makeConstraints {
-            $0.top.equalTo(routeTextField.snp.bottom).offset(16)
+            $0.top.equalTo(routeSearchBar.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(200)
         }

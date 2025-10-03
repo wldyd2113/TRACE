@@ -8,6 +8,7 @@
 import UIKit
 import MapKit
 import CoreLocation
+import RxSwift
 
 // MARK: - MapManagerDelegate
 extension TravelShowRecordViewController: MapManagerDelegate {
@@ -72,6 +73,9 @@ extension TravelShowRecordViewController {
     func setupMapManager() {
         mapManager.delegate = self
         mapManager.requestInitialLocation()
+
+        // SearchBar delegate 설정
+        routeSearchBar.delegate = self
     }
 
     @objc func clearSearchResults() {
@@ -111,6 +115,53 @@ extension TravelShowRecordViewController {
             )
             mapManager.mapView.setRegion(region, animated: true)
         }
+    }
+}
+
+// MARK: - UISearchBarDelegate
+extension TravelShowRecordViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+
+        // 수동 검색 실행
+        guard let query = searchBar.text, !query.isEmpty else { return }
+        print("🔍 여행지 검색 시작: '\(query)'")
+        performManualSearch(query: query)
+    }
+
+    private func performManualSearch(query: String) {
+        print("📍 NetworkManager로 '\(query)' 검색 요청 시작")
+
+        NetworkManger.shared.searchKakaoPlaces(query: query)
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] result in
+                switch result {
+                case .success(let response):
+                    let places = response.documents
+                    print("✅ 검색 완료: \(places.count)개 장소 발견")
+                    for (index, place) in places.enumerated() {
+                        print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
+                    }
+
+                    if !places.isEmpty {
+                        // 검색된 장소들을 현재 목록에 추가 (기존 장소들과 합치기)
+                        let existingPlaceNames = Set(self?.currentSearchedPlaces.map { $0.placeName } ?? [])
+                        let newPlaces = places.filter { !existingPlaceNames.contains($0.placeName) }
+
+                        self?.currentSearchedPlaces.append(contentsOf: newPlaces)
+                        self?.mapManager.displaySearchResults(places: self?.currentSearchedPlaces ?? [])
+
+                        print("📍 총 \(self?.currentSearchedPlaces.count ?? 0)개 장소가 지도에 표시됨")
+                    } else {
+                        print("🔍 '\(query)'에 대한 검색 결과가 없습니다")
+                    }
+                case .failure(let error):
+                    print("❌ 검색 실패: \(error.localizedDescription)")
+                }
+            }, onError: { error in
+                print("❌ 네트워크 오류: \(error.localizedDescription)")
+            })
+            .disposed(by: disposeBag)
     }
 }
 

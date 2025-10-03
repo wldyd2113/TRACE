@@ -32,7 +32,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         tabBarController.viewControllers = [plan, record]
         tabBarController.tabBar.tintColor = .skyBlue
-        tabBarController.tabBar.unselectedItemTintColor = .skyBlue
+        tabBarController.tabBar.unselectedItemTintColor = .systemGray4
 
         // Navigation Bar 전역 스타일 설정
         configureNavigationBarAppearance()

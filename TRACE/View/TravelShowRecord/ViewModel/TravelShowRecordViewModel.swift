@@ -19,7 +19,7 @@ class TravelShowRecordViewModel {
         let recordId: String?
         let viewDidLoad: Observable<Void>
         let editButtonTapped: Observable<Void>
-        let saveButtonTapped: Observable<(route: String, record: String)>
+        let saveButtonTapped: Observable<(route: String, record: String, places: [KakaoPlace])>
         let cancelButtonTapped: Observable<Void>
     }
 
@@ -30,32 +30,6 @@ class TravelShowRecordViewModel {
         let showAlert: Driver<AlertData>
         let isLoading: Driver<Bool>
         let navigateBack: Driver<Void>
-    }
-
-    // MARK: - Data Models
-    struct RecordDisplayData {
-        let travelName: String
-        let recordLog: String
-        let photos: [Data]
-        let places: [PlaceDisplayData]
-        let hasPlaceholder: Bool
-
-        var hasContent: Bool {
-            return !recordLog.isEmpty
-        }
-    }
-
-    struct PlaceDisplayData {
-        let id: String
-        let placeName: String
-        let latitude: Double
-        let longitude: Double
-    }
-
-    struct AlertData {
-        let title: String
-        let message: String
-        let completion: (() -> Void)?
     }
 
     // MARK: - Private Properties
@@ -90,7 +64,11 @@ class TravelShowRecordViewModel {
         // 저장 버튼 처리
         input.saveButtonTapped
             .subscribe(onNext: { [weak self] data in
-                self?.saveUpdatedRecord(route: data.route, record: data.record)
+                print("💾 저장 요청 받음 - 장소 개수: \(data.places.count)")
+                for (index, place) in data.places.enumerated() {
+                    print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
+                }
+                self?.saveUpdatedRecord(route: data.route, record: data.record, places: data.places)
             })
             .disposed(by: disposeBag)
 
@@ -104,7 +82,7 @@ class TravelShowRecordViewModel {
         return Output(
             recordData: recordDataRelay.asDriver(),
             isEditMode: isEditModeRelay.asDriver(),
-            showAlert: showAlertRelay.asDriver(onErrorJustReturn: AlertData(title: "오류", message: "알 수 없는 오류가 발생했습니다", completion: nil)),
+            showAlert: showAlertRelay.asDriver(onErrorJustReturn: AlertData(title: "오류", message: "알 수 없는 오류가 발생했습니다")),
             isLoading: isLoadingRelay.asDriver(),
             navigateBack: navigateBackRelay.asDriver(onErrorJustReturn: ())
         )
@@ -124,8 +102,7 @@ class TravelShowRecordViewModel {
             isLoadingRelay.accept(false)
             showAlertRelay.accept(AlertData(
                 title: "오류",
-                message: "데이터베이스 연결에 실패했습니다",
-                completion: nil
+                message: "데이터베이스 연결에 실패했습니다"
             ))
             return
         }
@@ -141,16 +118,14 @@ class TravelShowRecordViewModel {
                 print("❌ 해당 ID의 여행 기록을 찾을 수 없습니다: \(recordId)")
                 showAlertRelay.accept(AlertData(
                     title: "오류",
-                    message: "여행 기록을 찾을 수 없습니다",
-                    completion: nil
+                    message: "여행 기록을 찾을 수 없습니다"
                 ))
             }
         } catch {
             print("❌ ObjectId 변환 실패: \(error)")
             showAlertRelay.accept(AlertData(
                 title: "오류",
-                message: "잘못된 여행 기록 ID입니다",
-                completion: nil
+                message: "잘못된 여행 기록 ID입니다"
             ))
         }
 
@@ -201,14 +176,13 @@ class TravelShowRecordViewModel {
         print("🔄 편집 모드: \(edit ? "ON" : "OFF")")
     }
 
-    private func saveUpdatedRecord(route: String, record: String) {
+    private func saveUpdatedRecord(route: String, record: String, places: [KakaoPlace]) {
         guard let recordId = currentRecordId,
               let realm = RealmManager.shared.getRealm() else {
             print("❌ 저장 실패: Realm 접근 불가")
             showAlertRelay.accept(AlertData(
                 title: "저장 실패",
-                message: "데이터베이스 연결에 실패했습니다",
-                completion: nil
+                message: "데이터베이스 연결에 실패했습니다"
             ))
             return
         }
@@ -221,6 +195,19 @@ class TravelShowRecordViewModel {
                 try realm.write {
                     travelRecord.travelName = route
                     travelRecord.recordLog = record
+
+                    // 기존 장소들 삭제
+                    travelRecord.locations.removeAll()
+
+                    // 새로운 장소들 추가
+                    for place in places {
+                        let recordPlace = RecordPlace()
+                        recordPlace.location = place.placeName
+                        recordPlace.latitude = place.coordinate.latitude
+                        recordPlace.longitude = place.coordinate.longitude
+                        travelRecord.locations.append(recordPlace)
+                        print("📍 장소 저장: \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
+                    }
                 }
 
                 // UI 업데이트를 위해 새 데이터 로드
@@ -234,13 +221,13 @@ class TravelShowRecordViewModel {
                 navigateBackRelay.accept(())
 
                 print("✅ 여행 기록 수정 완료")
+                print("💾 저장된 장소 개수: \(travelRecord.locations.count)")
             }
         } catch {
             print("❌ 여행 기록 저장 실패: \(error)")
             showAlertRelay.accept(AlertData(
                 title: "저장 실패",
-                message: "여행 기록 저장 중 오류가 발생했습니다",
-                completion: nil
+                message: "여행 기록 저장 중 오류가 발생했습니다"
             ))
         }
 
