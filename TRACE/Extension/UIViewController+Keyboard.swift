@@ -33,15 +33,35 @@ extension UIViewController {
     /// 재귀적으로 모든 UITextField를 찾아서 설정합니다.
     private func configureTextFieldsForKeyboardDismissal(in view: UIView) {
         for subview in view.subviews {
-            if let textField = subview as? UITextField {
-                // 기존 delegate가 없는 경우에만 설정
-                if textField.delegate == nil {
-                    // KeyboardDismissalDelegate를 생성하여 설정
-                    textField.delegate = KeyboardDismissalDelegate.shared
+            if let searchBar = subview as? UISearchBar {
+                // UISearchBar는 자체적으로 delegate를 가지므로 건드리지 않음
+                // SearchBar의 Return 키 타입을 Search로 설정
+                if #available(iOS 13.0, *) {
+                    searchBar.searchTextField.returnKeyType = .search
+                } else {
+                    // iOS 13 미만에서는 하위 뷰에서 UITextField 찾아서 설정
+                    for subView in searchBar.subviews {
+                        for textField in subView.subviews {
+                            if let textField = textField as? UITextField {
+                                textField.returnKeyType = .search
+                            }
+                        }
+                    }
                 }
-                // Return 키 타입을 Done으로 설정
-                if textField.returnKeyType == .default {
-                    textField.returnKeyType = .done
+                // SearchBar 내부는 처리하지 않음
+                continue
+            } else if let textField = subview as? UITextField {
+                // UISearchBar 내부의 textField는 건드리지 않음
+                if !isTextFieldInSearchBar(textField) {
+                    // 기존 delegate가 없는 경우에만 설정
+                    if textField.delegate == nil {
+                        // KeyboardDismissalDelegate를 생성하여 설정
+                        textField.delegate = KeyboardDismissalDelegate.shared
+                    }
+                    // Return 키 타입을 Done으로 설정
+                    if textField.returnKeyType == .default {
+                        textField.returnKeyType = .done
+                    }
                 }
             } else if let textView = subview as? UITextView {
                 // UITextView의 경우 Done 버튼 추가
@@ -51,6 +71,18 @@ extension UIViewController {
                 configureTextFieldsForKeyboardDismissal(in: subview)
             }
         }
+    }
+
+    /// TextField가 UISearchBar 내부에 있는지 확인합니다.
+    private func isTextFieldInSearchBar(_ textField: UITextField) -> Bool {
+        var superview = textField.superview
+        while superview != nil {
+            if superview is UISearchBar {
+                return true
+            }
+            superview = superview?.superview
+        }
+        return false
     }
 
     /// UITextView에 Done 버튼이 있는 toolbar를 추가합니다.
