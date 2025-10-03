@@ -1,5 +1,8 @@
 **/APIKey.swift
 **/GoogleService-Info.plist
+TRACE/GoogleService-Info.plist
+GoogleService-Info.plist
+settings.json
 # Created by https://www.toptal.com/developers/gitignore/api/swift
 # Edit at https://www.toptal.com/developers/gitignore?templates=swift
 
