@@ -24,6 +24,9 @@ class TravelShowRecordViewController: UIViewController {
     var currentSearchedPlaces: [KakaoPlace] = []
     private var recordPhotos: [UIImage] = []
 
+    // MARK: - Triggers
+    private let deleteButtonTrigger = PublishRelay<Void>()
+
     // MARK: - UI Components
     private let scrollView = UIScrollView().then {
         $0.showsVerticalScrollIndicator = false
@@ -200,7 +203,8 @@ class TravelShowRecordViewController: UIViewController {
             viewDidLoad: Observable.just(()),
             editButtonTapped: editButtonTapped,
             saveButtonTapped: saveButtonTapped,
-            cancelButtonTapped: cancelButtonTapped
+            cancelButtonTapped: cancelButtonTapped,
+            deleteButtonTapped: deleteButtonTrigger.asObservable()
         )
 
         let output = viewModel.transform(input: input)
@@ -375,6 +379,13 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
             target: self,
             action: #selector(backButtonTapped)
         )
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "trash"),
+            style: .plain,
+            target: self,
+            action: #selector(deleteButtonTapped)
+        )
+        navigationItem.rightBarButtonItem?.tintColor = .skyBlue
 
         // TextView 설정
         recordTextView.textContainer.lineFragmentPadding = 0
@@ -483,6 +494,30 @@ extension TravelShowRecordViewController {
         navigationController?.popViewController(animated: true)
     }
 
+    @objc private func deleteButtonTapped() {
+        showDeleteConfirmationAlert()
+    }
+
+    private func showDeleteConfirmationAlert() {
+        let alert = UIAlertController(
+            title: "게시물 삭제",
+            message: "이 여행 기록을 정말 삭제하시겠습니까?\n삭제된 기록은 복구할 수 없습니다.",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+
+        alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            self?.deleteRecord()
+        })
+
+        present(alert, animated: true)
+    }
+
+    private func deleteRecord() {
+        // ViewModel에 삭제 요청
+        deleteButtonTrigger.accept(())
+    }
 }
 
 // MARK: - UICollectionViewDataSource & Delegate

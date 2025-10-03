@@ -21,6 +21,7 @@ class TravelShowRecordViewModel {
         let editButtonTapped: Observable<Void>
         let saveButtonTapped: Observable<(route: String, record: String, places: [KakaoPlace])>
         let cancelButtonTapped: Observable<Void>
+        let deleteButtonTapped: Observable<Void>
     }
 
     // MARK: - Output
@@ -76,6 +77,13 @@ class TravelShowRecordViewModel {
         input.cancelButtonTapped
             .subscribe(onNext: { [weak self] in
                 self?.cancelEdit()
+            })
+            .disposed(by: disposeBag)
+
+        // 삭제 버튼 처리
+        input.deleteButtonTapped
+            .subscribe(onNext: { [weak self] in
+                self?.deleteRecord()
             })
             .disposed(by: disposeBag)
 
@@ -240,5 +248,70 @@ class TravelShowRecordViewModel {
         }
         toggleEditMode(false)
         print("❌ 편집 취소")
+    }
+
+    private func deleteRecord() {
+        guard let recordId = currentRecordId,
+              let realm = RealmManager.shared.getRealm() else {
+            print("❌ 삭제 실패: Realm 접근 불가")
+            showAlertRelay.accept(AlertData(
+                title: "삭제 실패",
+                message: "데이터베이스 연결에 실패했습니다"
+            ))
+            return
+        }
+
+        isLoadingRelay.accept(true)
+
+        do {
+            let objectId = try ObjectId(string: recordId)
+            if let travelRecord = realm.object(ofType: TravelRecord.self, forPrimaryKey: objectId) {
+                try realm.write {
+                    // 사진 파일들 삭제
+                    if let travelPhoto = travelRecord.photo {
+                        deletePhotoFiles(photoFileNames: Array(travelPhoto.photos))
+                    }
+
+                    // Realm에서 레코드 삭제
+                    realm.delete(travelRecord)
+                }
+
+                print("✅ 여행 기록 삭제 완료: \(recordId)")
+
+                // 삭제 완료 후 이전 화면으로 이동
+                navigateBackRelay.accept(())
+
+            } else {
+                print("❌ 삭제할 여행 기록을 찾을 수 없습니다: \(recordId)")
+                showAlertRelay.accept(AlertData(
+                    title: "삭제 실패",
+                    message: "삭제할 여행 기록을 찾을 수 없습니다"
+                ))
+            }
+        } catch {
+            print("❌ 여행 기록 삭제 실패: \(error)")
+            showAlertRelay.accept(AlertData(
+                title: "삭제 실패",
+                message: "여행 기록 삭제 중 오류가 발생했습니다"
+            ))
+        }
+
+        isLoadingRelay.accept(false)
+    }
+
+    private func deletePhotoFiles(photoFileNames: [String]) {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+
+        for fileName in photoFileNames {
+            let photoPath = documentsPath.appendingPathComponent(fileName)
+            do {
+                if FileManager.default.fileExists(atPath: photoPath.path) {
+                    try FileManager.default.removeItem(at: photoPath)
+                    print("🗑️ 사진 파일 삭제 완료: \(fileName)")
+                }
+            } catch {
+                print("❌ 사진 파일 삭제 실패: \(error) - 경로: \(photoPath.path)")
+            }
+        }
     }
 }
