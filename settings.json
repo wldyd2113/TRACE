@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./**/*.rtf)",
+      "Read(./**/*.rtfd)",
+      "Read(./**/*.docx)",
+
+      "Read(./Config/Secrets/**)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./Pods/**)",
+      "Read(./Carthage/Build/**)",
+      "Read(./.swiftpm/**)",
+      "Read(./.build/**)",
+      "Read(./Build/**)",
+      "Read(./DerivedData/**)",
+      "Read(./.git/**)",
+      "Read(./**/.DS_Store)",
+      "Read(./**/*.xcuserstate)",
+      "Read(./**/*.xcworkspace/xcuserdata/**)",
+      "Read(./**/*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings)",
+      "Read(./**/*.dSYM)",
+      "Read(./**/*.ipa)",
+      "Read(./**/*.xcarchive)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "1000"
+  }
+}
