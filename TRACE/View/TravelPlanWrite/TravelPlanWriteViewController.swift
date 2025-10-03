@@ -143,7 +143,7 @@ class TravelPlanWriteViewController: UIViewController {
         startDateTextField.resignFirstResponder()
         endDateTextField.resignFirstResponder()
     }
-    
+
 }
 
 // MARK: - UITextFieldDelegate
@@ -256,10 +256,21 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
             target: self,
             action: #selector(backButtonTapped)
         )
-        navigationItem.rightBarButtonItems = [
-            UIBarButtonItem(image: UIImage(systemName: "airplane"), style: .plain, target: nil, action: nil),
-            UIBarButtonItem(image: UIImage(systemName: "map"), style: .plain, target: nil, action: nil)
-        ]
+        // 비활성화된 비행기 버튼
+        let airplaneUIButton = UIButton(type: .system)
+        airplaneUIButton.setImage(UIImage(systemName: "airplane"), for: .normal)
+        airplaneUIButton.tintColor = .skyBlue
+        airplaneUIButton.isUserInteractionEnabled = false
+        let airplaneButton = UIBarButtonItem(customView: airplaneUIButton)
+
+        // 비활성화된 지도 버튼
+        let mapUIButton = UIButton(type: .system)
+        mapUIButton.setImage(UIImage(systemName: "map"), for: .normal)
+        mapUIButton.tintColor = .skyBlue
+        mapUIButton.isUserInteractionEnabled = false
+        let mapButton = UIBarButtonItem(customView: mapUIButton)
+
+        navigationItem.rightBarButtonItems = [airplaneButton, mapButton]
 
         // TextField 직접 입력 방지 및 DatePicker 설정
         startDateTextField.inputView = startDatePicker
