@@ -121,6 +121,7 @@ class TravelPlanWriteViewController: UIViewController {
         configureUI()
         configureLayout()
         bind()
+        setupKeyboardDismissal()
     }
 
     override func viewWillDisappear(_ animated: Bool) {

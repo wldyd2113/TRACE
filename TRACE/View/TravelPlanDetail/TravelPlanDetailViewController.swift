@@ -170,6 +170,9 @@ class TravelPlanDetailViewController: UIViewController {
         // 맵 관리자 설정
         setupMapManager()
 
+        // 키보드 해제 설정
+        setupKeyboardDismissal()
+
         // ViewModel 바인딩
         bindViewModel()
     }

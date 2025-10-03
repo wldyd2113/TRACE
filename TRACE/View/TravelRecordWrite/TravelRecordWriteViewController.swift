@@ -170,6 +170,9 @@ class TravelRecordWriteViewController: UIViewController {
 
         // 초기 사진 섹션 숨김
         updatePhotoSectionVisibility()
+
+        // 키보드 해제 설정
+        setupKeyboardDismissal()
     }
 
     override func viewWillAppear(_ animated: Bool) {

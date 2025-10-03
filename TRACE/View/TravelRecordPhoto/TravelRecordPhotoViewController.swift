@@ -66,6 +66,9 @@ class TravelRecordPhotoViewController: UIViewController {
         bind()
         configureCellRegistration()
         requestPhotoLibraryPermission()
+
+        // 키보드 해제 설정
+        setupKeyboardDismissal()
     }
 
     override func viewWillAppear(_ animated: Bool) {
