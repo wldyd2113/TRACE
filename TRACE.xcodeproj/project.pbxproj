@@ -16,7 +16,22 @@
 		3B6AB3B32E85357700FBADF6 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3B22E85357700FBADF6 /* RealmSwift */; };
 		3B6AB3B62E85358700FBADF6 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3B52E85358700FBADF6 /* Alamofire */; };
 		3B6AB46B2E8577A500FBADF6 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB46A2E8577A500FBADF6 /* Then */; };
+		3B8C60052E90F3C700B885DE /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3B22E85357700FBADF6 /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3B8C60062E90F3C700B885DE /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				3B8C60052E90F3C700B885DE /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		3B6AB3112E8532DF00FBADF6 /* TRACE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TRACE.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -90,6 +105,7 @@
 				3B6AB30E2E8532DF00FBADF6 /* Frameworks */,
 				3B6AB30F2E8532DF00FBADF6 /* Resources */,
 				3B33D3912E8FB27A0034DD6E /* ShellScript */,
+				3B8C60062E90F3C700B885DE /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -228,6 +244,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jiyong.TRACE;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -257,6 +277,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jiyong.TRACE;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
