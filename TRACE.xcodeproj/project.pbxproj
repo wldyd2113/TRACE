@@ -104,8 +104,8 @@
 				3B6AB30D2E8532DF00FBADF6 /* Sources */,
 				3B6AB30E2E8532DF00FBADF6 /* Frameworks */,
 				3B6AB30F2E8532DF00FBADF6 /* Resources */,
-				3B33D3912E8FB27A0034DD6E /* ShellScript */,
 				3B8C60062E90F3C700B885DE /* Embed Frameworks */,
+				3B8C62592E91070D00B885DE /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -185,7 +185,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		3B33D3912E8FB27A0034DD6E /* ShellScript */ = {
+		3B8C62592E91070D00B885DE /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -244,6 +244,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jiyong.TRACE;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -277,6 +278,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jiyong.TRACE;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
