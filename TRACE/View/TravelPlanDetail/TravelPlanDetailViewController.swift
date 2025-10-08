@@ -368,20 +368,20 @@ class TravelPlanDetailViewController: UIViewController {
         // 기존 검색 구독 해제
         searchDisposeBag = DisposeBag()
 
-        // locationTextField의 텍스트 변화 감지
-        locationTextField.rx.text.orEmpty
-            .debounce(.milliseconds(500), scheduler: MainScheduler.instance)
-            .distinctUntilChanged()
-            .subscribe(onNext: { [weak self] query in
-                print("📝 TextField 입력 감지: '\(query)'")
-                guard let self = self, !query.isEmpty else {
-                    print("❌ 검색 조건 불만족: self=\(self != nil), query='\(query)'")
-                    return
-                }
-                print("✅ 검색 실행 조건 만족")
-                self.searchLocation(query: query)
-            })
-            .disposed(by: searchDisposeBag)
+        // locationTextField의 자동 검색 비활성화 (수동 검색만 사용)
+        // locationTextField.rx.text.orEmpty
+        //     .debounce(.milliseconds(500), scheduler: MainScheduler.instance)
+        //     .distinctUntilChanged()
+        //     .subscribe(onNext: { [weak self] query in
+        //         print("📝 TextField 입력 감지: '\(query)'")
+        //         guard let self = self, !query.isEmpty else {
+        //             print("❌ 검색 조건 불만족: self=\(self != nil), query='\(query)'")
+        //             return
+        //         }
+        //         print("✅ 검색 실행 조건 만족")
+        //         self.searchLocation(query: query)
+        //     })
+        //     .disposed(by: searchDisposeBag)
     }
 
     private func searchLocation(query: String) {
