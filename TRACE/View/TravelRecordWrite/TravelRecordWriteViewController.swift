@@ -21,6 +21,10 @@ class TravelRecordWriteViewController: UIViewController {
 
     // 검색된 장소들을 저장 (좌표 정보 포함)
     var currentSearchedPlaces: [KakaoPlace] = []
+    var currentGooglePlaces: [PlaceResult] = []
+
+    // 국내/해외 구분
+    internal var countryType: String = ""
 
     // ViewModel Input Relays
     private let photosRelay = BehaviorRelay<[Data]>(value: [])
@@ -334,6 +338,13 @@ extension TravelRecordWriteViewController: DesiginProtocolBind {
             })
             .disposed(by: disposeBag)
 
+        // 검색 바 편집 시작은 UISearchBarDelegate에서 처리
+        // routeSearchBar.rx.textDidBeginEditing
+        //     .subscribe(onNext: { [weak self] in
+        //         self?.showCountrySelectionAlert()
+        //     })
+        //     .disposed(by: disposeBag)
+
         // 검색 바 바인딩
         routeSearchBar.rx.searchButtonClicked
             .subscribe(onNext: { [weak self] in
@@ -546,5 +557,104 @@ extension TravelRecordWriteViewController {
             self.scrollView.contentInset.bottom = 0
             self.scrollView.verticalScrollIndicatorInsets.bottom = 0
         }
+    }
+
+    // MARK: - Country Selection Alert
+    internal func showCountrySelectionAlert() {
+        routeSearchBar.resignFirstResponder()
+
+        let alert = UIAlertController(title: "여행지 선택", message: "검색할 여행지가 국내입니까? 해외입니까?", preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "국내", style: .default) { [weak self] _ in
+            self?.countryType = "국내"
+            print("🇰🇷 국내 선택됨")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self?.routeSearchBar.becomeFirstResponder()
+            }
+        })
+
+        alert.addAction(UIAlertAction(title: "해외", style: .default) { [weak self] _ in
+            self?.countryType = "해외"
+            print("🌍 해외 선택됨")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self?.routeSearchBar.becomeFirstResponder()
+            }
+        })
+
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+
+        present(alert, animated: true)
+    }
+
+    internal func performManualSearch(query: String) {
+        guard !countryType.isEmpty else {
+            print("❌ 국가 타입이 선택되지 않았습니다")
+            return
+        }
+
+        print("🔍 수동 검색 실행: \(query)")
+        print("🔍 현재 countryType: \(countryType)")
+
+        if countryType == "국내" {
+            print("🇰🇷 [수동검색] 카카오 API 사용")
+            performKakaoSearch(query: query)
+        } else {
+            print("🌍 [수동검색] 구글 API 사용")
+            performGoogleSearch(query: query)
+        }
+    }
+
+    private func performKakaoSearch(query: String) {
+        NetworkManger.shared.searchKakaoPlaces(query: query)
+            .subscribe(onNext: { [weak self] result in
+                switch result {
+                case .success(let response):
+                    print("✅ 카카오 검색 성공: \(response.documents.count)개 결과")
+                    // 카카오 검색 시 구글 장소 정보 초기화
+                    self?.currentGooglePlaces.removeAll()
+                    self?.mapManager.displaySearchResults(places: response.documents)
+                    self?.currentSearchedPlaces = response.documents
+                case .failure(let error):
+                    print("❌ 카카오 검색 실패: \(error.localizedDescription)")
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+
+    private func performGoogleSearch(query: String) {
+        NetworkManger.shared.searchGooglePlaces(query: query)
+            .subscribe(onNext: { [weak self] result in
+                switch result {
+                case .success(let response):
+                    print("✅ 구글 검색 성공: \(response.results.count)개 결과")
+
+                    // 원본 구글 장소 정보 저장 (마커 클릭 시 사용)
+                    self?.currentGooglePlaces = response.results
+
+                    // GooglePlace를 KakaoPlace로 변환
+                    let kakaoPlaces = response.results.map { place in
+                        KakaoPlace(
+                            id: place.placeId,
+                            placeName: place.name,
+                            categoryName: place.types.first ?? "",
+                            categoryGroupCode: "",
+                            categoryGroupName: "",
+                            phone: "",
+                            addressName: place.formattedAddress ?? "",
+                            roadAddressName: place.formattedAddress ?? "",
+                            x: String(place.geometry.location.lng),
+                            y: String(place.geometry.location.lat),
+                            placeUrl: "",
+                            distance: ""
+                        )
+                    }
+
+                    self?.mapManager.displaySearchResults(places: kakaoPlaces)
+                    self?.currentSearchedPlaces = kakaoPlaces
+                case .failure(let error):
+                    print("❌ 구글 검색 실패: \(error.localizedDescription)")
+                }
+            })
+            .disposed(by: disposeBag)
     }
 }
