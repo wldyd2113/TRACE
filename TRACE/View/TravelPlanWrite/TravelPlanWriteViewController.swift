@@ -228,6 +228,11 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
                 if title == "완료" {
                     // 성공 시 Detail 화면으로 이동
                     let detailVC = TravelPlanDetailViewController()
+                    // 선택된 국내/해외 정보 전달
+                    let selectedCountry = self?.countryTextField.text ?? ""
+                    print("🚀 TravelPlanWrite: 선택된 국가 - '\(selectedCountry)'")
+                    detailVC.setCountryType(selectedCountry)
+                    print("✅ TravelPlanWrite: setCountryType 호출 완료")
                     self?.navigationController?.pushViewController(detailVC, animated: true)
                 }
             })

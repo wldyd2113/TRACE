@@ -23,6 +23,7 @@ class TravelPlanDetailViewController: UIViewController {
 
     // 검색된 장소들을 저장 (좌표 정보 포함)
     var currentSearchedPlaces: [KakaoPlace] = []
+    var currentGooglePlaces: [PlaceResult] = []
 
     // MARK: - Data
     var currentDay = 1
@@ -31,6 +32,12 @@ class TravelPlanDetailViewController: UIViewController {
     var endDate: Date?
     var selectedDayIndex = 0 // 현재 선택된 일차 인덱스 (0-based)
     var shouldPreventAutoSave = false // 자동 저장 방지 플래그
+
+    // 국내/해외 구분
+    var countryType: String = "국내" // 기본값
+
+    // 검색 구독 관리
+    private var searchDisposeBag = DisposeBag()
 
     // MARK: - UI Components
     let scrollView = UIScrollView().then {
@@ -153,6 +160,8 @@ class TravelPlanDetailViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .background
 
+        print("🏁 TravelPlanDetail viewDidLoad 시작 - 현재 countryType: \(countryType)")
+
         // 여행 계획 데이터 로드 및 일차 계산
         loadTravelPlanAndCalculateDays()
 
@@ -170,11 +179,19 @@ class TravelPlanDetailViewController: UIViewController {
         // 맵 관리자 설정
         setupMapManager()
 
+        // 초기 검색 설정 (기본값: 국내)
+        setupLocationSearch()
+
         // 키보드 해제 설정
         setupKeyboardDismissal()
 
         // ViewModel 바인딩
         bindViewModel()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        print("👀 TravelPlanDetail viewWillAppear - 현재 countryType: \(countryType)")
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -335,6 +352,110 @@ class TravelPlanDetailViewController: UIViewController {
 
         // 만약 스택에 없다면 새로 생성해서 이동
         navigationController?.popToRootViewController(animated: true)
+    }
+
+    // MARK: - Public Methods
+    func setCountryType(_ type: String) {
+        countryType = type
+        print("🌍 여행 타입 설정: \(type)")
+        setupLocationSearch()
+    }
+
+    // MARK: - Location Search Methods
+    private func setupLocationSearch() {
+        print("🔧 검색 설정 시작 - 국가타입: \(countryType)")
+
+        // 기존 검색 구독 해제
+        searchDisposeBag = DisposeBag()
+
+        // locationTextField의 텍스트 변화 감지
+        locationTextField.rx.text.orEmpty
+            .debounce(.milliseconds(500), scheduler: MainScheduler.instance)
+            .distinctUntilChanged()
+            .subscribe(onNext: { [weak self] query in
+                print("📝 TextField 입력 감지: '\(query)'")
+                guard let self = self, !query.isEmpty else {
+                    print("❌ 검색 조건 불만족: self=\(self != nil), query='\(query)'")
+                    return
+                }
+                print("✅ 검색 실행 조건 만족")
+                self.searchLocation(query: query)
+            })
+            .disposed(by: searchDisposeBag)
+    }
+
+    private func searchLocation(query: String) {
+        print("🔍 검색 시작 - 쿼리: \(query), 국가타입: \(countryType)")
+
+        if countryType == "국내" {
+            print("📍 카카오 API 사용")
+            searchWithKakao(query: query)
+        } else {
+            print("🌏 구글 API 사용")
+            searchWithGoogle(query: query)
+        }
+    }
+
+    private func searchWithKakao(query: String) {
+        print("🇰🇷 KAKAO API 호출 시작: \(query)")
+        print("🇰🇷 ===== 카카오 검색 실행 중 =====")
+
+        NetworkManger.shared.searchKakaoPlaces(query: query)
+            .subscribe(onNext: { [weak self] result in
+                print("🇰🇷 카카오 API 응답 받음")
+                switch result {
+                case .success(let response):
+                    self?.currentSearchedPlaces = response.documents
+                    self?.mapManager.displaySearchResults(places: response.documents)
+                    print("🇰🇷 카카오 검색 결과: \(response.documents.count)개")
+
+                case .failure(let error):
+                    print("❌ 카카오 검색 실패: \(error)")
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+
+    private func searchWithGoogle(query: String) {
+        print("🌍 GOOGLE API 호출 시작: \(query)")
+        print("🌍 ===== 구글 검색 실행 중 =====")
+
+        NetworkManger.shared.searchGooglePlaces(query: query)
+            .subscribe(onNext: { [weak self] result in
+                print("🌐 Google API 응답 받음")
+                switch result {
+                case .success(let response):
+                    print("✅ Google Places 응답 성공: \(response.results.count)개 결과")
+                    print("🔍 첫 번째 결과: \(response.results.first?.name ?? "없음")")
+
+                    // PlaceResult를 KakaoPlace 형태로 변환
+                    let kakaoPlaces = response.results.map { place in
+                        KakaoPlace(
+                            id: place.placeId,
+                            placeName: place.name,
+                            categoryName: place.types.first ?? "",
+                            categoryGroupCode: "",
+                            categoryGroupName: "",
+                            phone: "",
+                            addressName: place.formattedAddress ?? "",
+                            roadAddressName: place.formattedAddress ?? "",
+                            x: String(place.geometry.location.lng),
+                            y: String(place.geometry.location.lat),
+                            placeUrl: "",
+                            distance: ""
+                        )
+                    }
+
+                    self?.currentSearchedPlaces = kakaoPlaces
+                    self?.mapManager.displaySearchResults(places: kakaoPlaces)
+                    print("🔍 Google Places 검색 결과: \(kakaoPlaces.count)개")
+
+                case .failure(let error):
+                    print("❌ Google Places 검색 실패: \(error)")
+                    print("❌ 오류 상세: \(error.localizedDescription)")
+                }
+            })
+            .disposed(by: disposeBag)
     }
 
 }

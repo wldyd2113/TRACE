@@ -173,11 +173,17 @@ class TravelRecordWriteViewController: UIViewController {
 
         // 키보드 해제 설정
         setupKeyboardDismissal()
+        // 키보드 알림 설정
+        setupKeyboardNotifications()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     // MARK: - Collection Layout
@@ -483,5 +489,62 @@ extension TravelRecordWriteViewController: UICollectionViewDataSource, UICollect
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoDisplayOnlyCollectionViewCell", for: indexPath) as! PhotoDisplayOnlyCollectionViewCell
         cell.configure(with: selectedPhotos[indexPath.item])
         return cell
+    }
+}
+
+// MARK: - Keyboard Handling
+extension TravelRecordWriteViewController {
+    private func setupKeyboardNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+    }
+
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+              let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else {
+            return
+        }
+
+        let keyboardHeight = keyboardFrame.height
+        let safeAreaBottom = view.safeAreaInsets.bottom
+        let adjustedHeight = keyboardHeight - safeAreaBottom
+
+        UIView.animate(withDuration: animationDuration) {
+            self.scrollView.contentInset.bottom = adjustedHeight
+            self.scrollView.verticalScrollIndicatorInsets.bottom = adjustedHeight
+
+            // TextView가 키보드에 가려지지 않도록 스크롤
+            if self.diaryTextView.isFirstResponder {
+                let textViewFrame = self.diaryTextView.convert(self.diaryTextView.bounds, to: self.scrollView)
+                let visibleHeight = self.scrollView.frame.height - adjustedHeight
+
+                if textViewFrame.maxY > visibleHeight {
+                    let offsetY = textViewFrame.maxY - visibleHeight + 20 // 여유공간 20pt
+                    self.scrollView.setContentOffset(CGPoint(x: 0, y: offsetY), animated: false)
+                }
+            }
+        }
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        guard let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else {
+            return
+        }
+
+        UIView.animate(withDuration: animationDuration) {
+            self.scrollView.contentInset.bottom = 0
+            self.scrollView.verticalScrollIndicatorInsets.bottom = 0
+        }
     }
 }

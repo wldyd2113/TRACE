@@ -76,4 +76,10 @@ final class NetworkManger {
         let router = NetworkRouter.kakaoMapsearch(query: query, headers: headers)
         return request(router, type: KakaoPlacesResponse.self)
     }
+
+    // Google Places 검색
+    func searchGooglePlaces(query: String) -> Observable<Result<GooglePlacesResponse, AFError>> {
+        let router = NetworkRouter.googleMapsSearch(query: query)
+        return request(router, type: GooglePlacesResponse.self)
+    }
 }

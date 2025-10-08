@@ -28,12 +28,13 @@ extension TravelPlanDetailViewController {
 
         let output = viewModel.transform(input: input)
 
-        // 검색 결과를 MapManager로 전달
-        output.searchResults
-            .subscribe(onNext: { [weak self] places in
-                self?.mapManager.displaySearchResults(places: places)
-            })
-            .disposed(by: disposeBag)
+        // ViewModel의 검색 결과는 사용하지 않음 (항상 카카오만 사용하므로)
+        // 대신 TravelPlanDetailViewController의 countryType 기반 검색 사용
+        // output.searchResults
+        //     .subscribe(onNext: { [weak self] places in
+        //         self?.mapManager.displaySearchResults(places: places)
+        //     })
+        //     .disposed(by: disposeBag)
 
         // 기타 바인딩들
         output.isAddScheduleEnabled
