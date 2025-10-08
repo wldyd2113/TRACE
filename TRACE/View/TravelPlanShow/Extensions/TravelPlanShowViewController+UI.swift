@@ -327,6 +327,9 @@ extension TravelPlanShowViewController {
             self?.navigationItem.title = planData.travelName
             self?.totalDays = planData.totalDays
 
+            // countryType 설정 (API 분기용)
+            self?.setCountryType(planData.nation)
+
             // CollectionView 업데이트
             self?.dateCollectionView.reloadData()
 

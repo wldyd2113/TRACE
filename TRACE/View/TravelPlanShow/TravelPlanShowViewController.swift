@@ -29,8 +29,18 @@ class TravelPlanShowViewController: UIViewController {
     var isUpdatingFromViewModel = false // 무한 루프 방지 플래그
     var isUpdatingSearchFromMap = false // 검색 업데이트 무한 루프 방지 플래그
 
+    // 국내/해외 구분 (기본값: 국내)
+    internal var countryType: String = "국내"
+
+    // 국내/해외 타입 설정 메서드
+    func setCountryType(_ type: String) {
+        countryType = type
+        print("🌍 TravelPlanShow: countryType 설정됨 - '\(countryType)'")
+    }
+
     // 검색된 장소들을 저장 (좌표 정보 포함)
     var currentSearchedPlaces: [KakaoPlace] = []
+    var currentGooglePlaces: [PlaceResult] = []
 
     // Helper property to store subjects
     var daySelectedSubject: PublishSubject<Int>?
