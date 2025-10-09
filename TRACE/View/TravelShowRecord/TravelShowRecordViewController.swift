@@ -22,7 +22,9 @@ class TravelShowRecordViewController: UIViewController {
     // MARK: - Data
     var travelRecordId: String?
     var currentSearchedPlaces: [KakaoPlace] = []
+    var currentGooglePlaces: [PlaceResult] = []
     private var recordPhotos: [UIImage] = []
+    internal var countryType: String = "국내"
 
     // MARK: - Triggers
     private let deleteButtonTrigger = PublishRelay<Void>()
@@ -283,6 +285,9 @@ class TravelShowRecordViewController: UIViewController {
         }
         currentSearchedPlaces = places
         mapManager.displaySearchResults(places: places)
+
+        // 저장된 장소들을 기반으로 국내/해외 구분
+        determineCountryType(from: places)
     }
 
     private func updateEditMode(_ isEdit: Bool) {
@@ -297,6 +302,26 @@ class TravelShowRecordViewController: UIViewController {
             recordTextView.becomeFirstResponder()
         } else {
             view.endEditing(true)
+        }
+    }
+
+    private func determineCountryType(from places: [KakaoPlace]) {
+        for place in places {
+            let latitude = place.coordinate.latitude
+            let longitude = place.coordinate.longitude
+
+            // 한국 좌표 범위 체크 (대략적인 범위)
+            if latitude >= 33.0 && latitude <= 38.6 && longitude >= 124.0 && longitude <= 132.0 {
+                countryType = "국내"
+                print("📍 국내 여행으로 판단: \(place.placeName)")
+                return
+            }
+        }
+
+        // 한국 범위를 벗어나면 해외로 판단
+        if !places.isEmpty {
+            countryType = "해외"
+            print("📍 해외 여행으로 판단")
         }
     }
 

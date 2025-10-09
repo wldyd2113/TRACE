@@ -21,7 +21,20 @@ extension TravelShowRecordViewController: MapManagerDelegate {
     }
 
     func mapManagerDidSelectPlace(_ place: KakaoPlace) {
-        showPlaceInfoAlert(place: place)
+        // 해외 선택 시 구글 장소 정보 alert 표시, 국내는 카카오 alert 표시
+        if countryType == "해외" {
+            // 구글 검색 결과에서 해당 장소 찾기
+            if let googlePlace = currentGooglePlaces.first(where: { $0.name == place.placeName }) {
+                print("🌍 구글 장소 정보 표시: \(place.placeName)")
+                showGooglePlaceInfoAlert(place: googlePlace)
+            } else {
+                // 구글 장소를 찾을 수 없는 경우 기본 alert 표시
+                showPlaceInfoAlert(place: place)
+            }
+        } else {
+            // 국내인 경우 기존 카카오 alert 표시
+            showPlaceInfoAlert(place: place)
+        }
     }
 
     func mapManagerDidUpdateSearchedPlaces(_ places: [KakaoPlace]) {
@@ -65,6 +78,38 @@ extension TravelShowRecordViewController: MapManagerDelegate {
         present(alert, animated: true)
 
         print("📱 장소 정보 표시: \(place.placeName)")
+    }
+
+    private func showGooglePlaceInfoAlert(place: PlaceResult) {
+        let alert = UIAlertController(title: place.name, message: nil, preferredStyle: .actionSheet)
+
+        let infoMessage = """
+        📍 주소: \(place.formattedAddress ?? "정보 없음")
+        🌍 종류: \(place.types.first ?? "정보 없음")
+        🆔 장소 ID: \(place.placeId)
+        """
+
+        alert.message = infoMessage
+
+        alert.addAction(UIAlertAction(title: "구글 맵에서 보기", style: .default) { _ in
+            let coordinate = place.geometry.location.coordinate
+            if let url = URL(string: "https://www.google.com/maps/search/?api=1&query=\(coordinate.latitude),\(coordinate.longitude)") {
+                UIApplication.shared.open(url)
+            }
+        })
+
+        alert.addAction(UIAlertAction(title: "닫기", style: .cancel))
+
+        // iPad 대응
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = view
+            popover.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
+        }
+
+        present(alert, animated: true)
+
+        print("📱 구글 장소 정보 표시: \(place.name)")
     }
 }
 
@@ -130,39 +175,91 @@ extension TravelShowRecordViewController: UISearchBarDelegate {
     }
 
     private func performManualSearch(query: String) {
-        print("📍 NetworkManager로 '\(query)' 검색 요청 시작")
+        print("📍 NetworkManager로 '\(query)' 검색 요청 시작 (국가: \(countryType))")
 
-        NetworkManger.shared.searchKakaoPlaces(query: query)
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] result in
-                switch result {
-                case .success(let response):
-                    let places = response.documents
-                    print("✅ 검색 완료: \(places.count)개 장소 발견")
-                    for (index, place) in places.enumerated() {
-                        print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
+        if countryType == "해외" {
+            // 해외인 경우 구글 API 사용
+            NetworkManger.shared.searchGooglePlaces(query: query)
+                .observe(on: MainScheduler.instance)
+                .subscribe(onNext: { [weak self] result in
+                    switch result {
+                    case .success(let response):
+                        let places = response.results
+                        print("✅ 구글 검색 완료: \(places.count)개 장소 발견")
+
+                        // 구글 장소를 KakaoPlace 형식으로 변환
+                        let kakaoPlaces = places.map { googlePlace in
+                            KakaoPlace(
+                                id: googlePlace.placeId,
+                                placeName: googlePlace.name,
+                                categoryName: googlePlace.types.first ?? "",
+                                categoryGroupCode: "",
+                                categoryGroupName: "",
+                                phone: "",
+                                addressName: googlePlace.formattedAddress ?? "",
+                                roadAddressName: googlePlace.formattedAddress ?? "",
+                                x: String(googlePlace.geometry.location.lng),
+                                y: String(googlePlace.geometry.location.lat),
+                                placeUrl: "",
+                                distance: ""
+                            )
+                        }
+
+                        self?.currentGooglePlaces = places
+
+                        if !kakaoPlaces.isEmpty {
+                            let existingPlaceNames = Set(self?.currentSearchedPlaces.map { $0.placeName } ?? [])
+                            let newPlaces = kakaoPlaces.filter { !existingPlaceNames.contains($0.placeName) }
+
+                            self?.currentSearchedPlaces.append(contentsOf: newPlaces)
+                            self?.mapManager.displaySearchResults(places: self?.currentSearchedPlaces ?? [])
+
+                            print("📍 총 \(self?.currentSearchedPlaces.count ?? 0)개 장소가 지도에 표시됨")
+                        } else {
+                            print("🔍 '\(query)'에 대한 검색 결과가 없습니다")
+                            self?.showNoSearchResultsAlert(query: query)
+                        }
+                    case .failure(let error):
+                        print("❌ 구글 검색 실패: \(error.localizedDescription)")
                     }
+                }, onError: { error in
+                    print("❌ 구글 네트워크 오류: \(error.localizedDescription)")
+                })
+                .disposed(by: disposeBag)
+        } else {
+            // 국내인 경우 카카오 API 사용
+            NetworkManger.shared.searchKakaoPlaces(query: query)
+                .observe(on: MainScheduler.instance)
+                .subscribe(onNext: { [weak self] result in
+                    switch result {
+                    case .success(let response):
+                        let places = response.documents
+                        print("✅ 카카오 검색 완료: \(places.count)개 장소 발견")
+                        for (index, place) in places.enumerated() {
+                            print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
+                        }
 
-                    if !places.isEmpty {
-                        // 검색된 장소들을 현재 목록에 추가 (기존 장소들과 합치기)
-                        let existingPlaceNames = Set(self?.currentSearchedPlaces.map { $0.placeName } ?? [])
-                        let newPlaces = places.filter { !existingPlaceNames.contains($0.placeName) }
+                        if !places.isEmpty {
+                            // 검색된 장소들을 현재 목록에 추가 (기존 장소들과 합치기)
+                            let existingPlaceNames = Set(self?.currentSearchedPlaces.map { $0.placeName } ?? [])
+                            let newPlaces = places.filter { !existingPlaceNames.contains($0.placeName) }
 
-                        self?.currentSearchedPlaces.append(contentsOf: newPlaces)
-                        self?.mapManager.displaySearchResults(places: self?.currentSearchedPlaces ?? [])
+                            self?.currentSearchedPlaces.append(contentsOf: newPlaces)
+                            self?.mapManager.displaySearchResults(places: self?.currentSearchedPlaces ?? [])
 
-                        print("📍 총 \(self?.currentSearchedPlaces.count ?? 0)개 장소가 지도에 표시됨")
-                    } else {
-                        print("🔍 '\(query)'에 대한 검색 결과가 없습니다")
-                        self?.showNoSearchResultsAlert(query: query)
+                            print("📍 총 \(self?.currentSearchedPlaces.count ?? 0)개 장소가 지도에 표시됨")
+                        } else {
+                            print("🔍 '\(query)'에 대한 검색 결과가 없습니다")
+                            self?.showNoSearchResultsAlert(query: query)
+                        }
+                    case .failure(let error):
+                        print("❌ 카카오 검색 실패: \(error.localizedDescription)")
                     }
-                case .failure(let error):
-                    print("❌ 검색 실패: \(error.localizedDescription)")
-                }
-            }, onError: { error in
-                print("❌ 네트워크 오류: \(error.localizedDescription)")
-            })
-            .disposed(by: disposeBag)
+                }, onError: { error in
+                    print("❌ 카카오 네트워크 오류: \(error.localizedDescription)")
+                })
+                .disposed(by: disposeBag)
+        }
     }
 
     // MARK: - Alert Methods
