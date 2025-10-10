@@ -87,13 +87,15 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
     }
 
     private func addPlaceToRoute(place: KakaoPlace) {
-        // 기존 검색바 텍스트에 장소 추가
-        let currentText = routeSearchBar.text ?? ""
-        let newText = currentText.isEmpty ? place.placeName : "\(currentText) -> \(place.placeName)"
-        routeSearchBar.text = newText
+        // 선택된 장소 업데이트
+        selectedPlace = place
+        selectedRouteLabel.text = place.placeName
+        selectedRouteLabel.textColor = .label
+        selectedRouteLabel.isHidden = false
+        routeSearchButton.setTitle(place.placeName, for: .normal)
+        routeSearchButton.setTitleColor(.label, for: .normal)
 
         print("➕ 경로에 장소 추가: \(place.placeName)")
-        print("🗺️ 현재 경로: \(newText)")
     }
 
     private func showGooglePlaceInfoAlert(place: PlaceResult) {
@@ -131,13 +133,30 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
     }
 
     private func addGooglePlaceToRoute(place: PlaceResult) {
-        // 기존 검색바 텍스트에 장소 추가
-        let currentText = routeSearchBar.text ?? ""
-        let newText = currentText.isEmpty ? place.name : "\(currentText) -> \(place.name)"
-        routeSearchBar.text = newText
+        // 구글 장소를 KakaoPlace로 변환
+        let kakaoPlace = KakaoPlace(
+            id: place.placeId,
+            placeName: place.name,
+            categoryName: place.types.first ?? "",
+            categoryGroupCode: "",
+            categoryGroupName: "",
+            phone: "",
+            addressName: place.formattedAddress ?? "",
+            roadAddressName: place.formattedAddress ?? "",
+            x: String(place.geometry.location.lng),
+            y: String(place.geometry.location.lat),
+            placeUrl: "",
+            distance: ""
+        )
+
+        selectedPlace = kakaoPlace
+        selectedRouteLabel.text = place.name
+        selectedRouteLabel.textColor = .label
+        selectedRouteLabel.isHidden = false
+        routeSearchButton.setTitle(place.name, for: .normal)
+        routeSearchButton.setTitleColor(.label, for: .normal)
 
         print("➕ 경로에 구글 장소 추가: \(place.name)")
-        print("🗺️ 현재 경로: \(newText)")
     }
 
     private func openInGoogleMaps(place: PlaceResult) {
@@ -180,66 +199,28 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
     }
 }
 
-// MARK: - UISearchBarDelegate
-extension TravelRecordWriteViewController: UISearchBarDelegate {
-    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        // 이미 국가 타입이 선택되었으면 alert를 표시하지 않음
-        if countryType.isEmpty {
-            showCountrySelectionAlert()
-        }
-    }
-
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.resignFirstResponder()
-
-        // 수동 검색 실행
-        guard let query = searchBar.text, !query.isEmpty else { return }
-        print("🔍 수동 검색 시작: '\(query)'")
-        performManualSearch(query: query)
-    }
-}
 
 // MARK: - Map Helper Methods
 extension TravelRecordWriteViewController {
     func setupMapManager() {
         mapManager.delegate = self
         mapManager.requestInitialLocation()
-
-        // SearchBar delegate 설정
-        routeSearchBar.delegate = self
     }
 
     @objc func clearSearchResults() {
         mapManager.clearAllSearchResults()
-        routeSearchBar.text = ""
+        selectedPlace = nil
+        selectedRouteLabel.text = "여행지를 선택해주세요"
+        selectedRouteLabel.textColor = .secondaryLabel
+        selectedRouteLabel.isHidden = true
+        routeSearchButton.setTitle("여행지 검색", for: .normal)
+        routeSearchButton.setTitleColor(.label, for: .normal)
         currentSearchedPlaces.removeAll()
         currentGooglePlaces.removeAll()
         countryType = "" // 국가 타입도 초기화 (다시 선택할 수 있도록)
-        print("🗑️ 모든 검색 결과, 루트 및 국가 타입 삭제")
+        print("🗑️ 모든 검색 결과, 선택된 장소 및 국가 타입 삭제")
     }
 
-    // performManualSearch 메서드는 메인 파일에서 구현됨 (국내/해외 API 분기 로직 포함)
-    // func performManualSearch(query: String) {
-    //     print("🔍 수동 검색 실행: \(query)")
-    //
-    //     NetworkManger.shared.searchKakaoPlaces(query: query)
-    //         .subscribe(onNext: { [weak self] result in
-    //             switch result {
-    //             case .success(let response):
-    //                 print("✅ 검색 성공: \(response.documents.count)개 결과")
-    //                 if let bestMatch = self?.selectBestMatch(places: response.documents, query: query) {
-    //                     self?.mapManager.displaySearchResults(places: [bestMatch])
-    //                     print("🎯 최적 결과 선택: \(bestMatch.placeName)")
-    //                 } else {
-    //                     print("⚠️ 검색 결과 없음")
-    //                     self?.showNoSearchResultsAlert(query: query)
-    //                 }
-    //             case .failure(let error):
-    //                 print("❌ 검색 실패: \(error.localizedDescription)")
-    //             }
-    //         })
-    //         .disposed(by: disposeBag)
-    // }
 
     private func selectBestMatch(places: [KakaoPlace], query: String) -> KakaoPlace? {
         guard !places.isEmpty else { return nil }

@@ -118,15 +118,18 @@ extension TravelShowRecordViewController {
     func setupMapManager() {
         mapManager.delegate = self
         mapManager.requestInitialLocation()
-
-        // SearchBar delegate 설정
-        routeSearchBar.delegate = self
     }
 
     @objc func clearSearchResults() {
         mapManager.clearAllSearchResults()
+        selectedPlace = nil
+        selectedRouteLabel.text = "편집 모드에서 여행지를 추가할 수 있습니다"
+        selectedRouteLabel.textColor = .secondaryLabel
+        routeSearchButton.setTitle("여행지 검색", for: .normal)
+        routeSearchButton.setTitleColor(.label, for: .normal)
         currentSearchedPlaces.removeAll()
-        print("🗑️ 모든 검색 결과 및 루트 삭제")
+        currentGooglePlaces.removeAll()
+        print("🗑️ 모든 검색 결과, 선택된 장소 삭제")
     }
 
     func showRouteOnMap(coordinates: [CLLocationCoordinate2D]) {
@@ -163,118 +166,4 @@ extension TravelShowRecordViewController {
     }
 }
 
-// MARK: - UISearchBarDelegate
-extension TravelShowRecordViewController: UISearchBarDelegate {
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.resignFirstResponder()
-
-        // 수동 검색 실행
-        guard let query = searchBar.text, !query.isEmpty else { return }
-        print("🔍 여행지 검색 시작: '\(query)'")
-        performManualSearch(query: query)
-    }
-
-    private func performManualSearch(query: String) {
-        print("📍 NetworkManager로 '\(query)' 검색 요청 시작 (국가: \(countryType))")
-
-        if countryType == "해외" {
-            // 해외인 경우 구글 API 사용
-            NetworkManger.shared.searchGooglePlaces(query: query)
-                .observe(on: MainScheduler.instance)
-                .subscribe(onNext: { [weak self] result in
-                    switch result {
-                    case .success(let response):
-                        let places = response.results
-                        print("✅ 구글 검색 완료: \(places.count)개 장소 발견")
-
-                        // 구글 장소를 KakaoPlace 형식으로 변환
-                        let kakaoPlaces = places.map { googlePlace in
-                            KakaoPlace(
-                                id: googlePlace.placeId,
-                                placeName: googlePlace.name,
-                                categoryName: googlePlace.types.first ?? "",
-                                categoryGroupCode: "",
-                                categoryGroupName: "",
-                                phone: "",
-                                addressName: googlePlace.formattedAddress ?? "",
-                                roadAddressName: googlePlace.formattedAddress ?? "",
-                                x: String(googlePlace.geometry.location.lng),
-                                y: String(googlePlace.geometry.location.lat),
-                                placeUrl: "",
-                                distance: ""
-                            )
-                        }
-
-                        self?.currentGooglePlaces = places
-
-                        if !kakaoPlaces.isEmpty {
-                            let existingPlaceNames = Set(self?.currentSearchedPlaces.map { $0.placeName } ?? [])
-                            let newPlaces = kakaoPlaces.filter { !existingPlaceNames.contains($0.placeName) }
-
-                            self?.currentSearchedPlaces.append(contentsOf: newPlaces)
-                            self?.mapManager.displaySearchResults(places: self?.currentSearchedPlaces ?? [])
-
-                            print("📍 총 \(self?.currentSearchedPlaces.count ?? 0)개 장소가 지도에 표시됨")
-                        } else {
-                            print("🔍 '\(query)'에 대한 검색 결과가 없습니다")
-                            self?.showNoSearchResultsAlert(query: query)
-                        }
-                    case .failure(let error):
-                        print("❌ 구글 검색 실패: \(error.localizedDescription)")
-                    }
-                }, onError: { error in
-                    print("❌ 구글 네트워크 오류: \(error.localizedDescription)")
-                })
-                .disposed(by: disposeBag)
-        } else {
-            // 국내인 경우 카카오 API 사용
-            NetworkManger.shared.searchKakaoPlaces(query: query)
-                .observe(on: MainScheduler.instance)
-                .subscribe(onNext: { [weak self] result in
-                    switch result {
-                    case .success(let response):
-                        let places = response.documents
-                        print("✅ 카카오 검색 완료: \(places.count)개 장소 발견")
-                        for (index, place) in places.enumerated() {
-                            print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
-                        }
-
-                        if !places.isEmpty {
-                            // 검색된 장소들을 현재 목록에 추가 (기존 장소들과 합치기)
-                            let existingPlaceNames = Set(self?.currentSearchedPlaces.map { $0.placeName } ?? [])
-                            let newPlaces = places.filter { !existingPlaceNames.contains($0.placeName) }
-
-                            self?.currentSearchedPlaces.append(contentsOf: newPlaces)
-                            self?.mapManager.displaySearchResults(places: self?.currentSearchedPlaces ?? [])
-
-                            print("📍 총 \(self?.currentSearchedPlaces.count ?? 0)개 장소가 지도에 표시됨")
-                        } else {
-                            print("🔍 '\(query)'에 대한 검색 결과가 없습니다")
-                            self?.showNoSearchResultsAlert(query: query)
-                        }
-                    case .failure(let error):
-                        print("❌ 카카오 검색 실패: \(error.localizedDescription)")
-                    }
-                }, onError: { error in
-                    print("❌ 카카오 네트워크 오류: \(error.localizedDescription)")
-                })
-                .disposed(by: disposeBag)
-        }
-    }
-
-    // MARK: - Alert Methods
-    private func showNoSearchResultsAlert(query: String) {
-        DispatchQueue.main.async { [weak self] in
-            let alert = UIAlertController(
-                title: "검색 결과 없음",
-                message: "'\(query)'에 대한 검색 결과가 없습니다.\n다른 키워드로 검색해보세요.",
-                preferredStyle: .alert
-            )
-
-            alert.addAction(UIAlertAction(title: "확인", style: .default))
-
-            self?.present(alert, animated: true)
-        }
-    }
-}
 

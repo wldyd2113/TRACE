@@ -26,6 +26,9 @@ class TravelShowRecordViewController: UIViewController {
     private var recordPhotos: [UIImage] = []
     internal var countryType: String = "국내"
 
+    // 선택된 장소 저장
+    var selectedPlace: KakaoPlace?
+
     // MARK: - Triggers
     private let deleteButtonTrigger = PublishRelay<Void>()
 
@@ -68,16 +71,26 @@ class TravelShowRecordViewController: UIViewController {
         return mapManager.mapView
     }
 
-    let routeSearchBar = UISearchBar().then {
-        $0.placeholder = "여행지를 검색해보세요"
-        $0.searchBarStyle = .minimal
+    // 여행지 검색 버튼
+    let routeSearchButton = UIButton(type: .system).then {
+        $0.setTitle("여행지 검색", for: .normal)
+        $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .systemGray6
+        $0.setTitleColor(.label, for: .normal)
         $0.layer.cornerRadius = 8
-        $0.clipsToBounds = true
-        $0.searchTextField.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.searchTextField.backgroundColor = .systemGray6
-        $0.isUserInteractionEnabled = true
-        $0.searchTextField.isUserInteractionEnabled = true
+        $0.layer.borderWidth = 1
+        $0.layer.borderColor = UIColor.systemGray4.cgColor
+        $0.contentHorizontalAlignment = .left
+        $0.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
+        $0.isUserInteractionEnabled = false // 편집 모드에서만 활성화
+    }
+
+    // 선택된 장소 표시 라벨
+    let selectedRouteLabel = UILabel().then {
+        $0.text = "편집 모드에서 여행지를 추가할 수 있습니다"
+        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
+        $0.textColor = .secondaryLabel
+        $0.isHidden = true
     }
 
     private let mapDescriptionLabel = UILabel().then {
@@ -196,10 +209,15 @@ class TravelShowRecordViewController: UIViewController {
 
     // MARK: - ViewModel Binding
     private func bindViewModel() {
+        // 선택된 장소 텍스트를 Observable로 변환
+        let selectedRouteText = selectedRouteLabel.rx.observe(String.self, "text")
+            .map { $0 ?? "" }
+            .asObservable()
+
         let editButtonTapped = editButton.rx.tap.asObservable()
         let saveButtonTapped = saveButton.rx.tap
             .withLatestFrom(Observable.combineLatest(
-                Observable.just(""),
+                selectedRouteText,
                 recordTextView.rx.text.orEmpty
             ))
             .map { [weak self] in
@@ -292,15 +310,23 @@ class TravelShowRecordViewController: UIViewController {
 
     private func updateEditMode(_ isEdit: Bool) {
         recordTextView.isEditable = isEdit
-        routeSearchBar.isUserInteractionEnabled = isEdit
+        routeSearchButton.isUserInteractionEnabled = isEdit
 
         editButton.isHidden = isEdit
         saveButton.isHidden = !isEdit
         cancelButton.isHidden = !isEdit
 
+        // 편집 모드에 따른 UI 업데이트
         if isEdit {
+            routeSearchButton.backgroundColor = .systemGray6
+            routeSearchButton.setTitleColor(.label, for: .normal)
+            selectedRouteLabel.text = "여행지를 추가하려면 검색 버튼을 눌러주세요"
+            selectedRouteLabel.isHidden = false
             recordTextView.becomeFirstResponder()
         } else {
+            routeSearchButton.backgroundColor = .systemGray5
+            routeSearchButton.setTitleColor(.secondaryLabel, for: .normal)
+            selectedRouteLabel.isHidden = true
             view.endEditing(true)
         }
     }
@@ -331,6 +357,16 @@ class TravelShowRecordViewController: UIViewController {
             completion?()
         })
         present(alert, animated: true)
+    }
+
+    // MARK: - Search Modal Methods
+    private func presentSearchModal() {
+        let searchVC = TravelSearchViewController()
+        searchVC.delegate = self
+        searchVC.countryType = countryType
+        searchVC.modalPresentationStyle = .overFullScreen
+        searchVC.modalTransitionStyle = .crossDissolve
+        present(searchVC, animated: true)
     }
 
 
@@ -406,6 +442,28 @@ class TravelShowRecordViewController: UIViewController {
     }
 }
 
+// MARK: - TravelSearchDelegate
+extension TravelShowRecordViewController: TravelSearchDelegate {
+    func didSelectPlace(_ place: KakaoPlace) {
+        selectedPlace = place
+        selectedRouteLabel.text = place.placeName
+        selectedRouteLabel.textColor = .label
+        selectedRouteLabel.isHidden = false
+
+        // 검색 버튼 텍스트 업데이트
+        routeSearchButton.setTitle(place.placeName, for: .normal)
+        routeSearchButton.setTitleColor(.label, for: .normal)
+
+        print("📍 장소 선택됨: \(place.placeName)")
+
+        // 선택된 장소를 현재 검색된 장소에 추가
+        if !currentSearchedPlaces.contains(where: { $0.placeName == place.placeName }) {
+            currentSearchedPlaces.append(place)
+            mapManager.displaySearchResults(places: currentSearchedPlaces)
+        }
+    }
+}
+
 // MARK: - DesiginProtocolBind
 extension TravelShowRecordViewController: DesiginProtocolBind {
     func bind() {
@@ -433,6 +491,13 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
                 }
             })
             .disposed(by: disposeBag)
+
+        // 여행지 검색 버튼 바인딩 (편집 모드에서만 작동)
+        routeSearchButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                self?.presentSearchModal()
+            })
+            .disposed(by: disposeBag)
     }
 
     func configureHierarchy() {
@@ -443,8 +508,8 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
         contentView.addSubview(photoCollectionView)
 
         contentView.addSubview(routeTitleLabel)
-
-        contentView.addSubview(routeSearchBar)
+        contentView.addSubview(routeSearchButton)
+        contentView.addSubview(selectedRouteLabel)
         contentView.addSubview(mapView)
         contentView.addSubview(mapDescriptionLabel)
 
@@ -510,15 +575,20 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
             $0.leading.trailing.equalToSuperview().inset(20)
         }
 
-        routeSearchBar.snp.makeConstraints {
+        routeSearchButton.snp.makeConstraints {
             $0.top.equalTo(routeTitleLabel.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(44)
         }
 
+        selectedRouteLabel.snp.makeConstraints {
+            $0.top.equalTo(routeSearchButton.snp.bottom).offset(8)
+            $0.leading.trailing.equalToSuperview().inset(20)
+        }
+
         // 지도 영역
         mapView.snp.makeConstraints {
-            $0.top.equalTo(routeSearchBar.snp.bottom).offset(16)
+            $0.top.equalTo(selectedRouteLabel.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(200)
         }

@@ -26,6 +26,9 @@ class TravelRecordWriteViewController: UIViewController {
     // 국내/해외 구분
     internal var countryType: String = ""
 
+    // 선택된 장소 저장
+    var selectedPlace: KakaoPlace?
+
     // ViewModel Input Relays
     private let photosRelay = BehaviorRelay<[Data]>(value: [])
     let searchedPlacesRelay = BehaviorRelay<[KakaoPlace]>(value: [])
@@ -65,16 +68,25 @@ class TravelRecordWriteViewController: UIViewController {
         $0.textColor = .label
     }
 
-    let routeSearchBar = UISearchBar().then {
-        $0.placeholder = "예: 서울 -> 부산"
-        $0.searchBarStyle = .minimal
+    // 여행지 검색 버튼
+    let routeSearchButton = UIButton(type: .system).then {
+        $0.setTitle("여행지 검색", for: .normal)
+        $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .systemGray6
+        $0.setTitleColor(.label, for: .normal)
         $0.layer.cornerRadius = 8
-        $0.clipsToBounds = true
-        $0.searchTextField.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.searchTextField.backgroundColor = .systemGray6
-        $0.isUserInteractionEnabled = true
-        $0.searchTextField.isUserInteractionEnabled = true
+        $0.layer.borderWidth = 1
+        $0.layer.borderColor = UIColor.systemGray4.cgColor
+        $0.contentHorizontalAlignment = .left
+        $0.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
+    }
+
+    // 선택된 장소 표시 라벨
+    let selectedRouteLabel = UILabel().then {
+        $0.text = "여행지를 선택해주세요"
+        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
+        $0.textColor = .secondaryLabel
+        $0.isHidden = true
     }
 
     private let routeDescriptionLabel = UILabel().then {
@@ -233,9 +245,14 @@ class TravelRecordWriteViewController: UIViewController {
 
     // MARK: - ViewModel Binding
     private func bindViewModel() {
+        // 선택된 장소 텍스트를 Observable로 변환
+        let selectedRouteText = selectedRouteLabel.rx.observe(String.self, "text")
+            .map { $0 ?? "" }
+            .asDriver(onErrorJustReturn: "")
+
         // Input 생성
         let input = RecordWriteViewModel.Input(
-            routeText: routeSearchBar.rx.text.orEmpty.asDriver(),
+            routeText: selectedRouteText,
             diaryText: diaryTextView.rx.text.orEmpty.asDriver(),
             saveButtonTapped: saveButton.rx.tap.asDriver(),
             photos: photosRelay,
@@ -304,6 +321,26 @@ class TravelRecordWriteViewController: UIViewController {
 
 }
 
+// MARK: - TravelSearchDelegate
+extension TravelRecordWriteViewController: TravelSearchDelegate {
+    func didSelectPlace(_ place: KakaoPlace) {
+        selectedPlace = place
+        selectedRouteLabel.text = place.placeName
+        selectedRouteLabel.textColor = .label
+        selectedRouteLabel.isHidden = false
+
+        // 검색 버튼 텍스트 업데이트
+        routeSearchButton.setTitle(place.placeName, for: .normal)
+        routeSearchButton.setTitleColor(.label, for: .normal)
+
+        print("📍 장소 선택됨: \(place.placeName)")
+
+        // 선택된 장소를 지도에 표시 (선택된 장소만)
+        currentSearchedPlaces = [place]
+        mapManager.displaySearchResults(places: [place])
+    }
+}
+
 // MARK: - DesiginProtocolBind
 extension TravelRecordWriteViewController: DesiginProtocolBind {
     func bind() {
@@ -338,20 +375,10 @@ extension TravelRecordWriteViewController: DesiginProtocolBind {
             })
             .disposed(by: disposeBag)
 
-        // 검색 바 편집 시작은 UISearchBarDelegate에서 처리
-        // routeSearchBar.rx.textDidBeginEditing
-        //     .subscribe(onNext: { [weak self] in
-        //         self?.showCountrySelectionAlert()
-        //     })
-        //     .disposed(by: disposeBag)
-
-        // 검색 바 바인딩
-        routeSearchBar.rx.searchButtonClicked
+        // 여행지 검색 버튼 바인딩
+        routeSearchButton.rx.tap
             .subscribe(onNext: { [weak self] in
-                self?.routeSearchBar.resignFirstResponder()
-                guard let query = self?.routeSearchBar.text, !query.isEmpty else { return }
-                print("🔍 수동 검색 시작: '\(query)'")
-                self?.performManualSearch(query: query)
+                self?.showCountrySelectionAlert()
             })
             .disposed(by: disposeBag)
     }
@@ -364,7 +391,8 @@ extension TravelRecordWriteViewController: DesiginProtocolBind {
         contentView.addSubview(photoCollectionView)
 
         contentView.addSubview(routeSectionLabel)
-        contentView.addSubview(routeSearchBar)
+        contentView.addSubview(routeSearchButton)
+        contentView.addSubview(selectedRouteLabel)
         contentView.addSubview(routeDescriptionLabel)
 
         contentView.addSubview(mapView)
@@ -431,14 +459,19 @@ extension TravelRecordWriteViewController: DesiginProtocolBind {
             $0.leading.trailing.equalToSuperview().inset(20)
         }
 
-        routeSearchBar.snp.makeConstraints {
+        routeSearchButton.snp.makeConstraints {
             $0.top.equalTo(routeSectionLabel.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(44)
         }
 
+        selectedRouteLabel.snp.makeConstraints {
+            $0.top.equalTo(routeSearchButton.snp.bottom).offset(8)
+            $0.leading.trailing.equalToSuperview().inset(20)
+        }
+
         routeDescriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(routeSearchBar.snp.bottom).offset(8)
+            $0.top.equalTo(selectedRouteLabel.snp.bottom).offset(8)
             $0.leading.trailing.equalToSuperview().inset(20)
         }
 
@@ -561,24 +594,18 @@ extension TravelRecordWriteViewController {
 
     // MARK: - Country Selection Alert
     internal func showCountrySelectionAlert() {
-        routeSearchBar.resignFirstResponder()
-
         let alert = UIAlertController(title: "여행지 선택", message: "검색할 여행지가 국내입니까? 해외입니까?", preferredStyle: .alert)
 
         alert.addAction(UIAlertAction(title: "국내", style: .default) { [weak self] _ in
             self?.countryType = "국내"
             print("🇰🇷 국내 선택됨")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self?.routeSearchBar.becomeFirstResponder()
-            }
+            self?.presentSearchModal()
         })
 
         alert.addAction(UIAlertAction(title: "해외", style: .default) { [weak self] _ in
             self?.countryType = "해외"
             print("🌍 해외 선택됨")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self?.routeSearchBar.becomeFirstResponder()
-            }
+            self?.presentSearchModal()
         })
 
         alert.addAction(UIAlertAction(title: "취소", style: .cancel))
@@ -586,75 +613,14 @@ extension TravelRecordWriteViewController {
         present(alert, animated: true)
     }
 
-    internal func performManualSearch(query: String) {
-        guard !countryType.isEmpty else {
-            print("❌ 국가 타입이 선택되지 않았습니다")
-            return
-        }
-
-        print("🔍 수동 검색 실행: \(query)")
-        print("🔍 현재 countryType: \(countryType)")
-
-        if countryType == "국내" {
-            print("🇰🇷 [수동검색] 카카오 API 사용")
-            performKakaoSearch(query: query)
-        } else {
-            print("🌍 [수동검색] 구글 API 사용")
-            performGoogleSearch(query: query)
-        }
+    // MARK: - Search Modal Methods
+    func presentSearchModal() {
+        let searchVC = TravelSearchViewController()
+        searchVC.delegate = self
+        searchVC.countryType = countryType
+        searchVC.modalPresentationStyle = .overFullScreen
+        searchVC.modalTransitionStyle = .crossDissolve
+        present(searchVC, animated: true)
     }
 
-    private func performKakaoSearch(query: String) {
-        NetworkManger.shared.searchKakaoPlaces(query: query)
-            .subscribe(onNext: { [weak self] result in
-                switch result {
-                case .success(let response):
-                    print("✅ 카카오 검색 성공: \(response.documents.count)개 결과")
-                    // 카카오 검색 시 구글 장소 정보 초기화
-                    self?.currentGooglePlaces.removeAll()
-                    self?.mapManager.displaySearchResults(places: response.documents)
-                    self?.currentSearchedPlaces = response.documents
-                case .failure(let error):
-                    print("❌ 카카오 검색 실패: \(error.localizedDescription)")
-                }
-            })
-            .disposed(by: disposeBag)
-    }
-
-    private func performGoogleSearch(query: String) {
-        NetworkManger.shared.searchGooglePlaces(query: query)
-            .subscribe(onNext: { [weak self] result in
-                switch result {
-                case .success(let response):
-                    print("✅ 구글 검색 성공: \(response.results.count)개 결과")
-
-                    // 원본 구글 장소 정보 저장 (마커 클릭 시 사용)
-                    self?.currentGooglePlaces = response.results
-
-                    // GooglePlace를 KakaoPlace로 변환
-                    let kakaoPlaces = response.results.map { place in
-                        KakaoPlace(
-                            id: place.placeId,
-                            placeName: place.name,
-                            categoryName: place.types.first ?? "",
-                            categoryGroupCode: "",
-                            categoryGroupName: "",
-                            phone: "",
-                            addressName: place.formattedAddress ?? "",
-                            roadAddressName: place.formattedAddress ?? "",
-                            x: String(place.geometry.location.lng),
-                            y: String(place.geometry.location.lat),
-                            placeUrl: "",
-                            distance: ""
-                        )
-                    }
-
-                    self?.mapManager.displaySearchResults(places: kakaoPlaces)
-                    self?.currentSearchedPlaces = kakaoPlaces
-                case .failure(let error):
-                    print("❌ 구글 검색 실패: \(error.localizedDescription)")
-                }
-            })
-            .disposed(by: disposeBag)
-    }
 }
