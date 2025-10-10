@@ -59,6 +59,27 @@ class MapManager: NSObject {
         }
     }
 
+    func requestCurrentLocation() {
+        let authStatus = locationManager.authorizationStatus
+        print("📍 MapManager: Requesting current location, status: \(authStatus.rawValue)")
+
+        switch authStatus {
+        case .notDetermined:
+            print("📍 MapManager: Permission not determined, requesting permission...")
+            locationManager.requestWhenInUseAuthorization()
+        case .denied, .restricted:
+            print("📍 MapManager: Location access denied, cannot get current location")
+            // 사용자에게 설정으로 이동하라는 알림을 보낼 수 있음
+            delegate?.mapManagerDidFailToGetLocation()
+        case .authorizedWhenInUse, .authorizedAlways:
+            print("📍 MapManager: Location authorized, requesting current location...")
+            locationManager.requestLocation()
+        @unknown default:
+            print("📍 MapManager: Unknown authorization status")
+            delegate?.mapManagerDidFailToGetLocation()
+        }
+    }
+
     func setDefaultLocation() {
         print("📍 Setting default location (Seoul)")
         let defaultCoordinate = CLLocationCoordinate2D(latitude: 37.5665, longitude: 126.9780)

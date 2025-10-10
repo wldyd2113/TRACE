@@ -28,9 +28,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let record = UINavigationController(rootViewController: recordVc)
         record.tabBarItem = UITabBarItem(title: "기록", image: UIImage(systemName: "text.page.fill"), tag: 1)
 
+        
+        let channelVC = TravelChannelViewController()
+        let channel = UINavigationController(rootViewController: channelVC)
+        channel.tabBarItem = UITabBarItem(title: "경로", image: UIImage(systemName: "map.fill"), tag: 1)
 
 
-        tabBarController.viewControllers = [plan, record]
+
+
+        tabBarController.viewControllers = [plan,channel ,record]
         tabBarController.tabBar.tintColor = .skyBlue
         tabBarController.tabBar.unselectedItemTintColor = .systemGray4
 
