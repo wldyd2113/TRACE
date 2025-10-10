@@ -42,6 +42,9 @@ class TravelPlanShowViewController: UIViewController {
     var currentSearchedPlaces: [KakaoPlace] = []
     var currentGooglePlaces: [PlaceResult] = []
 
+    // 선택된 장소 저장
+    var selectedPlace: KakaoPlace?
+
     // Helper property to store subjects
     var daySelectedSubject: PublishSubject<Int>?
 
@@ -93,8 +96,25 @@ class TravelPlanShowViewController: UIViewController {
         $0.isUserInteractionEnabled = true
     }
 
-    let locationTextField = UITextField().then {
-        $0.applyTravelStyle(placeholder: "여행지 입력")
+    // 여행지 검색 버튼
+    let locationSearchButton = UIButton(type: .system).then {
+        $0.setTitle("여행지 검색", for: .normal)
+        $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
+        $0.backgroundColor = .systemGray6
+        $0.setTitleColor(.label, for: .normal)
+        $0.layer.cornerRadius = 8
+        $0.layer.borderWidth = 1
+        $0.layer.borderColor = UIColor.systemGray4.cgColor
+        $0.contentHorizontalAlignment = .left
+        $0.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
+    }
+
+    // 선택된 장소 표시 라벨
+    let selectedLocationLabel = UILabel().then {
+        $0.text = "장소를 선택해주세요"
+        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
+        $0.textColor = .secondaryLabel
+        $0.isHidden = true
     }
 
     let addScheduleItemButton = UIButton(type: .system).then {
@@ -113,26 +133,6 @@ class TravelPlanShowViewController: UIViewController {
         $0.applyDescriptionStyle(text: "각 시간대 일정을 추가하거나 수정할 수 있습니다.")
     }
 
-    // 여행 경로 섹션
-    let routeTitleLabel = UILabel().then {
-        $0.applySectionTitleStyle(text: "여행 경로")
-    }
-
-    let routeSearchBar = UISearchBar().then {
-        $0.placeholder = "예: 서울 -> 부산"
-        $0.searchBarStyle = .minimal
-        $0.backgroundColor = .systemGray6
-        $0.layer.cornerRadius = 8
-        $0.clipsToBounds = true
-        $0.searchTextField.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
-        $0.searchTextField.backgroundColor = .systemGray6
-        $0.isUserInteractionEnabled = true
-        $0.searchTextField.isUserInteractionEnabled = true
-    }
-
-    let routeDescriptionLabel = UILabel().then {
-        $0.applyDescriptionStyle(text: "여행 경로를 확인하고 수정할 수 있습니다.")
-    }
 
     // 동적으로 추가될 일정 컨테이너
     let scheduleStackView = UIStackView().then {
@@ -197,6 +197,36 @@ class TravelPlanShowViewController: UIViewController {
         if let planId = travelPlanId {
             viewModel.loadTravelPlan(id: planId)
         }
+    }
+
+    // MARK: - Search Modal Methods
+    func presentSearchModal() {
+        let searchVC = TravelSearchViewController()
+        searchVC.delegate = self
+        searchVC.countryType = countryType
+        searchVC.modalPresentationStyle = .overFullScreen
+        searchVC.modalTransitionStyle = .crossDissolve
+        present(searchVC, animated: true)
+    }
+}
+
+// MARK: - TravelSearchDelegate
+extension TravelPlanShowViewController: TravelSearchDelegate {
+    func didSelectPlace(_ place: KakaoPlace) {
+        selectedPlace = place
+        selectedLocationLabel.text = place.placeName
+        selectedLocationLabel.textColor = .label
+        selectedLocationLabel.isHidden = false
+
+        // 검색 버튼 텍스트 업데이트
+        locationSearchButton.setTitle(place.placeName, for: .normal)
+        locationSearchButton.setTitleColor(.label, for: .normal)
+
+        print("📍 장소 선택됨: \(place.placeName)")
+
+        // 선택된 장소를 지도에 표시 (선택된 장소만)
+        currentSearchedPlaces = [place]
+        mapManager.displaySearchResults(places: [place])
     }
 }
 

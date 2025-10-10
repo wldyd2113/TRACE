@@ -49,24 +49,12 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
             .bind(to: timeTextField.rx.text)
             .disposed(by: disposeBag)
 
-        // 텍스트필드 입력 감지 (둘 다 입력되어야 버튼 활성화)
-        Observable.combineLatest(
-            timeTextField.rx.text.orEmpty,
-            locationTextField.rx.text.orEmpty
-        )
-        .map { !$0.isEmpty && !$1.isEmpty }
-        .bind(to: addScheduleItemButton.rx.isEnabled)
-        .disposed(by: disposeBag)
-
-        // 버튼 활성/비활성 상태에 따른 색상 변경
-        Observable.combineLatest(
-            timeTextField.rx.text.orEmpty,
-            locationTextField.rx.text.orEmpty
-        )
-        .map { !$0.isEmpty && !$1.isEmpty }
-        .map { $0 ? UIColor.skyBlue : UIColor.systemGray4 }
-        .bind(to: addScheduleItemButton.rx.backgroundColor)
-        .disposed(by: disposeBag)
+        // 검색 버튼 클릭 시 모달 검색 뷰 표시
+        locationSearchButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                self?.presentSearchModal()
+            })
+            .disposed(by: disposeBag)
 
         // 일정 추가 버튼
         addScheduleItemButton.rx.tap
@@ -82,9 +70,8 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
         scrollView.addSubview(contentView)
 
         [dateCollectionView, budgetTitleLabel, budgetTextField, budgetDescriptionLabel,
-         scheduleTitleLabel, timeTextField, locationTextField, addScheduleItemButton, scheduleDescriptionLabel,
-         scheduleStackView, routeTitleLabel, routeSearchBar, routeDescriptionLabel,
-         mapView].forEach {
+         scheduleTitleLabel, timeTextField, locationSearchButton, selectedLocationLabel, addScheduleItemButton, scheduleDescriptionLabel,
+         scheduleStackView, mapView].forEach {
             contentView.addSubview($0)
         }
 
@@ -111,8 +98,6 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
         )
         navigationItem.rightBarButtonItem?.tintColor = .skyBlue
 
-        // RouteSearchBar 설정
-        routeSearchBar.delegate = self
 
         // 시간 피커 설정
         timeTextField.inputView = timePicker
@@ -172,14 +157,19 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
             $0.height.equalTo(44)
         }
 
-        locationTextField.snp.makeConstraints {
+        locationSearchButton.snp.makeConstraints {
             $0.top.equalTo(timeTextField.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(44)
         }
 
+        selectedLocationLabel.snp.makeConstraints {
+            $0.top.equalTo(locationSearchButton.snp.bottom).offset(8)
+            $0.leading.trailing.equalToSuperview().inset(20)
+        }
+
         addScheduleItemButton.snp.makeConstraints {
-            $0.top.equalTo(locationTextField.snp.bottom).offset(12)
+            $0.top.equalTo(selectedLocationLabel.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(44)
         }
@@ -194,24 +184,8 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
             $0.leading.trailing.equalToSuperview().inset(20)
         }
 
-        routeTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(scheduleStackView.snp.bottom).offset(30)
-            $0.leading.trailing.equalToSuperview().inset(20)
-        }
-
-        routeSearchBar.snp.makeConstraints {
-            $0.top.equalTo(routeTitleLabel.snp.bottom).offset(12)
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(44)
-        }
-
-        routeDescriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(routeSearchBar.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(20)
-        }
-
         mapView.snp.makeConstraints {
-            $0.top.equalTo(routeDescriptionLabel.snp.bottom).offset(16)
+            $0.top.equalTo(scheduleStackView.snp.bottom).offset(30)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(200)
             $0.bottom.equalToSuperview().offset(-30)
@@ -264,8 +238,7 @@ extension TravelPlanShowViewController {
     func setReadOnlyMode() {
         budgetTextField.isUserInteractionEnabled = false
         timeTextField.isUserInteractionEnabled = false
-        locationTextField.isUserInteractionEnabled = false
-        routeSearchBar.isUserInteractionEnabled = false
+        locationSearchButton.isUserInteractionEnabled = false
         addScheduleItemButton.isHidden = true
 
         // 지도 인터랙션 비활성화
@@ -282,8 +255,7 @@ extension TravelPlanShowViewController {
     func setEditMode() {
         budgetTextField.isUserInteractionEnabled = true
         timeTextField.isUserInteractionEnabled = true
-        locationTextField.isUserInteractionEnabled = true
-        routeSearchBar.isUserInteractionEnabled = true
+        locationSearchButton.isUserInteractionEnabled = true
         addScheduleItemButton.isHidden = false
 
         // 지도 인터랙션 활성화
@@ -350,7 +322,6 @@ extension TravelPlanShowViewController {
 
             // 텍스트 필드 업데이트 (무한 루프 방지)
             self.budgetTextField.text = dayData.budget
-            self.routeSearchBar.text = dayData.route
 
             // 플래그 해제
             self.isUpdatingFromViewModel = false
@@ -386,7 +357,6 @@ extension TravelPlanShowViewController {
 
             print("🔄 Day \(self.currentDay) UI 업데이트:")
             print("   💰 예산: '\(dayData.budget.isEmpty ? "미설정" : dayData.budget)'")
-            print("   🚗 경로: '\(dayData.route.isEmpty ? "미설정" : dayData.route)'")
             print("   📋 일정: \(dayData.scheduleItems.count)개")
             print("   📍 장소: \(dayData.searchedPlaces.count)개")
         }

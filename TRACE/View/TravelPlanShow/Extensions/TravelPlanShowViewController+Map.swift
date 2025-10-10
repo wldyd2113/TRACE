@@ -20,10 +20,9 @@ extension TravelPlanShowViewController {
     // MARK: - Map Search Methods
     @objc func clearSearchResults() {
         mapManager.clearAllSearchResults()
-        routeSearchBar.text = ""
         currentSearchedPlaces.removeAll()
         currentGooglePlaces.removeAll()
-        print("🗑️ 모든 검색 결과 및 루트 삭제")
+        print("🗑️ 모든 검색 결과 삭제")
     }
 
     func performManualSearch(query: String) {
@@ -281,7 +280,28 @@ extension TravelPlanShowViewController: MapManagerDelegate {
         // 편집 모드에서만 일정 추가 버튼 표시
         if isEditMode {
             alert.addAction(UIAlertAction(title: "일정에 추가", style: .default) { [weak self] _ in
-                self?.locationTextField.text = place.name
+                // 구글 장소를 KakaoPlace로 변환
+                let kakaoPlace = KakaoPlace(
+                    id: place.placeId,
+                    placeName: place.name,
+                    categoryName: place.types.first ?? "",
+                    categoryGroupCode: "",
+                    categoryGroupName: "",
+                    phone: "",
+                    addressName: place.formattedAddress ?? "",
+                    roadAddressName: place.formattedAddress ?? "",
+                    x: String(place.geometry.location.lng),
+                    y: String(place.geometry.location.lat),
+                    placeUrl: "",
+                    distance: ""
+                )
+
+                self?.selectedPlace = kakaoPlace
+                self?.selectedLocationLabel.text = place.name
+                self?.selectedLocationLabel.textColor = .label
+                self?.selectedLocationLabel.isHidden = false
+                self?.locationSearchButton.setTitle(place.name, for: .normal)
+                self?.locationSearchButton.setTitleColor(.label, for: .normal)
             })
         }
 
@@ -303,7 +323,12 @@ extension TravelPlanShowViewController: MapManagerDelegate {
         // 편집 모드에서만 장소를 일정에 추가
         guard isEditMode else { return }
 
-        locationTextField.text = place.placeName
+        selectedPlace = place
+        selectedLocationLabel.text = place.placeName
+        selectedLocationLabel.textColor = .label
+        selectedLocationLabel.isHidden = false
+        locationSearchButton.setTitle(place.placeName, for: .normal)
+        locationSearchButton.setTitleColor(.label, for: .normal)
 
         print("➕ 일정에 장소 추가: \(place.placeName)")
     }

@@ -17,17 +17,23 @@ extension TravelPlanShowViewController {
         let loadPlanSubject = PublishSubject<String>()
         let daySelectedSubject = PublishSubject<Int>()
         let budgetChangedSubject = PublishSubject<String>()
-        let routeChangedSubject = PublishSubject<String>()
         let addScheduleSubject = PublishSubject<(time: String, location: String)>()
         let saveChangesSubject = PublishSubject<Void>()
+
+        // 선택된 장소 텍스트를 Observable로 변환
+        let selectedLocationText = selectedLocationLabel.rx.observe(String.self, "text")
+            .map { $0 ?? "" }
+            .asObservable()
 
         let input = PlanShowViewModel.Input(
             loadPlan: loadPlanSubject.asObservable(),
             daySelected: daySelectedSubject.asObservable(),
             budgetChanged: budgetChangedSubject.asObservable(),
-            routeChanged: routeChangedSubject.asObservable(),
+            routeChanged: Observable.just(""), // 여행 경로 기능 제거
             addSchedule: addScheduleSubject.asObservable(),
-            saveChanges: saveChangesSubject.asObservable()
+            saveChanges: saveChangesSubject.asObservable(),
+            timeText: timeTextField.rx.text.orEmpty.asObservable(),
+            locationText: selectedLocationText
         )
 
         let output = viewModel.transform(input: input)
@@ -74,6 +80,17 @@ extension TravelPlanShowViewController {
             })
             .disposed(by: disposeBag)
 
+        // 일정 추가 버튼 활성화 바인딩
+        output.isAddScheduleEnabled
+            .bind(to: addScheduleItemButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+
+        output.isAddScheduleButtonEnabled
+            .subscribe(onNext: { [weak self] isEnabled in
+                self?.addScheduleItemButton.backgroundColor = isEnabled ? .skyBlue : .systemGray4
+            })
+            .disposed(by: disposeBag)
+
         // 예산 텍스트 필드 변경 감지 (사용자 입력만 감지)
         budgetTextField.rx.text.orEmpty
             .skip(1) // 초기값 스킵
@@ -93,7 +110,7 @@ extension TravelPlanShowViewController {
         addScheduleItemButton.rx.tap
             .withLatestFrom(Observable.combineLatest(
                 timeTextField.rx.text.orEmpty,
-                locationTextField.rx.text.orEmpty
+                selectedLocationText
             ))
             .subscribe(onNext: { [weak self] timeAndLocation in
                 // ViewModel에 일정 추가
@@ -102,23 +119,25 @@ extension TravelPlanShowViewController {
                 // 입력 필드 초기화 (편집 모드는 유지)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     self?.timeTextField.text = ""
-                    self?.locationTextField.text = ""
+                    self?.selectedLocationLabel.text = "장소를 선택해주세요"
+                    self?.selectedLocationLabel.textColor = .secondaryLabel
+                    self?.selectedLocationLabel.isHidden = true
+                    self?.locationSearchButton.setTitle("여행지 검색", for: .normal)
+                    self?.locationSearchButton.setTitleColor(.label, for: .normal)
+                    self?.selectedPlace = nil
                     print("✨ 일정 추가 후 입력 필드 초기화 완료 (편집 모드 유지)")
                 }
             })
             .disposed(by: disposeBag)
 
-        // 저장 버튼 - 경로 텍스트도 함께 업데이트
+        // 저장 버튼
         saveButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
 
-                // 현재 입력된 텍스트들을 ViewModel에 업데이트
+                // 현재 입력된 예산을 ViewModel에 업데이트
                 if let budgetText = self.budgetTextField.text {
                     budgetChangedSubject.onNext(budgetText)
-                }
-                if let routeText = self.routeSearchBar.text {
-                    routeChangedSubject.onNext(routeText)
                 }
 
                 // 저장 실행

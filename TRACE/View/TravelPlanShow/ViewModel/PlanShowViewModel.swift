@@ -23,6 +23,8 @@ class PlanShowViewModel: BaseViewModel {
         let routeChanged: Observable<String>
         let addSchedule: Observable<(time: String, location: String)>
         let saveChanges: Observable<Void>
+        let timeText: Observable<String>
+        let locationText: Observable<String>
     }
 
     // MARK: - Output
@@ -32,6 +34,8 @@ class PlanShowViewModel: BaseViewModel {
         let scheduleItems: Observable<[ScheduleItem]>
         let saveResult: Observable<(success: Bool, message: String)>
         let error: Observable<String>
+        let isAddScheduleEnabled: Observable<Bool>
+        let isAddScheduleButtonEnabled: Observable<Bool>
     }
 
     // MARK: - Data Models
@@ -134,12 +138,25 @@ class PlanShowViewModel: BaseViewModel {
         let scheduleItems = currentDayData
             .map { $0.scheduleItems }
 
+        // 일정 추가 버튼 활성화 여부
+        let isAddScheduleEnabled = Observable.combineLatest(
+            input.timeText,
+            input.locationText
+        ) { time, location in
+            return !time.isEmpty && !location.isEmpty
+        }
+
+        // 일정 추가 버튼 활성화 상태 (UI 색상은 View에서 처리)
+        let isAddScheduleButtonEnabled = isAddScheduleEnabled
+
         return Output(
             travelPlanData: travelPlanData.compactMap { $0 }.asObservable(),
             currentDayData: currentDayData,
             scheduleItems: scheduleItems,
             saveResult: saveResult.asObservable(),
-            error: errorRelay.asObservable()
+            error: errorRelay.asObservable(),
+            isAddScheduleEnabled: isAddScheduleEnabled,
+            isAddScheduleButtonEnabled: isAddScheduleButtonEnabled
         )
     }
 
