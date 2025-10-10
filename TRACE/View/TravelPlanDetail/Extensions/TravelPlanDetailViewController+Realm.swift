@@ -15,16 +15,13 @@ extension TravelPlanDetailViewController {
 
         // 현재 입력된 데이터를 ViewModel에 업데이트
         let currentBudget = budgetTextField.text ?? ""
-        let currentRoute = routeSearchBar.text ?? ""
 
         print("📝 현재 UI 데이터:")
         print("   💰 예산: '\(currentBudget)'")
-        print("   🚗 경로: '\(currentRoute)'")
         print("   📅 현재 일차: \(currentDay)")
 
         // ViewModel에 현재 데이터 업데이트
         viewModel.updateBudget(currentBudget, forDay: currentDay)
-        viewModel.updateRoute(currentRoute, forDay: currentDay)
         viewModel.updateSearchedPlaces(currentSearchedPlaces, forDay: currentDay)
 
         // ViewModel을 통해 저장 실행

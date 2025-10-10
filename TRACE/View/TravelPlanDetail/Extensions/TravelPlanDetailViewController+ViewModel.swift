@@ -15,11 +15,16 @@ extension TravelPlanDetailViewController {
         // 자동 검색 비활성화 - 빈 문자열로 고정
         let searchQuery = Observable.just("").filter { _ in false }
 
+        // 선택된 장소 텍스트를 Observable로 변환
+        let selectedLocationText = selectedLocationLabel.rx.observe(String.self, "text")
+            .map { $0 ?? "" }
+            .asObservable()
+
         let input = PlanDetailViewModel.Input(
             budgetText: budgetTextField.rx.text.orEmpty.asObservable(),
-            routeText: routeSearchBar.rx.text.orEmpty.asObservable(),
+            routeText: Observable.just(""), // 여행 경로 기능 제거
             timeText: timeTextField.rx.text.orEmpty.asObservable(),
-            locationText: locationTextField.rx.text.orEmpty.asObservable(),
+            locationText: selectedLocationText,
             addScheduleButtonTapped: addScheduleItemButton.rx.tap.asObservable(),
             dayButtonTapped: createDayButtonObservable(),
             saveButtonTapped: saveButton.rx.tap.asObservable(),
@@ -61,7 +66,12 @@ extension TravelPlanDetailViewController {
 
                 // 입력 필드 초기화
                 self.timeTextField.text = ""
-                self.locationTextField.text = ""
+                self.selectedLocationLabel.text = "장소를 선택해주세요"
+                self.selectedLocationLabel.textColor = .secondaryLabel
+                self.selectedLocationLabel.isHidden = true
+                self.locationSearchButton.setTitle("여행지 검색", for: .normal)
+                self.locationSearchButton.setTitleColor(.label, for: .normal)
+                self.selectedPlace = nil
 
                 // 현재 일차의 최신 일정 데이터로 UI 업데이트
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {

@@ -25,24 +25,12 @@ extension TravelPlanDetailViewController: DesiginProtocolBind {
 
         // 일정 추가 버튼은 ViewModel에서 처리됨 (bindViewModel()에서 바인딩)
 
-        // 텍스트필드 입력 감지 (둘 다 입력되어야 버튼 활성화)
-        Observable.combineLatest(
-            timeTextField.rx.text.orEmpty,
-            locationTextField.rx.text.orEmpty
-        )
-        .map { !$0.isEmpty && !$1.isEmpty }
-        .bind(to: addScheduleItemButton.rx.isEnabled)
-        .disposed(by: disposeBag)
-
-        // 버튼 활성/비활성 상태에 따른 색상 변경
-        Observable.combineLatest(
-            timeTextField.rx.text.orEmpty,
-            locationTextField.rx.text.orEmpty
-        )
-        .map { !$0.isEmpty && !$1.isEmpty }
-        .map { $0 ? UIColor.skyBlue : UIColor.systemGray4 }
-        .bind(to: addScheduleItemButton.rx.backgroundColor)
-        .disposed(by: disposeBag)
+        // 검색 버튼 클릭 시 모달 검색 뷰 표시
+        locationSearchButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                self?.presentSearchModal()
+            })
+            .disposed(by: disposeBag)
 
         // 저장 버튼 - 직접 액션과 ViewModel 바인딩 모두 사용
         saveButton.rx.tap
@@ -64,9 +52,8 @@ extension TravelPlanDetailViewController: DesiginProtocolBind {
         scrollView.addSubview(contentView)
 
         [dateCollectionView, budgetTitleLabel, budgetTextField, budgetDescriptionLabel,
-         scheduleTitleLabel, timeTextField, locationTextField, addScheduleItemButton, scheduleDescriptionLabel,
-         scheduleStackView, routeTitleLabel, routeSearchBar, routeDescriptionLabel,
-         mapView, saveButton, startTravelButton].forEach {
+         scheduleTitleLabel, timeTextField, locationSearchButton, selectedLocationLabel, addScheduleItemButton, scheduleDescriptionLabel,
+         scheduleStackView, mapView, saveButton, startTravelButton].forEach {
             contentView.addSubview($0)
         }
     }
@@ -87,8 +74,6 @@ extension TravelPlanDetailViewController: DesiginProtocolBind {
             action: #selector(clearCurrentDayData)
         )
 
-        // RouteSearchBar 설정 - 수동 검색을 위해 delegate 활성화
-        routeSearchBar.delegate = self
 
         // 시간 피커 설정
         timeTextField.inputView = timePicker
@@ -145,14 +130,19 @@ extension TravelPlanDetailViewController: DesiginProtocolBind {
             $0.height.equalTo(44)
         }
 
-        locationTextField.snp.makeConstraints {
+        locationSearchButton.snp.makeConstraints {
             $0.top.equalTo(timeTextField.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(44)
         }
 
+        selectedLocationLabel.snp.makeConstraints {
+            $0.top.equalTo(locationSearchButton.snp.bottom).offset(8)
+            $0.leading.trailing.equalToSuperview().inset(20)
+        }
+
         addScheduleItemButton.snp.makeConstraints {
-            $0.top.equalTo(locationTextField.snp.bottom).offset(12)
+            $0.top.equalTo(selectedLocationLabel.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(44)
         }
@@ -167,24 +157,8 @@ extension TravelPlanDetailViewController: DesiginProtocolBind {
             $0.leading.trailing.equalToSuperview().inset(20)
         }
 
-        routeTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(scheduleStackView.snp.bottom).offset(30)
-            $0.leading.trailing.equalToSuperview().inset(20)
-        }
-
-        routeSearchBar.snp.makeConstraints {
-            $0.top.equalTo(routeTitleLabel.snp.bottom).offset(12)
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(44)
-        }
-
-        routeDescriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(routeSearchBar.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(20)
-        }
-
         mapView.snp.makeConstraints {
-            $0.top.equalTo(routeDescriptionLabel.snp.bottom).offset(16)
+            $0.top.equalTo(scheduleStackView.snp.bottom).offset(30)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(200)
         }
@@ -329,7 +303,6 @@ extension TravelPlanDetailViewController {
         DispatchQueue.main.async { [weak self] in
             // 텍스트 필드 업데이트 (ViewModel 데이터 기준)
             self?.budgetTextField.text = dayData.budget
-            self?.routeSearchBar.text = dayData.route
 
             // 일정 UI도 업데이트
             self?.updateScheduleUI(items: dayData.scheduleItems)

@@ -9,17 +9,6 @@ import UIKit
 import MapKit
 import CoreLocation
 
-// MARK: - MapSearchDelegate
-extension TravelPlanDetailViewController: MapSearchDelegate {
-    func didSelectRoute(_ route: String, coordinates: [CLLocationCoordinate2D]) {
-        routeSearchBar.text = route
-        showRouteOnMap(coordinates: coordinates)
-    }
-
-    private func showRouteOnMap(coordinates: [CLLocationCoordinate2D]) {
-        mapManager.showRouteOnMap(coordinates: coordinates)
-    }
-}
 
 // MARK: - MapManagerDelegate
 extension TravelPlanDetailViewController: MapManagerDelegate {
@@ -96,23 +85,17 @@ extension TravelPlanDetailViewController: MapManagerDelegate {
     }
 
     private func addPlaceToSchedule(place: KakaoPlace) {
-        locationTextField.text = place.placeName
+        selectedPlace = place
+        selectedLocationLabel.text = place.placeName
+        selectedLocationLabel.textColor = .label
+        selectedLocationLabel.isHidden = false
+        locationSearchButton.setTitle(place.placeName, for: .normal)
+        locationSearchButton.setTitleColor(.label, for: .normal)
 
         print("➕ 일정에 장소 추가: \(place.placeName)")
     }
 }
 
-// MARK: - UISearchBarDelegate (수동 검색을 위해 활성화)
-extension TravelPlanDetailViewController: UISearchBarDelegate {
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.resignFirstResponder()
-
-        // 수동 검색 실행
-        guard let query = searchBar.text, !query.isEmpty else { return }
-        print("🔍 수동 검색 시작: '\(query)'")
-        performManualSearch(query: query)
-    }
-}
 
 // MARK: - Map Helper Methods
 extension TravelPlanDetailViewController {
@@ -123,9 +106,8 @@ extension TravelPlanDetailViewController {
 
     @objc func clearSearchResults() {
         mapManager.clearAllSearchResults()
-        routeSearchBar.text = ""
         currentGooglePlaces.removeAll()
-        print("🗑️ 모든 검색 결과 및 루트 삭제")
+        print("🗑️ 모든 검색 결과 삭제")
     }
 
     @objc func clearCurrentDayData() {
@@ -152,7 +134,6 @@ extension TravelPlanDetailViewController {
 
         // UI 초기화
         budgetTextField.text = ""
-        routeSearchBar.text = ""
 
         // 일정 목록 UI 초기화 (스케줄 스택뷰 초기화)
         scheduleStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -325,7 +306,28 @@ extension TravelPlanDetailViewController {
         })
 
         alert.addAction(UIAlertAction(title: "일정에 추가", style: .default) { [weak self] _ in
-            self?.locationTextField.text = place.name
+            // 구글 장소를 KakaoPlace로 변환
+            let kakaoPlace = KakaoPlace(
+                id: place.placeId,
+                placeName: place.name,
+                categoryName: place.types.first ?? "",
+                categoryGroupCode: "",
+                categoryGroupName: "",
+                phone: "",
+                addressName: place.formattedAddress ?? "",
+                roadAddressName: place.formattedAddress ?? "",
+                x: String(place.geometry.location.lng),
+                y: String(place.geometry.location.lat),
+                placeUrl: "",
+                distance: ""
+            )
+
+            self?.selectedPlace = kakaoPlace
+            self?.selectedLocationLabel.text = place.name
+            self?.selectedLocationLabel.textColor = .label
+            self?.selectedLocationLabel.isHidden = false
+            self?.locationSearchButton.setTitle(place.name, for: .normal)
+            self?.locationSearchButton.setTitleColor(.label, for: .normal)
         })
 
         alert.addAction(UIAlertAction(title: "닫기", style: .cancel))
