@@ -18,6 +18,13 @@ class TravelChannelViewController: UIViewController {
     let disposeBag = DisposeBag()
     let mapManager = MapManager()
     let viewModel = TravelChannelViewModel()
+    let locationManager = CLLocationManager()
+
+    // 경로 추적 관련
+    var isTrackingRoute = false
+    var currentRouteIndex = 0
+    var currentTravelRoutes: [TravelChannelViewModel.TravelRouteData] = []
+    let arrivalThreshold: CLLocationDistance = 50 // 50미터 이내 도착으로 판단
 
     // MARK: - UI Components
     // MapKit 관련 (MapManager에서 관리)
@@ -75,6 +82,9 @@ class TravelChannelViewController: UIViewController {
         // 맵 관리자 설정
         setupMapManager()
 
+        // 위치 관리자 설정
+        setupLocationManager()
+
         // ViewModel 바인딩
         bindViewModel()
     }
@@ -82,6 +92,10 @@ class TravelChannelViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: animated)
+
+        // 뷰가 나타날 때마다 데이터 새로고침
+        print("📍 TravelChannel 화면 나타남 - 데이터 새로고침")
+        viewModel.refreshData()
     }
 }
 

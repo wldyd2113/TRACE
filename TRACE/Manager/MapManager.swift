@@ -182,6 +182,19 @@ class MapManager: NSObject {
         print("📍 모든 검색 결과 삭제")
     }
 
+    func removePlace(at coordinate: CLLocationCoordinate2D) {
+        if let index = searchedPlaces.firstIndex(where: { place in
+            abs(place.coordinate.latitude - coordinate.latitude) < 0.0001 &&
+            abs(place.coordinate.longitude - coordinate.longitude) < 0.0001
+        }) {
+            let removedPlace = searchedPlaces.remove(at: index)
+            print("📍 장소 제거: \(removedPlace.placeName)")
+
+            // 지도 다시 그리기 (루트 포함)
+            displaySearchResults(places: searchedPlaces)
+        }
+    }
+
     private func updateMapRegion(coordinates: [CLLocationCoordinate2D]) {
         guard !coordinates.isEmpty else { return }
 
@@ -206,11 +219,16 @@ class MapManager: NSObject {
 
         guard coordinates.count >= 2 else { return }
 
-        // 좌표들을 연결하는 폴리라인 생성
-        let polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
-        mapView.addOverlay(polyline)
+        // 각 세그먼트별로 다른 색상의 폴리라인 생성
+        for i in 0..<coordinates.count - 1 {
+            let segmentCoordinates = [coordinates[i], coordinates[i + 1]]
+            let polyline = CustomPolyline(coordinates: segmentCoordinates, count: 2)
+            polyline.segmentIndex = i
+            polyline.totalSegments = coordinates.count - 1
+            mapView.addOverlay(polyline)
+        }
 
-        print("🗺️ 루트 그리기: \(coordinates.count)개 지점 연결")
+        print("🗺️ 루트 그리기: \(coordinates.count)개 지점 연결 (\(coordinates.count - 1)개 세그먼트)")
     }
 }
 
@@ -284,12 +302,45 @@ extension MapManager: MKMapViewDelegate {
     }
 
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-        if let polyline = overlay as? MKPolyline {
-            let renderer = MKPolylineRenderer(polyline: polyline)
-            renderer.strokeColor = .systemBlue
-            renderer.lineWidth = 3.0
+        if let customPolyline = overlay as? CustomPolyline {
+            let renderer = MKPolylineRenderer(polyline: customPolyline)
+
+            // 세그먼트별로 그라데이션 색상 적용
+            let progress = Float(customPolyline.segmentIndex) / Float(max(customPolyline.totalSegments - 1, 1))
+
+            // 시작점(파란색)에서 끝점(보라색)으로 그라데이션
+            let startColor = UIColor.systemBlue
+            let endColor = UIColor.systemPurple
+
+            let blendedColor = UIColor.blendColors(
+                startColor: startColor,
+                endColor: endColor,
+                progress: CGFloat(progress)
+            )
+
+            renderer.strokeColor = blendedColor
+            renderer.lineWidth = 5.0
+            renderer.lineCap = .round
+            renderer.lineJoin = .round
+            renderer.alpha = 0.9
+
+            // 그림자 효과
+            renderer.shouldRasterize = true
+
             return renderer
         }
+
+        // 기본 폴리라인 처리
+        if let polyline = overlay as? MKPolyline {
+            let renderer = MKPolylineRenderer(polyline: polyline)
+            renderer.strokeColor = UIColor.systemBlue
+            renderer.lineWidth = 4.0
+            renderer.lineCap = .round
+            renderer.lineJoin = .round
+            renderer.alpha = 0.8
+            return renderer
+        }
+
         return MKOverlayRenderer(overlay: overlay)
     }
 }
@@ -304,6 +355,32 @@ class PlaceAnnotation: NSObject, MKAnnotation {
     override init() {
         self.coordinate = CLLocationCoordinate2D()
         super.init()
+    }
+}
+
+// MARK: - Custom Polyline
+class CustomPolyline: MKPolyline {
+    var segmentIndex: Int = 0
+    var totalSegments: Int = 1
+}
+
+// MARK: - UIColor Extension
+extension UIColor {
+    static func blendColors(startColor: UIColor, endColor: UIColor, progress: CGFloat) -> UIColor {
+        let clampedProgress = max(0.0, min(1.0, progress))
+
+        var startRed: CGFloat = 0, startGreen: CGFloat = 0, startBlue: CGFloat = 0, startAlpha: CGFloat = 0
+        var endRed: CGFloat = 0, endGreen: CGFloat = 0, endBlue: CGFloat = 0, endAlpha: CGFloat = 0
+
+        startColor.getRed(&startRed, green: &startGreen, blue: &startBlue, alpha: &startAlpha)
+        endColor.getRed(&endRed, green: &endGreen, blue: &endBlue, alpha: &endAlpha)
+
+        let blendedRed = startRed + (endRed - startRed) * clampedProgress
+        let blendedGreen = startGreen + (endGreen - startGreen) * clampedProgress
+        let blendedBlue = startBlue + (endBlue - startBlue) * clampedProgress
+        let blendedAlpha = startAlpha + (endAlpha - startAlpha) * clampedProgress
+
+        return UIColor(red: blendedRed, green: blendedGreen, blue: blendedBlue, alpha: blendedAlpha)
     }
 }
 
