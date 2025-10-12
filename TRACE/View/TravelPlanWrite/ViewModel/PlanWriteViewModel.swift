@@ -92,7 +92,18 @@ class PlanWriteViewModel {
             return
         }
 
-        // TravelDay 초기값 생성
+        // 시작일과 종료일 사이의 모든 일차 생성
+        let calendar = Calendar.current
+        let daysDifference = calendar.dateComponents([.day], from: start, to: end).day ?? 0
+        let totalDays = max(daysDifference + 1, 1) // 시작일과 종료일 포함, 최소 1일
+
+        print("📅 날짜 계산 결과:")
+        print("   • 시작일: \(DateManager.shared.formatToKoreanString(from: start))")
+        print("   • 종료일: \(DateManager.shared.formatToKoreanString(from: end))")
+        print("   • 일수 차이: \(daysDifference)일")
+        print("   • 총 일차: \(totalDays)일")
+
+        // TravelDay 초기값 생성 (첫 번째 일차용)
         let travelDay = TravelDay()
         travelDay.price = 0
         travelDay.place = ""
@@ -110,6 +121,18 @@ class PlanWriteViewModel {
             endDate: end,
             day: travelDay
         )
+
+        // 각 일차별 상세 정보 생성
+        print("📝 일차별 상세 정보 생성 시작:")
+        for dayNumber in 1...totalDays {
+            let dayDetail = TravelDayDetail()
+            dayDetail.dayNumber = dayNumber
+            dayDetail.budget = ""
+            dayDetail.route = ""
+            travelPlan.travelDays.append(dayDetail)
+            print("   • \(dayNumber)일차 생성 완료")
+        }
+        print("📝 총 \(travelPlan.travelDays.count)개 일차 생성됨")
 
         // Realm에 저장
         saveTravelPlan(travelPlan)
