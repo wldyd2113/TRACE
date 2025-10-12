@@ -103,8 +103,13 @@ class PlanDetailViewModel: BaseViewModel {
                 return (selectedDay: selectedDay, budget: currentData.0, route: currentData.1, currentDay: currentData.2)
             }
             .subscribe(onNext: { [weak self] data in
-                // 현재 일차 데이터 저장
-                self?.saveCurrentDayData(budget: data.budget, route: data.route, day: data.currentDay)
+                // 자동 저장 방지 플래그 확인
+                if !(self?.shouldPreventAutoSave ?? false) {
+                    // 현재 일차 데이터 저장
+                    self?.saveCurrentDayData(budget: data.budget, route: data.route, day: data.currentDay)
+                } else {
+                    print("🚫 ViewModel: 일차 변경 시 자동 저장 방지됨")
+                }
                 // 새로운 일차로 변경
                 self?.currentDay.accept(data.selectedDay)
             })

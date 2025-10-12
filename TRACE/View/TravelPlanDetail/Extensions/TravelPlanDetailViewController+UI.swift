@@ -61,12 +61,6 @@ extension TravelPlanDetailViewController: DesiginProtocolBind {
     func configureUI() {
         // Navigation Bar 설정
         navigationItem.title = "여행 계획"
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "chevron.left"),
-            style: .plain,
-            target: self,
-            action: #selector(backButtonTapped)
-        )
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "trash"),
             style: .plain,
@@ -181,16 +175,6 @@ extension TravelPlanDetailViewController: DesiginProtocolBind {
 
 // MARK: - UI Helper Methods
 extension TravelPlanDetailViewController {
-    @objc func backButtonTapped() {
-        print("🔙 TravelPlanDetail: Back 버튼 클릭 - 데이터 저장 없이 뒤로가기")
-
-        // ViewController와 ViewModel 모두 자동 저장 방지 활성화
-        shouldPreventAutoSave = true
-        viewModel.shouldPreventAutoSave = true
-
-        // 데이터 저장 없이 바로 뒤로가기
-        navigationController?.popViewController(animated: true)
-    }
 
     @objc func timePickerDone() {
         timeTextField.resignFirstResponder()

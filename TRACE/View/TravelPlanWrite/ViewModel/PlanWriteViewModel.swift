@@ -24,6 +24,11 @@ class PlanWriteViewModel {
     // MARK: - Auto Save Prevention
     private var shouldPreventAutoSave = false
 
+    deinit {
+        print("🗑️ PlanWriteViewModel deinit - 자동 저장 방지 활성화")
+        shouldPreventAutoSave = true
+    }
+
     // MARK: - Outputs
     let isFormValid: Observable<Bool>
     let buttonBackgroundColor: Observable<UIColor>
@@ -69,6 +74,8 @@ class PlanWriteViewModel {
 
     // MARK: - Methods
     func createTravelPlan() {
+        print("🔍 createTravelPlan() 호출됨 - shouldPreventAutoSave: \(shouldPreventAutoSave)")
+
         // 자동 저장 방지 플래그 확인
         if shouldPreventAutoSave {
             print("🚫 자동 저장이 방지되어 여행 계획 생성을 건너뜁니다")
@@ -109,6 +116,14 @@ class PlanWriteViewModel {
     }
 
     private func saveTravelPlan(_ travelPlan: TravelPlan) {
+        print("🔍 saveTravelPlan() 호출됨 - shouldPreventAutoSave: \(shouldPreventAutoSave)")
+
+        // 한 번 더 자동 저장 방지 확인
+        if shouldPreventAutoSave {
+            print("🚫 saveTravelPlan에서 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
+            return
+        }
+
         guard let realm = RealmManager.shared.getRealm() else {
             print("❌ ===== Realm 저장 실패 =====")
             print("오류 내용: Realm 인스턴스를 가져올 수 없습니다")

@@ -21,13 +21,13 @@ extension TravelPlanDetailViewController {
             .asObservable()
 
         let input = PlanDetailViewModel.Input(
-            budgetText: budgetTextField.rx.text.orEmpty.asObservable(),
+            budgetText: Observable.just(""), // 자동 업데이트 비활성화
             routeText: Observable.just(""), // 여행 경로 기능 제거
             timeText: timeTextField.rx.text.orEmpty.asObservable(),
             locationText: selectedLocationText,
             addScheduleButtonTapped: addScheduleItemButton.rx.tap.asObservable(),
             dayButtonTapped: createDayButtonObservable(),
-            saveButtonTapped: saveButton.rx.tap.asObservable(),
+            saveButtonTapped: Observable.never(), // 자동 저장 비활성화
             searchQuery: searchQuery
         )
 

@@ -43,7 +43,7 @@ extension TravelChannelViewController: DesiginProtocolBind {
 
     func configureUI() {
         // Navigation Bar 설정
-        navigationItem.title = "여행 채널"
+        navigationItem.title = "여행 경로"
     }
 
     func configureLayout() {

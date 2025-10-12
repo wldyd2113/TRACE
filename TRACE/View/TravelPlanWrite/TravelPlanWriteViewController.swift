@@ -16,6 +16,11 @@ class TravelPlanWriteViewController: UIViewController {
 
     private let disposeBag = DisposeBag()
     private let viewModel = PlanWriteViewModel()
+
+    // 자동 저장 방지 플래그
+    private var shouldPreventAutoSave = false
+    private var lastBackButtonTapTime: Date?
+    private var isComingFromBackNavigation = false
     
     // MARK: - UI Components
     private let scrollView = UIScrollView().then {
@@ -124,17 +129,56 @@ class TravelPlanWriteViewController: UIViewController {
         configureLayout()
         bind()
         setupKeyboardDismissal()
+
+        // 네비게이션 컨트롤러 델리게이트 설정
+        navigationController?.delegate = self
+        // 스와이프 뒤로가기 제스처 델리게이트 설정
+        navigationController?.interactivePopGestureRecognizer?.delegate = self
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        print("🔄 TravelPlanWrite: viewWillAppear - isComingFromBackNavigation: \(isComingFromBackNavigation)")
+
+        // 뒤로가기로 인한 재진입인 경우에만 특별 처리
+        if isComingFromBackNavigation {
+            print("🔄 TravelPlanWrite: viewWillAppear - 뒤로가기로 인한 재진입")
+            // 5초 후에 자동으로 해제
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
+                self?.isComingFromBackNavigation = false
+                print("⏰ TravelPlanWrite: 5초 후 뒤로가기 상태 해제")
+            }
+        } else {
+            print("✅ TravelPlanWrite: viewWillAppear - 새로운 진입 또는 정상 진입")
+        }
+
+        // 항상 기본 상태로 리셋 (뒤로가기가 아닌 경우)
+        if !isComingFromBackNavigation {
+            shouldPreventAutoSave = false
+            viewModel.disableAutoSavePrevention()
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        // 명시적으로 자동 저장 방지
-        print("🚫 TravelPlanWrite: viewWillDisappear - 자동 저장 비활성화")
-        // 여기서는 의도적으로 아무것도 저장하지 않음
+
+        // 뒤로가기로 인한 종료인지 확인
+        if isMovingFromParent {
+            print("🚫 TravelPlanWrite: 뒤로가기 버튼으로 종료 - 자동 저장 방지")
+            shouldPreventAutoSave = true
+            viewModel.enableAutoSavePrevention()
+        } else {
+            print("ℹ️ TravelPlanWrite: 다른 이유로 viewWillDisappear")
+        }
     }
  
     @objc private func backButtonTapped() {
+        // 뒤로가기 버튼 탭 시간 기록
+        lastBackButtonTapTime = Date()
+
         // 명시적으로 자동 저장 방지 활성화
+        shouldPreventAutoSave = true
         viewModel.enableAutoSavePrevention()
         print("🔙 Back 버튼 클릭 - 자동 저장 없이 바로 뒤로가기")
 
@@ -145,6 +189,28 @@ class TravelPlanWriteViewController: UIViewController {
     @objc private func datePickerDone() {
         startDateTextField.resignFirstResponder()
         endDateTextField.resignFirstResponder()
+    }
+
+    private func showBackNavigationAlert() {
+        let alert = UIAlertController(
+            title: "새로운 여행 계획",
+            message: "뒤로가기 후 바로 새로운 여행 계획을 만드시겠습니까?",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "예", style: .default) { [weak self] _ in
+            print("✅ 사용자가 새로운 여행 계획 생성 확인")
+            self?.isComingFromBackNavigation = false
+            self?.shouldPreventAutoSave = false
+            self?.viewModel.disableAutoSavePrevention()
+            self?.viewModel.createTravelPlan()
+        })
+
+        alert.addAction(UIAlertAction(title: "아니오", style: .cancel) { _ in
+            print("❌ 사용자가 새로운 여행 계획 생성 취소")
+        })
+
+        present(alert, animated: true)
     }
 
 }
@@ -241,7 +307,47 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
         // 여행 계획하기 버튼 액션
         planButton.rx.tap
             .subscribe(onNext: { [weak self] in
-                self?.viewModel.createTravelPlan()
+                print("🔍 여행 계획하기 버튼 탭됨")
+                print("   • shouldPreventAutoSave: \(self?.shouldPreventAutoSave ?? false)")
+                print("   • isComingFromBackNavigation: \(self?.isComingFromBackNavigation ?? false)")
+
+                // 뒤로가기로 인한 재진입 상태인지 확인
+                if self?.isComingFromBackNavigation == true {
+                    print("🚫 뒤로가기 재진입 상태에서 버튼 탭 무시됨")
+
+                    // 사용자가 정말 새로운 계획을 만들고 싶다면 플래그를 해제
+                    self?.showBackNavigationAlert()
+                    return
+                }
+
+                // 뒤로가기 버튼을 최근에 눌렀는지 확인 (3초 이내)
+                if let lastBackTime = self?.lastBackButtonTapTime,
+                   Date().timeIntervalSince(lastBackTime) < 3.0 {
+                    print("🚫 뒤로가기 후 3초 이내 버튼 탭 무시됨")
+                    return
+                }
+
+                // 여행 계획 생성 없이 TravelPlanDetailViewController로 이동만
+                print("✅ TravelPlanDetailViewController로 이동 (자동 저장 없음)")
+                let detailVC = TravelPlanDetailViewController()
+                let selectedCountry = self?.countryTextField.text ?? "국내"
+                detailVC.setCountryType(selectedCountry)
+
+                // 임시 여행 정보를 DetailViewController에 전달 (저장하지 않음)
+                if let country = self?.countryTextField.text,
+                   let destination = self?.destinationTextField.text,
+                   let startDate = self?.viewModel.startDate.value,
+                   let endDate = self?.viewModel.endDate.value {
+                    // DetailViewController에서 사용할 임시 데이터 설정
+                    detailVC.tempTravelInfo = (
+                        country: country,
+                        destination: destination,
+                        startDate: startDate,
+                        endDate: endDate
+                    )
+                }
+
+                self?.navigationController?.pushViewController(detailVC, animated: true)
             })
             .disposed(by: disposeBag)
     }
@@ -381,5 +487,40 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
             $0.height.equalTo(50)
             $0.bottom.equalToSuperview().offset(-30)
         }
+    }
+}
+
+// MARK: - UINavigationControllerDelegate
+extension TravelPlanWriteViewController: UINavigationControllerDelegate {
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+        print("🔍 Navigation willShow: \(type(of: viewController)), current VC count: \(navigationController.viewControllers.count)")
+
+        // 다른 뷰컨트롤러에서 현재 뷰컨트롤러로 돌아오는 경우 (뒤로가기)
+        if viewController == self {
+            // 네비게이션 스택에 2개 이상의 뷰컨트롤러가 있고, 현재가 마지막이 아니라면 뒤로가기
+            let isBackNavigation = navigationController.viewControllers.count >= 2 &&
+                                 navigationController.viewControllers.last != self
+
+            if isBackNavigation {
+                print("🚫 TravelPlanWrite: 뒤로가기로 재진입 감지")
+                isComingFromBackNavigation = true
+            } else {
+                print("✅ TravelPlanWrite: 새로운 진입 감지")
+                isComingFromBackNavigation = false
+            }
+        }
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+extension TravelPlanWriteViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        // 스와이프 뒤로가기 제스처가 시작될 때 자동 저장 방지
+        if gestureRecognizer == navigationController?.interactivePopGestureRecognizer {
+            print("🚫 TravelPlanWrite: 스와이프 뒤로가기 감지 - 자동 저장 방지")
+            shouldPreventAutoSave = true
+            viewModel.enableAutoSavePrevention()
+        }
+        return true
     }
 }

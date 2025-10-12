@@ -15,7 +15,7 @@ import CoreLocation
 import Alamofire
 import RealmSwift
 
-class TravelPlanDetailViewController: UIViewController {
+class TravelPlanDetailViewController: UIViewController, UINavigationControllerDelegate {
 
     let disposeBag = DisposeBag()
     let mapManager = MapManager()
@@ -41,6 +41,9 @@ class TravelPlanDetailViewController: UIViewController {
 
     // 선택된 장소 저장
     var selectedPlace: KakaoPlace?
+
+    // 임시 여행 정보 (저장되지 않은 상태)
+    var tempTravelInfo: (country: String, destination: String, startDate: Date, endDate: Date)?
 
     // MARK: - UI Components
     let scrollView = UIScrollView().then {
@@ -155,6 +158,12 @@ class TravelPlanDetailViewController: UIViewController {
         return mapManager.mapView
     }
 
+    deinit {
+        print("🗑️ TravelPlanDetailViewController deinit - 자동 저장 방지 활성화")
+        shouldPreventAutoSave = true
+        viewModel.shouldPreventAutoSave = true
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .background
@@ -186,6 +195,12 @@ class TravelPlanDetailViewController: UIViewController {
 
         // ViewModel 바인딩
         bindViewModel()
+
+        // 커스텀 뒤로가기 버튼 설정
+        setupCustomBackButton()
+
+        // 네비게이션 컨트롤러 델리게이트 설정
+        navigationController?.delegate = self
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -195,17 +210,50 @@ class TravelPlanDetailViewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        print("🚫 TravelPlanDetail: viewWillDisappear - 자동 저장 비활성화")
+        print("ℹ️ TravelPlanDetail: viewWillDisappear")
 
-        // ViewController와 ViewModel 모두 명시적으로 자동 저장 방지
-        shouldPreventAutoSave = true
-        viewModel.shouldPreventAutoSave = true
+        // 자동 저장 방지 플래그 확인
+        if shouldPreventAutoSave {
+            print("🚫 viewWillDisappear: 자동 저장 방지로 인해 데이터 저장 생략")
+            return
+        }
 
-        // back 버튼으로 나갈 때 데이터 저장하지 않음
+        // 정상적인 경우에만 현재 일차 데이터 저장
+        saveCurrentDayData()
     }
 
     // MARK: - Travel Plan Loading and Day Calculation
     private func loadTravelPlanAndCalculateDays() {
+        // 임시 여행 정보가 있는 경우 (아직 저장되지 않은 새로운 여행 계획)
+        if let tempInfo = tempTravelInfo {
+            print("📅 임시 여행 정보 사용:")
+            print("   📍 여행지: \(tempInfo.destination)")
+            print("   🗓️시작일: \(DateManager.shared.formatToKoreanString(from: tempInfo.startDate))")
+            print("   🗓️ 종료일: \(DateManager.shared.formatToKoreanString(from: tempInfo.endDate))")
+
+            startDate = tempInfo.startDate
+            endDate = tempInfo.endDate
+
+            // 시작일과 종료일 사이의 일차 계산
+            let calendar = Calendar.current
+            let daysDifference = calendar.dateComponents([.day], from: startDate!, to: endDate!).day ?? 0
+            totalDays = max(1, daysDifference + 1) // 최소 1일, 당일 여행도 1일로 계산
+
+            // Navigation title 업데이트
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "M/d"
+            let startDateStr = dateFormatter.string(from: startDate!)
+            let endDateStr = dateFormatter.string(from: endDate!)
+            navigationItem.title = "\(tempInfo.destination) (\(startDateStr)~\(endDateStr), \(totalDays)일)"
+
+            print("   📊 총 일차: \(totalDays)일")
+
+            // CollectionView 리액티브 업데이트
+            updateCollectionViewReactively()
+            return
+        }
+
+        // 기존 저장된 여행 계획 로드
         do {
             let realm = try Realm()
             let allPlans = realm.objects(TravelPlan.self)
@@ -224,7 +272,7 @@ class TravelPlanDetailViewController: UIViewController {
             let daysDifference = calendar.dateComponents([.day], from: startDate!, to: endDate!).day ?? 0
             totalDays = max(1, daysDifference + 1) // 최소 1일, 당일 여행도 1일로 계산
 
-            print("📅 여행 계획 로드:")
+            print("📅 저장된 여행 계획 로드:")
             print("   📍 여행지: \(latestPlan.travelName)")
             print("   🗓️ 시작일: \(DateManager.shared.formatToKoreanString(from: startDate!))")
             print("   🗓️ 종료일: \(DateManager.shared.formatToKoreanString(from: endDate!))")
@@ -253,8 +301,13 @@ class TravelPlanDetailViewController: UIViewController {
     }
 
     func selectDay(at index: Int) {
-        // 현재 일차의 데이터 저장 (검색된 장소들도 포함)
-        saveCurrentDayData()
+        // 자동 저장 방지 플래그 확인 후 저장
+        if !shouldPreventAutoSave {
+            // 현재 일차의 데이터 저장 (검색된 장소들도 포함)
+            saveCurrentDayData()
+        } else {
+            print("🚫 일차 선택 시 자동 저장 방지됨")
+        }
 
         // 선택 상태 업데이트
         let previousIndex = selectedDayIndex
@@ -465,5 +518,75 @@ extension TravelPlanDetailViewController: TravelSearchDelegate {
         // 선택된 장소를 지도에 표시 (선택된 장소만)
         currentSearchedPlaces = [place]
         mapManager.displaySearchResults(places: [place])
+    }
+}
+
+// MARK: - Custom Back Button Methods
+extension TravelPlanDetailViewController {
+    private func setupCustomBackButton() {
+        // 커스텀 뒤로가기 버튼 생성
+        let backButton = UIBarButtonItem(
+            image: UIImage(systemName: "chevron.left"),
+            style: .plain,
+            target: self,
+            action: #selector(backButtonTapped)
+        )
+        navigationItem.leftBarButtonItem = backButton
+
+        // 네비게이션 바의 기본 뒤로가기 버튼을 감지하기 위한 설정
+        navigationController?.interactivePopGestureRecognizer?.delegate = self
+    }
+
+    @objc private func backButtonTapped() {
+        showCancelAlert()
+    }
+
+    private func showCancelAlert() {
+        let alert = UIAlertController(
+            title: "편집 취소",
+            message: "작성 중인 내용이 저장되지 않습니다. 정말 나가시겠습니까?",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "계속 편집", style: .cancel))
+        alert.addAction(UIAlertAction(title: "나가기", style: .destructive) { [weak self] _ in
+            // 자동 저장 방지 활성화
+            self?.shouldPreventAutoSave = true
+            self?.viewModel.shouldPreventAutoSave = true
+            print("🚫 TravelPlanDetail: 사용자가 나가기 선택 - 자동 저장 방지")
+            self?.navigationController?.popViewController(animated: true)
+        })
+        present(alert, animated: true)
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+extension TravelPlanDetailViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        // 스와이프 뒤로가기 제스처가 시작될 때 확인 알림 표시
+        if gestureRecognizer == navigationController?.interactivePopGestureRecognizer {
+            print("🚫 스와이프 뒤로가기 감지 - 확인 알림 표시")
+            showCancelAlert()
+            return false // 제스처를 취소하고 알림을 먼저 표시
+        }
+        return true
+    }
+}
+
+// MARK: - UINavigationControllerDelegate
+extension TravelPlanDetailViewController {
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+        // TravelPlanDetailViewController에서 다른 화면으로 이동할 때
+        if self != viewController {
+            print("🔄 TravelPlanDetail: 다른 화면으로 이동 중")
+
+            // 자동 저장 방지 플래그가 설정된 경우 저장하지 않음
+            if shouldPreventAutoSave {
+                print("🚫 navigationController willShow: 자동 저장 방지로 인해 데이터 저장 생략")
+                return
+            }
+
+            // 정상적인 네비게이션의 경우에만 저장
+            saveCurrentDayData()
+        }
     }
 }
