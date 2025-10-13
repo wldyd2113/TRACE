@@ -17,7 +17,7 @@ extension TravelPlanDetailViewController: DesiginProtocolBind {
             .map { date in
                 let formatter = DateFormatter()
                 formatter.dateFormat = "a h:mm"
-                formatter.locale = Locale(identifier: "ko_KR")
+                formatter.locale = Locale.current
                 return formatter.string(from: date)
             }
             .bind(to: timeTextField.rx.text)
@@ -60,7 +60,7 @@ extension TravelPlanDetailViewController: DesiginProtocolBind {
 
     func configureUI() {
         // Navigation Bar 설정
-        navigationItem.title = "여행 계획"
+        navigationItem.title = NSLocalizedString("travel_plan", comment: "Travel plan")
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "trash"),
             style: .plain,
@@ -186,12 +186,12 @@ extension TravelPlanDetailViewController {
         containerView.layer.cornerRadius = 8
 
         let timeLabel = UILabel()
-        timeLabel.text = item.time.isEmpty ? "시간 미정" : item.time
+        timeLabel.text = item.time.isEmpty ? NSLocalizedString("time_unscheduled", comment: "Time unscheduled") : item.time
         timeLabel.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         timeLabel.textColor = .labelLight
 
         let locationLabel = UILabel()
-        locationLabel.text = item.location.isEmpty ? "장소 미정" : item.location
+        locationLabel.text = item.location.isEmpty ? NSLocalizedString("location_unscheduled", comment: "Location unscheduled") : item.location
         locationLabel.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         locationLabel.textColor = .systemGray
 

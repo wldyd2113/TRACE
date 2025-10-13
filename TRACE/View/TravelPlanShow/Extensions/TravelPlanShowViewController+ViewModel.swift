@@ -119,10 +119,10 @@ extension TravelPlanShowViewController {
                 // 입력 필드 초기화 (편집 모드는 유지)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     self?.timeTextField.text = ""
-                    self?.selectedLocationLabel.text = "장소를 선택해주세요"
+                    self?.selectedLocationLabel.text = NSLocalizedString("select_place", comment: "Select place")
                     self?.selectedLocationLabel.textColor = .secondaryLabel
                     self?.selectedLocationLabel.isHidden = true
-                    self?.locationSearchButton.setTitle("여행지 검색", for: .normal)
+                    self?.locationSearchButton.setTitle(NSLocalizedString("search_destination", comment: "Search destination"), for: .normal)
                     self?.locationSearchButton.setTitleColor(.label, for: .normal)
                     self?.selectedPlace = nil
                     print("✨ 일정 추가 후 입력 필드 초기화 완료 (편집 모드 유지)")

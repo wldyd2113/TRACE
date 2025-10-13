@@ -64,7 +64,7 @@ final class RecordViewModel: BaseViewModel {
         // 기록 개수 문자열 생성
         let recordCountString = recordsRelay.asDriver()
             .map { records in
-                return "\(records.count)\n게시물"
+                return String(format: NSLocalizedString("posts_format", comment: "Posts format"), records.count)
             }
 
         return Output(
@@ -205,7 +205,7 @@ struct TravelRecordDisplayModel {
     let hasLocation: Bool
 
     var displayTitle: String {
-        return travelName.isEmpty ? "여행 기록" : travelName
+        return travelName.isEmpty ? NSLocalizedString("travel_record", comment: "Travel record") : travelName
     }
 
     var dateString: String {

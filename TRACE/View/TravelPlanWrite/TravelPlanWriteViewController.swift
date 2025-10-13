@@ -30,50 +30,50 @@ class TravelPlanWriteViewController: UIViewController {
     private let contentView = UIView()
     
     private let titleLabel = UILabel().then {
-        $0.applyTitleStyle(text: "여행 계획")
+        $0.applyTitleStyle(text: NSLocalizedString("travel_plan", comment: ""))
     }
     
     // 여행 국가 섹션
     private let countryTitleLabel = UILabel().then {
-        $0.applySectionTitleStyle(text: "여행 국가")
+        $0.applySectionTitleStyle(text: NSLocalizedString("travel_country", comment: ""))
     }
     
     private let countryTextField = UITextField().then {
-        $0.applyTravelStyle(placeholder: "국내/해외 선택")
+        $0.applyTravelStyle(placeholder: NSLocalizedString("travel_country_placeholder", comment: ""))
         $0.isUserInteractionEnabled = true
         $0.isEnabled = true
     }
     
     private let countryDescriptionLabel = UILabel().then {
-        $0.applyDescriptionStyle(text: "원하시는 여행지를 입력해주세요.")
+        $0.applyDescriptionStyle(text: NSLocalizedString("travel_country_description", comment: ""))
     }
     
     // 여행지 입력 섹션
     private let destinationTitleLabel = UILabel().then {
-        $0.applySectionTitleStyle(text: "여행지 입력")
+        $0.applySectionTitleStyle(text: NSLocalizedString("travel_destination", comment: ""))
     }
     
     private let destinationTextField = UITextField().then {
-        $0.applyTravelStyle(placeholder: "예: 파리")
+        $0.applyTravelStyle(placeholder: NSLocalizedString("travel_destination_placeholder", comment: ""))
     }
     
     private let destinationDescriptionLabel = UILabel().then {
-        $0.applyDescriptionStyle(text: "원하시는 여행지를 입력해주세요.")
+        $0.applyDescriptionStyle(text: NSLocalizedString("travel_destination_description", comment: ""))
     }
     
     // 여행일자 입력 섹션
     private let dateTitleLabel = UILabel().then {
-        $0.applySectionTitleStyle(text: "여행일자 입력")
+        $0.applySectionTitleStyle(text: NSLocalizedString("travel_date_input", comment: ""))
     }
 
     private let startDateTextField = UITextField().then {
-        $0.applyTravelStyle(placeholder: "여행 시작일")
+        $0.applyTravelStyle(placeholder: NSLocalizedString("travel_start_date_placeholder", comment: ""))
         $0.isUserInteractionEnabled = true
         $0.isEnabled = true
     }
 
     private let endDateTextField = UITextField().then {
-        $0.applyTravelStyle(placeholder: "여행 종료일")
+        $0.applyTravelStyle(placeholder: NSLocalizedString("travel_end_date_placeholder", comment: ""))
         $0.isUserInteractionEnabled = true
         $0.isEnabled = true
     }
@@ -92,19 +92,19 @@ class TravelPlanWriteViewController: UIViewController {
 
     // 국가 선택 ActionSheet
     private lazy var countryActionSheet: UIAlertController = {
-        let alert = UIAlertController(title: "여행 국가 선택", message: "여행 지역을 선택해주세요", preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: NSLocalizedString("country_selection_title", comment: ""), message: NSLocalizedString("country_selection_message", comment: ""), preferredStyle: .actionSheet)
 
-        alert.addAction(UIAlertAction(title: "국내", style: .default) { [weak self] _ in
-            self?.countryTextField.text = "국내"
-            self?.viewModel.countryText.accept("국내")
+        alert.addAction(UIAlertAction(title: NSLocalizedString("domestic", comment: ""), style: .default) { [weak self] _ in
+            self?.countryTextField.text = NSLocalizedString("domestic", comment: "")
+            self?.viewModel.countryText.accept(NSLocalizedString("domestic", comment: ""))
         })
 
-        alert.addAction(UIAlertAction(title: "해외", style: .default) { [weak self] _ in
-            self?.countryTextField.text = "해외"
-            self?.viewModel.countryText.accept("해외")
+        alert.addAction(UIAlertAction(title: NSLocalizedString("international", comment: ""), style: .default) { [weak self] _ in
+            self?.countryTextField.text = NSLocalizedString("international", comment: "")
+            self?.viewModel.countryText.accept(NSLocalizedString("international", comment: ""))
         })
 
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
 
         // iPad 대응은 present 시점에 설정
 
@@ -112,12 +112,12 @@ class TravelPlanWriteViewController: UIViewController {
     }()
 
     private let dateDescriptionLabel = UILabel().then {
-        $0.applyDescriptionStyle(text: "여행 시작일과 종료일을 입력해주세요.")
+        $0.applyDescriptionStyle(text: NSLocalizedString("travel_date_description", comment: ""))
     }
     
     // 여행 계획하기 버튼
     private let planButton = UIButton(type: .system).then {
-        $0.applyLightActionStyle(title: "여행 계획하기")
+        $0.applyLightActionStyle(title: NSLocalizedString("plan_travel_button", comment: ""))
     }
     
     override func viewDidLoad() {
@@ -193,12 +193,12 @@ class TravelPlanWriteViewController: UIViewController {
 
     private func showBackNavigationAlert() {
         let alert = UIAlertController(
-            title: "새로운 여행 계획",
-            message: "뒤로가기 후 바로 새로운 여행 계획을 만드시겠습니까?",
+            title: NSLocalizedString("new_travel_plan", comment: ""),
+            message: NSLocalizedString("back_navigation_message", comment: ""),
             preferredStyle: .alert
         )
 
-        alert.addAction(UIAlertAction(title: "예", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("yes", comment: ""), style: .default) { [weak self] _ in
             print("✅ 사용자가 새로운 여행 계획 생성 확인")
             self?.isComingFromBackNavigation = false
             self?.shouldPreventAutoSave = false
@@ -206,7 +206,7 @@ class TravelPlanWriteViewController: UIViewController {
             self?.viewModel.createTravelPlan()
         })
 
-        alert.addAction(UIAlertAction(title: "아니오", style: .cancel) { _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("no", comment: ""), style: .cancel) { _ in
             print("❌ 사용자가 새로운 여행 계획 생성 취소")
         })
 
@@ -295,8 +295,10 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
                     // 성공 시 Detail 화면으로 이동
                     let detailVC = TravelPlanDetailViewController()
                     // 선택된 국내/해외 정보 전달
-                    let selectedCountry = self?.countryTextField.text ?? ""
-                    print("🚀 TravelPlanWrite: 선택된 국가 - '\(selectedCountry)'")
+                    let selectedCountryText = self?.countryTextField.text ?? ""
+                    // NSLocalizedString 값을 고정값으로 변환
+                    let selectedCountry = selectedCountryText == NSLocalizedString("international", comment: "") ? "해외" : "국내"
+                    print("🚀 TravelPlanWrite: 선택된 국가 - '\(selectedCountry)' (원본: '\(selectedCountryText)')")
                     detailVC.setCountryType(selectedCountry)
                     print("✅ TravelPlanWrite: setCountryType 호출 완료")
                     self?.navigationController?.pushViewController(detailVC, animated: true)
@@ -330,7 +332,9 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
                 // 여행 계획 생성 없이 TravelPlanDetailViewController로 이동만
                 print("✅ TravelPlanDetailViewController로 이동 (자동 저장 없음)")
                 let detailVC = TravelPlanDetailViewController()
-                let selectedCountry = self?.countryTextField.text ?? "국내"
+                let selectedCountryText = self?.countryTextField.text ?? NSLocalizedString("domestic", comment: "")
+                // NSLocalizedString 값을 고정값으로 변환
+                let selectedCountry = selectedCountryText == NSLocalizedString("international", comment: "") ? "해외" : "국내"
                 detailVC.setCountryType(selectedCountry)
 
                 // 임시 여행 정보를 DetailViewController에 전달 (저장하지 않음)
@@ -365,7 +369,7 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
 
     func configureUI() {
         // Navigation Bar 설정
-        navigationItem.title = "여행 계획"
+        navigationItem.title = NSLocalizedString("travel_plan", comment: "")
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "chevron.left"),
             style: .plain,

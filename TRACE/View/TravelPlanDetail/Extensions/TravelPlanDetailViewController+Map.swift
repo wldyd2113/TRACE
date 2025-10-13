@@ -53,24 +53,41 @@ extension TravelPlanDetailViewController: MapManagerDelegate {
         let infoMessage = """
         📍 주소: \(place.addressName)
         🏢 카테고리: \(place.categoryName)
-        📞 전화번호: \(place.phone.isEmpty ? "정보 없음" : place.phone)
+        📞 전화번호: \(place.phone.isEmpty ? NSLocalizedString("no_info", comment: "No info") : place.phone)
         🌐 카카오맵: \(place.placeUrl)
         📏 거리: \(place.distance)m
         """
 
         alert.message = infoMessage
 
-        alert.addAction(UIAlertAction(title: "카카오맵에서 보기", style: .default) { _ in
-            if let url = URL(string: place.placeUrl) {
-                UIApplication.shared.open(url)
-            }
-        })
+        // countryType에 따라 다른 맵 연결
+        if countryType == "해외" {
+            // 해외인 경우 구글맵 연결
+            alert.addAction(UIAlertAction(title: NSLocalizedString("view_google_map", comment: "View google map"), style: .default) { _ in
+                let lat = place.coordinate.latitude
+                let lng = place.coordinate.longitude
+                let placeName = place.placeName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
 
-        alert.addAction(UIAlertAction(title: "일정에 추가", style: .default) { [weak self] _ in
+                if let url = URL(string: "https://maps.google.com/?q=\(lat),\(lng)") {
+                    UIApplication.shared.open(url)
+                } else if let url = URL(string: "https://maps.google.com/?q=\(placeName)") {
+                    UIApplication.shared.open(url)
+                }
+            })
+        } else {
+            // 국내인 경우 카카오맵 연결
+            alert.addAction(UIAlertAction(title: NSLocalizedString("view_kakao_map", comment: "View kakao map"), style: .default) { _ in
+                if let url = URL(string: place.placeUrl) {
+                    UIApplication.shared.open(url)
+                }
+            })
+        }
+
+        alert.addAction(UIAlertAction(title: NSLocalizedString("add_to_schedule", comment: "Add to schedule"), style: .default) { [weak self] _ in
             self?.addPlaceToSchedule(place: place)
         })
 
-        alert.addAction(UIAlertAction(title: "닫기", style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("close", comment: "Close"), style: .cancel))
 
         // iPad 대응
         if let popover = alert.popoverPresentationController {
@@ -113,13 +130,13 @@ extension TravelPlanDetailViewController {
     @objc func clearCurrentDayData() {
         // 확인 alert 표시
         let alert = UIAlertController(
-            title: "Day \(currentDay) 데이터 삭제",
-            message: "해당 일차의 모든 데이터(예산, 일정, 경로)를 삭제하시겠습니까?",
+            title: String(format: NSLocalizedString("day_data_delete", comment: "Day data delete"), currentDay),
+            message: NSLocalizedString("day_data_delete_message", comment: "Day data delete message"),
             preferredStyle: .alert
         )
 
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-        alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: "Cancel"), style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("delete", comment: "Delete"), style: .destructive) { [weak self] _ in
             self?.performClearCurrentDayData()
         })
 
@@ -149,11 +166,11 @@ extension TravelPlanDetailViewController {
 
         // 성공 메시지 표시
         let successAlert = UIAlertController(
-            title: "삭제 완료",
-            message: "Day \(currentDay)의 모든 데이터가 삭제되었습니다.",
+            title: NSLocalizedString("delete_complete", comment: "Delete complete"),
+            message: String(format: NSLocalizedString("day_data_deleted", comment: "Day data deleted"), currentDay),
             preferredStyle: .alert
         )
-        successAlert.addAction(UIAlertAction(title: "확인", style: .default))
+        successAlert.addAction(UIAlertAction(title: NSLocalizedString("confirm", comment: "Confirm"), style: .default))
         present(successAlert, animated: true)
     }
 
@@ -293,19 +310,19 @@ extension TravelPlanDetailViewController {
         let alert = UIAlertController(title: place.name, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        📍 주소: \(place.formattedAddress ?? "정보 없음")
-        🏢 카테고리: \(place.types.first ?? "정보 없음")
+        📍 주소: \(place.formattedAddress ?? NSLocalizedString("no_info", comment: "No info"))
+        🏢 카테고리: \(place.types.first ?? NSLocalizedString("no_info", comment: "No info"))
         🌐 구글맵: Google Maps
         📏 좌표: \(place.geometry.location.lat), \(place.geometry.location.lng)
         """
 
         alert.message = infoMessage
 
-        alert.addAction(UIAlertAction(title: "구글맵에서 보기", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("view_google_map", comment: "View google map"), style: .default) { [weak self] _ in
             self?.openInGoogleMaps(place: place)
         })
 
-        alert.addAction(UIAlertAction(title: "일정에 추가", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("add_to_schedule", comment: "Add to schedule"), style: .default) { [weak self] _ in
             // 구글 장소를 KakaoPlace로 변환
             let kakaoPlace = KakaoPlace(
                 id: place.placeId,
@@ -330,7 +347,7 @@ extension TravelPlanDetailViewController {
             self?.locationSearchButton.setTitleColor(.label, for: .normal)
         })
 
-        alert.addAction(UIAlertAction(title: "닫기", style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("close", comment: "Close"), style: .cancel))
 
         // iPad 대응
         if let popover = alert.popoverPresentationController {
@@ -370,12 +387,12 @@ extension TravelPlanDetailViewController {
     private func showNoSearchResultsAlert(query: String) {
         DispatchQueue.main.async { [weak self] in
             let alert = UIAlertController(
-                title: "검색 결과 없음",
-                message: "'\(query)'에 대한 검색 결과가 없습니다.\n다른 키워드로 검색해보세요.",
+                title: NSLocalizedString("no_search_results_title", comment: "No search results title"),
+                message: String(format: NSLocalizedString("no_search_results_message", comment: "No search results message"), query),
                 preferredStyle: .alert
             )
 
-            alert.addAction(UIAlertAction(title: "확인", style: .default))
+            alert.addAction(UIAlertAction(title: NSLocalizedString("confirm", comment: "Confirm"), style: .default))
 
             self?.present(alert, animated: true)
         }

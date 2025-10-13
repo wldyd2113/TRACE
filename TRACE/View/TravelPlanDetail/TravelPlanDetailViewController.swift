@@ -72,31 +72,31 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
 
     // 예상 경비 섹션
     let budgetTitleLabel = UILabel().then {
-        $0.applySectionTitleStyle(text: "예상 경비")
+        $0.applySectionTitleStyle(text: NSLocalizedString("estimated_budget", comment: "Estimated budget"))
     }
 
     let budgetTextField = UITextField().then {
-        $0.applyTravelStyle(placeholder: "예: 20,000원", fontSize: 16)
+        $0.applyTravelStyle(placeholder: NSLocalizedString("estimated_budget", comment: "Estimated budget"), fontSize: 16)
     }
 
     let budgetDescriptionLabel = UILabel().then {
-        $0.applyDescriptionStyle(text: "예상 경비를 입력해주세요.")
+        $0.applyDescriptionStyle(text: NSLocalizedString("estimated_budget", comment: "Estimated budget description"))
     }
 
     // 여행 일정 추가 섹션
     let scheduleTitleLabel = UILabel().then {
-        $0.applySectionTitleStyle(text: "여행 일정 추가")
+        $0.applySectionTitleStyle(text: NSLocalizedString("add_travel_schedule", comment: "Add travel schedule"))
     }
 
     // 시간 입력 필드
     let timeTextField = UITextField().then {
-        $0.applyTravelStyle(placeholder: "시간 선택")
+        $0.applyTravelStyle(placeholder: NSLocalizedString("time_selection", comment: "Time selection"))
         $0.isUserInteractionEnabled = true
     }
 
     // 여행지 검색 버튼
     let locationSearchButton = UIButton(type: .system).then {
-        $0.setTitle("여행지 검색", for: .normal)
+        $0.setTitle(NSLocalizedString("search_destination", comment: "Search destination"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .systemGray6
         $0.setTitleColor(.label, for: .normal)
@@ -109,7 +109,7 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
 
     // 선택된 장소 표시 라벨
     let selectedLocationLabel = UILabel().then {
-        $0.text = "장소를 선택해주세요"
+        $0.text = NSLocalizedString("select_place", comment: "Select place")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         $0.textColor = .secondaryLabel
         $0.isHidden = true
@@ -117,7 +117,7 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
 
     // 일정 추가 버튼
     let addScheduleItemButton = UIButton(type: .system).then {
-        $0.applyMainActionStyle(title: "일정 추가하기")
+        $0.applyMainActionStyle(title: NSLocalizedString("add_schedule", comment: "Add schedule"))
         $0.isEnabled = false
         $0.backgroundColor = .systemGray4
     }
@@ -130,7 +130,7 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
     }
 
     let scheduleDescriptionLabel = UILabel().then {
-        $0.applyDescriptionStyle(text: "각 시간대 일정 추가")
+        $0.applyDescriptionStyle(text: NSLocalizedString("each_time_schedule", comment: "Add schedule for each time"))
     }
 
 
@@ -142,14 +142,14 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
 
     // 하단 버튼들
     let saveButton = UIButton(type: .system).then {
-        $0.applyMainActionStyle(title: "여행 계획 저장하기")
+        $0.applyMainActionStyle(title: NSLocalizedString("save_travel_plan", comment: "Save travel plan"))
         $0.layer.cornerRadius = 25
         $0.backgroundColor = .skyBlue
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
     }
 
     let startTravelButton = UIButton(type: .system).then {
-        $0.applyMainActionStyle(title: "여행 시작하기")
+        $0.applyMainActionStyle(title: NSLocalizedString("start_travel", comment: "Start travel"))
         $0.layer.cornerRadius = 25
     }
 
@@ -180,6 +180,9 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
 
         // ViewModel currentDay 초기 동기화
         viewModel.setCurrentDay(currentDay)
+
+        // ViewModel countryType 설정
+        viewModel.setCountryType(countryType)
 
         // 초기 데이터 로드 (1일차)
         loadDayData(day: currentDay)
@@ -274,9 +277,15 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
 
             print("📅 저장된 여행 계획 로드:")
             print("   📍 여행지: \(latestPlan.travelName)")
+            print("   🌍 국가: \(latestPlan.nation)")
             print("   🗓️ 시작일: \(DateManager.shared.formatToKoreanString(from: startDate!))")
             print("   🗓️ 종료일: \(DateManager.shared.formatToKoreanString(from: endDate!))")
             print("   📊 총 일차: \(totalDays)일")
+
+            // countryType 설정 (해외면 Google API, 국내면 Kakao API 사용)
+            let planCountryType = latestPlan.nation == "해외" ? "해외" : "국내"
+            setCountryType(planCountryType)
+            print("🌍 저장된 여행 계획에서 countryType 설정됨: \(planCountryType)")
 
             // Navigation title 업데이트
             let dateFormatter = DateFormatter()
@@ -406,6 +415,7 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
     // MARK: - Public Methods
     func setCountryType(_ type: String) {
         countryType = type
+        viewModel.setCountryType(type)
         print("🌍 여행 타입 설정: \(type)")
         setupLocationSearch()
     }
@@ -543,12 +553,12 @@ extension TravelPlanDetailViewController {
 
     private func showCancelAlert() {
         let alert = UIAlertController(
-            title: "편집 취소",
-            message: "작성 중인 내용이 저장되지 않습니다. 정말 나가시겠습니까?",
+            title: NSLocalizedString("cancel_edit", comment: "Cancel edit"),
+            message: NSLocalizedString("cancel_edit_message", comment: "Cancel edit message"),
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "계속 편집", style: .cancel))
-        alert.addAction(UIAlertAction(title: "나가기", style: .destructive) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("continue_editing", comment: "Continue editing"), style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("exit", comment: "Exit"), style: .destructive) { [weak self] _ in
             // 자동 저장 방지 활성화
             self?.shouldPreventAutoSave = true
             self?.viewModel.shouldPreventAutoSave = true

@@ -70,7 +70,7 @@ final class RecordWriteViewModel: BaseViewModel {
 
         return Output(
             isSaveEnabled: isSaveEnabled,
-            saveResult: saveResultRelay.asDriver(onErrorJustReturn: .failure("알 수 없는 오류가 발생했습니다.")),
+            saveResult: saveResultRelay.asDriver(onErrorJustReturn: .failure(NSLocalizedString("unknown_error", comment: "Unknown error"))),
             isLoading: isLoadingRelay.asDriver()
         )
     }
@@ -92,7 +92,7 @@ final class RecordWriteViewModel: BaseViewModel {
             DispatchQueue.main.async {
                 guard let realm = RealmManager.shared.safeRealm() else {
                     self.isLoadingRelay.accept(false)
-                    self.saveResultRelay.accept(.failure("데이터베이스 연결에 실패했습니다"))
+                    self.saveResultRelay.accept(.failure(NSLocalizedString("database_connection_failed", comment: "Database connection failed")))
                     print("❌ Realm 인스턴스 생성 실패")
                     return
                 }
@@ -101,8 +101,8 @@ final class RecordWriteViewModel: BaseViewModel {
                     var recordId: String = ""
                     try realm.write {
                         let record = TravelRecord()
-                        record.travelName = route.isEmpty ? "여행 기록" : route
-                        record.nation = self.extractNationFromRoute(route) ?? "대한민국"
+                        record.travelName = route.isEmpty ? NSLocalizedString("travel_record", comment: "Travel record") : route
+                        record.nation = self.extractNationFromRoute(route) ?? NSLocalizedString("korea", comment: "Korea")
                         record.recordLog = diary
                         record.travelDate = Date()
 
@@ -132,7 +132,7 @@ final class RecordWriteViewModel: BaseViewModel {
 
                 } catch {
                     self.isLoadingRelay.accept(false)
-                    self.saveResultRelay.accept(.failure("저장 중 오류가 발생했습니다: \(error.localizedDescription)"))
+                    self.saveResultRelay.accept(.failure(String(format: "%@ %@", NSLocalizedString("record_save_error", comment: "Record save error"), error.localizedDescription)))
                     print("❌ 여행 기록 저장 실패: \(error)")
                 }
             }
@@ -146,7 +146,7 @@ final class RecordWriteViewModel: BaseViewModel {
 
         for keyword in koreanKeywords {
             if route.contains(keyword) {
-                return "대한민국"
+                return NSLocalizedString("korea", comment: "Korea")
             }
         }
 

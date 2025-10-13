@@ -66,10 +66,10 @@ extension TravelPlanDetailViewController {
 
                 // 입력 필드 초기화
                 self.timeTextField.text = ""
-                self.selectedLocationLabel.text = "장소를 선택해주세요"
+                self.selectedLocationLabel.text = NSLocalizedString("select_place", comment: "Select place")
                 self.selectedLocationLabel.textColor = .secondaryLabel
                 self.selectedLocationLabel.isHidden = true
-                self.locationSearchButton.setTitle("여행지 검색", for: .normal)
+                self.locationSearchButton.setTitle(NSLocalizedString("search_destination", comment: "Search destination"), for: .normal)
                 self.locationSearchButton.setTitleColor(.label, for: .normal)
                 self.selectedPlace = nil
 

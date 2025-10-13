@@ -22,16 +22,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let planVC = TravelPlanMainViewController()
         let plan = UINavigationController(rootViewController: planVC)
-        plan.tabBarItem = UITabBarItem(title: "계획", image: UIImage(systemName: "calendar"), tag: 0)
+        plan.tabBarItem = UITabBarItem(title: NSLocalizedString("plan_tab", comment: "Plan tab"), image: UIImage(systemName: "calendar"), tag: 0)
         
         let recordVc = TravelRecordViewController()
         let record = UINavigationController(rootViewController: recordVc)
-        record.tabBarItem = UITabBarItem(title: "기록", image: UIImage(systemName: "text.page.fill"), tag: 1)
+        record.tabBarItem = UITabBarItem(title: NSLocalizedString("record_tab", comment: "Record tab"), image: UIImage(systemName: "text.page.fill"), tag: 1)
 
         
         let channelVC = TravelChannelViewController()
         let channel = UINavigationController(rootViewController: channelVC)
-        channel.tabBarItem = UITabBarItem(title: "경로", image: UIImage(systemName: "map.fill"), tag: 1)
+        channel.tabBarItem = UITabBarItem(title: NSLocalizedString("route_tab", comment: "Route tab"), image: UIImage(systemName: "map.fill"), tag: 1)
 
 
 

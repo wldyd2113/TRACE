@@ -6,4 +6,174 @@
 
 */
 
+// TravelPlanWrite Screen
+"travel_plan" = "Travel Plan";
+"travel_country" = "Travel Country";
+"travel_country_placeholder" = "Domestic/International";
+"travel_country_description" = "Please select your desired travel destination.";
+"travel_destination" = "Travel Destination";
+"travel_destination_placeholder" = "e.g., Paris";
+"travel_destination_description" = "Please enter your desired travel destination.";
+"travel_date_input" = "Travel Date Input";
+"travel_start_date_placeholder" = "Travel Start Date";
+"travel_end_date_placeholder" = "Travel End Date";
+"travel_date_description" = "Please enter the start and end dates of your trip.";
+"plan_travel_button" = "Plan Travel";
 
+// Country Selection
+"country_selection_title" = "Select Travel Country";
+"country_selection_message" = "Please select your travel region";
+"domestic" = "Domestic";
+"international" = "International";
+"cancel" = "Cancel";
+
+// Alert Messages
+"error" = "Error";
+"completion" = "Complete";
+"all_fields_required" = "Please fill in all fields.";
+"travel_plan_created" = "Travel plan has been created!";
+"save_failed" = "Save Failed";
+"database_connection_failed" = "Database connection failed";
+"travel_plan_save_failed" = "Failed to save travel plan.";
+
+// Back Navigation
+"new_travel_plan" = "New Travel Plan";
+"back_navigation_message" = "Would you like to create a new travel plan after going back?";
+"yes" = "Yes";
+"no" = "No";
+
+// TravelRecord Screen
+"travel_record" = "Travel Records";
+"posts" = "Posts";
+"posts_format" = "%d\nPosts";
+"travel_destination_category" = "Travel Destination";
+"tourist_attraction" = "Tourist Attraction";
+
+// TravelPlanMain Screen
+"travel_destinations" = "Travel Destinations";
+"where_to_travel" = "Where would you like to travel?";
+"add_travel" = "Add Travel";
+"travel_plan_list" = "Travel Plan List";
+"my_travel_plan" = "My Travel Plans";
+"no_upcoming_travel" = "No Upcoming Trips";
+"plan_new_travel" = "Plan a new trip!";
+"ok" = "OK";
+
+// TravelRecordPhoto Screen
+"select" = "Select";
+"photos_selected_format" = "%d selected";
+"total_photos_format" = "Total %d photos";
+"photo_permission_required" = "Photo access permission required\nPlease allow permission in settings";
+"photo_permission_title" = "Photo Access Permission Required";
+"photo_permission_message" = "Photo library access permission is required for travel records.";
+"go_to_settings" = "Go to Settings";
+"notification" = "Notification";
+"no_photos_selected" = "No photos selected.";
+"photo_selection" = "Photo Selection";
+
+// TravelSearch Screen
+"search_destination" = "Search Destination";
+"search_place_placeholder" = "Enter a place to search";
+"no_search_results" = "No search results found.\nTry searching with different keywords.";
+"search_error" = "Search Error";
+"country_type_domestic" = "🇰🇷 Domestic Search (KakaoMap)";
+"country_type_international" = "🌍 International Search (Google)";
+
+// TravelPlanShow Screen
+"estimated_budget" = "Estimated Budget";
+"travel_schedule" = "Travel Schedule";
+"select_place" = "Please select a place";
+"add_schedule" = "Add Schedule";
+"edit" = "Edit";
+"save" = "Save";
+
+// TravelRecordWrite Screen
+"selected_travel_photos" = "Selected Travel Photos";
+"travel_route" = "Travel Route";
+"select_destination" = "Please select a destination";
+"route_description" = "Tap travel route to see map selection schedule.";
+"travel_diary" = "Travel Diary";
+"diary_placeholder" = "Record today's travel...";
+"diary_description" = "Please share your thoughts and stories from the trip.";
+"cancel_writing" = "Cancel Writing";
+"cancel_writing_message" = "Your content will be lost. Do you really want to cancel?";
+"continue_writing" = "Continue Writing";
+"travel_record" = "Travel Record";
+"destination_selection" = "Destination Selection";
+"destination_location_question" = "Is the destination domestic or international?";
+
+// TravelShowRecord Screen
+"travel_moments_photos" = "Photos Capturing Travel Moments";
+"edit_mode_add_destination" = "You can add destinations in edit mode";
+"route_selection_map" = "Map for selecting travel routes";
+"travel_record_writing" = "Travel Record Writing";
+"record_placeholder" = "Record your amazing travel experiences...";
+"record_description" = "Add photos and share your thoughts.";
+"add_destination_instruction" = "Press the search button to add destinations";
+"delete_post" = "Delete Post";
+"delete_confirmation_message" = "Do you really want to delete this travel record?\nDeleted records cannot be recovered.";
+"delete" = "Delete";
+
+// TravelPlanDetail Screen
+"add_travel_schedule" = "Add Travel Schedule";
+"each_time_schedule" = "Add schedule for each time";
+"save_travel_plan" = "Save Travel Plan";
+"start_travel" = "Start Travel";
+"cancel_edit" = "Cancel Edit";
+"cancel_edit_message" = "Your content will not be saved. Do you really want to exit?";
+"continue_editing" = "Continue Editing";
+"exit" = "Exit";
+
+// Time and Date
+"time_selection" = "Select Time";
+
+// Day format
+"day_format" = "Day %d";
+
+// Tab bar titles
+"plan_tab" = "Plan";
+"record_tab" = "Record";
+"route_tab" = "Route";
+
+// Navigation titles
+"view_travel_plan" = "View Travel Plan";
+"travel_photo_placeholder" = "Add travel photos";
+"time_unscheduled" = "Time TBD";
+"location_unscheduled" = "Location TBD";
+"confirm" = "Confirm";
+"schedule_delete_title" = "Delete Schedule";
+"schedule_delete_message" = "Delete '%@' schedule?";
+"save_complete" = "Save Complete";
+"delete_complete" = "Delete Complete";
+"travel_plan_delete" = "Delete Travel Plan";
+"travel_plan_delete_message" = "Are you sure you want to delete this travel plan?\nDeleted data cannot be recovered.";
+"plan_delete_complete_message" = "Travel plan has been successfully deleted.";
+"day_data_delete" = "Delete Day %d Data";
+"day_data_delete_message" = "Do you want to delete all data (budget, schedule, route) for this day?";
+"day_data_deleted" = "All data for Day %d has been deleted.";
+"no_search_results_title" = "No Search Results";
+"no_search_results_message" = "No search results found for '%@'.\nTry searching with different keywords.";
+"view_kakao_map" = "View on KakaoMap";
+"add_to_schedule" = "Add to Schedule";
+"close" = "Close";
+"view_google_map" = "View on Google Maps";
+"no_info" = "No information";
+"place_type" = "Type";
+"place_id" = "Place ID";
+"add_to_route" = "Add to Route";
+
+// Error Messages
+"unknown_error" = "An unknown error occurred.";
+"korea" = "South Korea";
+"travel_plan_not_found" = "Travel plan not found.";
+"load_travel_plan_failed" = "Failed to load travel plan.";
+"no_travel_plan_to_save" = "No travel plan to save.";
+"travel_plan_saved_successfully" = "Travel plan saved successfully!";
+"travel_plan_save_retry" = "Failed to save travel plan. Please try again.";
+"record_not_found" = "Travel record not found";
+"invalid_record_id" = "Invalid travel record ID";
+"record_save_error" = "Error occurred while saving travel record";
+"record_delete_not_found" = "Travel record to delete not found";
+"record_delete_error" = "Error occurred while deleting travel record";
+"search_failed_retry" = "Search failed. Please try again.";
+"network_error" = "Network error occurred.";

@@ -43,7 +43,7 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
             .map { date in
                 let formatter = DateFormatter()
                 formatter.dateFormat = "a h:mm"
-                formatter.locale = Locale(identifier: "ko_KR")
+                formatter.locale = Locale.current
                 return formatter.string(from: date)
             }
             .bind(to: timeTextField.rx.text)
@@ -83,7 +83,7 @@ extension TravelPlanShowViewController: DesiginProtocolBind {
 
     func configureUI() {
         // Navigation Bar 설정
-        navigationItem.title = "여행 계획 보기"
+        navigationItem.title = NSLocalizedString("view_travel_plan", comment: "View travel plan")
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "chevron.left"),
             style: .plain,
@@ -300,7 +300,15 @@ extension TravelPlanShowViewController {
             self?.totalDays = planData.totalDays
 
             // countryType 설정 (API 분기용)
-            self?.setCountryType(planData.nation)
+            // planData.nation이 NSLocalizedString 값일 수 있으므로 고정값으로 변환
+            let planCountryType: String
+            if planData.nation == "해외" || planData.nation == NSLocalizedString("international", comment: "") {
+                planCountryType = "해외"
+            } else {
+                planCountryType = "국내"
+            }
+            print("🔄 nation 값 변환: '\(planData.nation)' → '\(planCountryType)'")
+            self?.setCountryType(planCountryType)
 
             // CollectionView 업데이트
             self?.dateCollectionView.reloadData()
@@ -402,12 +410,12 @@ extension TravelPlanShowViewController {
         containerView.layer.cornerRadius = 8
 
         let timeLabel = UILabel()
-        timeLabel.text = item.time.isEmpty ? "시간 미정" : item.time
+        timeLabel.text = item.time.isEmpty ? NSLocalizedString("time_unscheduled", comment: "Time unscheduled") : item.time
         timeLabel.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         timeLabel.textColor = .labelLight
 
         let locationLabel = UILabel()
-        locationLabel.text = item.location.isEmpty ? "장소 미정" : item.location
+        locationLabel.text = item.location.isEmpty ? NSLocalizedString("location_unscheduled", comment: "Location unscheduled") : item.location
         locationLabel.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         locationLabel.textColor = .systemGray
 
@@ -464,13 +472,13 @@ extension TravelPlanShowViewController {
 
         // 삭제 확인 알림
         let alert = UIAlertController(
-            title: "일정 삭제",
+            title: NSLocalizedString("schedule_delete_title", comment: "Schedule delete title"),
             message: "'\(itemToDelete.time) - \(itemToDelete.location)' 일정을 삭제하시겠습니까?",
             preferredStyle: .alert
         )
 
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-        alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: "Cancel"), style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("delete", comment: "Delete"), style: .destructive) { [weak self] _ in
             self?.viewModel.removeScheduleItem(at: index, forDay: self?.currentDay ?? 1)
             print("🗑️ 일정 삭제 완료: \(itemToDelete.time) - \(itemToDelete.location)")
         })
@@ -497,13 +505,13 @@ extension TravelPlanShowViewController {
 
     @objc func showDeleteConfirmation() {
         let alert = UIAlertController(
-            title: "여행 계획 삭제",
-            message: "이 여행 계획을 완전히 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.",
+            title: NSLocalizedString("travel_plan_delete", comment: "Travel plan delete"),
+            message: NSLocalizedString("travel_plan_delete_message", comment: "Travel plan delete message"),
             preferredStyle: .alert
         )
 
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-        alert.addAction(UIAlertAction(title: "완료", style: .destructive) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: "Cancel"), style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("delete_complete", comment: "Delete complete"), style: .destructive) { [weak self] _ in
             self?.deleteTravelPlan()
         })
 
@@ -539,11 +547,11 @@ extension TravelPlanShowViewController {
 
             // 성공 알림 후 메인 화면으로 이동
             let successAlert = UIAlertController(
-                title: "삭제 완료",
-                message: "여행 계획이 성공적으로 삭제되었습니다.",
+                title: NSLocalizedString("delete_complete", comment: "Delete complete"),
+                message: NSLocalizedString("plan_delete_complete_message", comment: "Plan delete complete message"),
                 preferredStyle: .alert
             )
-            successAlert.addAction(UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+            successAlert.addAction(UIAlertAction(title: NSLocalizedString("confirm", comment: "Confirm"), style: .default) { [weak self] _ in
                 self?.navigateToMainScreen()
             })
             present(successAlert, animated: true)

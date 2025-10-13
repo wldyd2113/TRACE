@@ -18,11 +18,11 @@ class TravelPlanMainViewController: UIViewController {
     
     // MARK: - UI Components
     private let titleLabel = UILabel().then {
-        $0.applyTitleStyle(text: "여행지")
+        $0.applyTitleStyle(text: NSLocalizedString("travel_destinations", comment: "Travel destinations"))
     }
     
     private let subtitleLabel = UILabel().then {
-        $0.applySubtitleStyle(text: "어디로 여행을 가나요?")
+        $0.applySubtitleStyle(text: NSLocalizedString("where_to_travel", comment: "Where to travel question"))
     }
     
     // 메인 여행 정보를 담는 컨테이너 뷰
@@ -49,14 +49,14 @@ class TravelPlanMainViewController: UIViewController {
     }
     
     private let imagePlaceholderLabel = UILabel().then {
-        $0.text = "일본 여행 사진"
+        $0.text = NSLocalizedString("travel_photo_placeholder", comment: "Travel photo placeholder")
         $0.font = FontManager.onglapFont(16)
         $0.textColor = .label
         $0.textAlignment = .center
     }
     
     private let countryLabel = UILabel().then {
-        $0.text = "일본"
+        $0.text = NSLocalizedString("sample_country", comment: "Sample country")
         $0.font = FontManager.onglapFont(14)
         $0.textColor = .systemGray
     }
@@ -74,16 +74,16 @@ class TravelPlanMainViewController: UIViewController {
     }
     
     private let addTravelButton = UIButton(type: .system).then {
-        $0.applyMainActionStyle(title: "여행 추가하기", fontSize: 16)
+        $0.applyMainActionStyle(title: NSLocalizedString("add_travel", comment: "Add travel"), fontSize: 16)
         $0.layer.cornerRadius = 10
     }
 
     private let travelListLabel = UILabel().then {
-        $0.applyTitleStyle(text: "여행 계획 리스트", fontSize: 18)
+        $0.applyTitleStyle(text: NSLocalizedString("travel_plan_list", comment: "Travel plan list"), fontSize: 18)
     }
 
     private let myTravelLabel = UILabel().then {
-        $0.applyDescriptionStyle(text: "나의 여행 계획")
+        $0.applyDescriptionStyle(text: NSLocalizedString("my_travel_plan", comment: "My travel plan"))
     }
     
     private let tableView = UITableView().then {
@@ -174,7 +174,7 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
                 let showVC = TravelPlanShowViewController()
                 showVC.travelPlanId = selectedPlan.id
                 self?.navigationController?.pushViewController(showVC, animated: true)
-                print("🏃‍♂️ 여행 계획 상세 화면으로 이동: \(selectedPlan.location)")
+                print("🏃‍♂️ Moving to travel plan detail: \(selectedPlan.location)")
             })
             .disposed(by: disposeBag)
 
@@ -194,11 +194,11 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
 
             guard let data = data else {
                 // 다가오는 여행 계획이 없는 경우
-                self?.countryLabel.text = "다가오는 여행 없음"
-                self?.dateLabel.text = "새로운 여행을 계획해보세요!"
+                self?.countryLabel.text = NSLocalizedString("no_upcoming_travel", comment: "No upcoming travel")
+                self?.dateLabel.text = NSLocalizedString("plan_new_travel", comment: "Plan new travel")
                 self?.dDayLabel.text = ""
                 self?.imagePlaceholderLabel.isHidden = true // 이미지가 있으므로 텍스트 숨김
-                print("📭 다가오는 여행 계획이 없어 기본 UI 표시")
+                print("📭 No upcoming travel plans, showing default UI")
                 return
             }
 
@@ -233,8 +233,8 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
 
     private func showErrorAlert(message: String) {
         DispatchQueue.main.async { [weak self] in
-            let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "확인", style: .default))
+            let alert = UIAlertController(title: NSLocalizedString("error", comment: "Error"), message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: "OK"), style: .default))
             self?.present(alert, animated: true)
         }
     }

@@ -77,7 +77,7 @@ class PlanMainViewModel: BaseViewModel {
 
         guard let realm = RealmManager.shared.getRealm() else {
             print("❌ Realm 인스턴스를 가져올 수 없습니다")
-            errorRelay.accept("데이터베이스 연결에 실패했습니다")
+            errorRelay.accept(NSLocalizedString("database_connection_failed", comment: "Database connection failed"))
             return
         }
 
@@ -125,7 +125,7 @@ class PlanMainViewModel: BaseViewModel {
 
         } catch {
             print("❌ Realm 데이터 로드 실패: \(error.localizedDescription)")
-            errorRelay.accept("여행 계획을 불러오는데 실패했습니다.")
+            errorRelay.accept(NSLocalizedString("load_travel_plan_failed", comment: "Load travel plan failed"))
         }
     }
 

@@ -6,4 +6,175 @@
 
 */
 
+// TravelPlanWrite Screen
+"travel_plan" = "旅行計画";
+"travel_country" = "旅行国";
+"travel_country_placeholder" = "国内/海外選択";
+"travel_country_description" = "ご希望の旅行先を選択してください。";
+"travel_destination" = "旅行先入力";
+"travel_destination_placeholder" = "例：パリ";
+"travel_destination_description" = "ご希望の旅行先を入力してください。";
+"travel_date_input" = "旅行日程入力";
+"travel_start_date_placeholder" = "旅行開始日";
+"travel_end_date_placeholder" = "旅行終了日";
+"travel_date_description" = "旅行の開始日と終了日を入力してください。";
+"plan_travel_button" = "旅行計画を立てる";
+
+// Country Selection
+"country_selection_title" = "旅行国選択";
+"country_selection_message" = "旅行地域を選択してください";
+"domestic" = "国内";
+"international" = "海外";
+"cancel" = "キャンセル";
+
+// Alert Messages
+"error" = "エラー";
+"completion" = "完了";
+"all_fields_required" = "すべての項目を入力してください。";
+"travel_plan_created" = "旅行計画が作成されました！";
+"save_failed" = "保存失敗";
+"database_connection_failed" = "データベース接続に失敗しました";
+"travel_plan_save_failed" = "旅行計画の保存に失敗しました。";
+
+// Back Navigation
+"new_travel_plan" = "新しい旅行計画";
+"back_navigation_message" = "戻った後、新しい旅行計画を作成しますか？";
+"yes" = "はい";
+"no" = "いいえ";
+
+// TravelRecord Screen
+"travel_record" = "旅行記録";
+"posts" = "投稿";
+"posts_format" = "%d\n投稿";
+"travel_destination_category" = "旅行先";
+"tourist_attraction" = "観光地";
+
+// TravelPlanMain Screen
+"travel_destinations" = "旅行先";
+"where_to_travel" = "どこに旅行に行きますか？";
+"add_travel" = "旅行追加";
+"travel_plan_list" = "旅行計画リスト";
+"my_travel_plan" = "私の旅行計画";
+"no_upcoming_travel" = "予定されている旅行なし";
+"plan_new_travel" = "新しい旅行を計画しましょう！";
+"ok" = "OK";
+
+// TravelRecordPhoto Screen
+"select" = "選択";
+"photos_selected_format" = "%d個選択済み";
+"total_photos_format" = "合計%d枚の写真";
+"photo_permission_required" = "写真アクセス許可が必要です\n設定で許可してください";
+"photo_permission_title" = "写真アクセス許可が必要";
+"photo_permission_message" = "旅行記録のため、フォトライブラリアクセス許可が必要です。";
+"go_to_settings" = "設定へ移動";
+"notification" = "お知らせ";
+"no_photos_selected" = "選択された写真がありません。";
+"photo_selection" = "写真選択";
+
+// TravelSearch Screen
+"search_destination" = "旅行先検索";
+"search_place_placeholder" = "検索する場所を入力してください";
+"no_search_results" = "検索結果がありません。\n他のキーワードで検索してみてください。";
+"search_error" = "検索エラー";
+"country_type_domestic" = "🇰🇷 国内検索（カカオマップ）";
+"country_type_international" = "🌍 海外検索（Google）";
+
+// TravelPlanShow Screen
+"estimated_budget" = "予想予算";
+"travel_schedule" = "旅行スケジュール";
+"select_place" = "場所を選択してください";
+"add_schedule" = "スケジュール追加";
+"edit" = "編集";
+"save" = "保存";
+
+// TravelRecordWrite Screen
+"selected_travel_photos" = "選択された旅行写真";
+"travel_route" = "旅行ルート";
+"select_destination" = "旅行先を選択してください";
+"route_description" = "旅行ルートをタップするとマップ選択スケジュールが表示されます。";
+"travel_diary" = "旅行日記作成";
+"diary_placeholder" = "今日の旅行を記録してください...";
+"diary_description" = "旅行中に感じたことや話を書いてください。";
+"cancel_writing" = "作成キャンセル";
+"cancel_writing_message" = "作成中の内容が消えます。本当にキャンセルしますか？";
+"continue_writing" = "作成継続";
+"travel_record" = "旅行記録";
+"destination_selection" = "旅行先選択";
+"destination_location_question" = "検索する旅行先は国内ですか？海外ですか？";
+
+// TravelShowRecord Screen
+"travel_moments_photos" = "旅行の瞬間を収めた写真";
+"edit_mode_add_destination" = "編集モードで旅行先を追加できます";
+"route_selection_map" = "旅行ルートを選択できるマップ";
+"travel_record_writing" = "旅行記録作成";
+"record_placeholder" = "旅行の素晴らしい記録を書いてください...";
+"record_description" = "写真を追加して、感想を残してください。";
+"add_destination_instruction" = "旅行先を追加するには検索ボタンを押してください";
+"delete_post" = "投稿削除";
+"delete_confirmation_message" = "この旅行記録を本当に削除しますか？\n削除された記録は復元できません。";
+"delete" = "削除";
+
+// TravelPlanDetail Screen
+"add_travel_schedule" = "旅行スケジュール追加";
+"each_time_schedule" = "各時間帯のスケジュール追加";
+"save_travel_plan" = "旅行計画保存";
+"start_travel" = "旅行開始";
+"cancel_edit" = "編集キャンセル";
+"cancel_edit_message" = "作成中の内容が保存されません。本当に出ますか？";
+"continue_editing" = "編集継続";
+"exit" = "出る";
+
+// Error Messages
+"unknown_error" = "不明なエラーが発生しました。";
+"korea" = "韓国";
+"travel_plan_not_found" = "旅行計画が見つかりません。";
+"load_travel_plan_failed" = "旅行計画の読み込みに失敗しました。";
+"no_travel_plan_to_save" = "保存する旅行計画がありません。";
+"travel_plan_saved_successfully" = "旅行計画が正常に保存されました！";
+"travel_plan_save_retry" = "旅行計画の保存に失敗しました。もう一度お試しください。";
+"record_not_found" = "旅行記録が見つかりません";
+"invalid_record_id" = "無効な旅行記録IDです";
+"record_save_error" = "旅行記録保存中にエラーが発生しました";
+"record_delete_not_found" = "削除する旅行記録が見つかりません";
+"record_delete_error" = "旅行記録削除中にエラーが発生しました";
+"search_failed_retry" = "検索に失敗しました。もう一度お試しください。";
+"network_error" = "ネットワークエラーが発生しました。";
+
+// Time and Date
+"time_selection" = "時間選択";
+
+// Day format
+"day_format" = "%d日目";
+
+// Tab bar titles
+"plan_tab" = "計画";
+"record_tab" = "記録";
+"route_tab" = "ルート";
+
+// Navigation titles
+"view_travel_plan" = "旅行計画を見る";
+"travel_photo_placeholder" = "旅行写真を追加してください";
+"time_unscheduled" = "時間未定";
+"location_unscheduled" = "場所未定";
+"confirm" = "確認";
+"schedule_delete_title" = "スケジュール削除";
+"schedule_delete_message" = "'%@'のスケジュールを削除しますか？";
+"save_complete" = "保存完了";
+"delete_complete" = "削除完了";
+"travel_plan_delete" = "旅行計画削除";
+"travel_plan_delete_message" = "この旅行計画を完全に削除しますか？\n削除されたデータは復元できません。";
+"plan_delete_complete_message" = "旅行計画が正常に削除されました。";
+"day_data_delete" = "Day %d データ削除";
+"day_data_delete_message" = "その日のすべてのデータ（予算、スケジュール、ルート）を削除しますか？";
+"day_data_deleted" = "Day %dのすべてのデータが削除されました。";
+"no_search_results_title" = "検索結果なし";
+"no_search_results_message" = "'%@'の検索結果がありません。\n他のキーワードで検索してみてください。";
+"view_kakao_map" = "カカオマップで見る";
+"add_to_schedule" = "スケジュールに追加";
+"close" = "閉じる";
+"view_google_map" = "グーグルマップで見る";
+"no_info" = "情報なし";
+"place_type" = "種類";
+"place_id" = "場所ID";
+"add_to_route" = "ルートに追加";
 

@@ -34,8 +34,12 @@ class TravelPlanShowViewController: UIViewController {
 
     // 국내/해외 타입 설정 메서드
     func setCountryType(_ type: String) {
+        print("🔄 TravelPlanShow: setCountryType 호출됨")
+        print("   • 이전 countryType: '\(countryType)'")
+        print("   • 새로운 countryType: '\(type)'")
+
         countryType = type
-        print("🌍 TravelPlanShow: countryType 설정됨 - '\(countryType)'")
+        print("✅ TravelPlanShow: countryType 설정 완료 - '\(countryType)'")
     }
 
     // 검색된 장소들을 저장 (좌표 정보 포함)
@@ -75,30 +79,30 @@ class TravelPlanShowViewController: UIViewController {
 
     // 예상 경비 섹션
     let budgetTitleLabel = UILabel().then {
-        $0.applySectionTitleStyle(text: "예상 경비")
+        $0.applySectionTitleStyle(text: NSLocalizedString("estimated_budget", comment: "Estimated budget"))
     }
 
     let budgetTextField = UITextField().then {
-        $0.applyTravelStyle(placeholder: "예: 20,000원", fontSize: 16)
+        $0.applyTravelStyle(placeholder: NSLocalizedString("estimated_budget", comment: "Estimated budget"), fontSize: 16)
     }
 
     let budgetDescriptionLabel = UILabel().then {
-        $0.applyDescriptionStyle(text: "예상 경비를 확인하고 수정할 수 있습니다.")
+        $0.applyDescriptionStyle(text: NSLocalizedString("estimated_budget", comment: "Estimated budget description"))
     }
 
     // 여행 일정 섹션
     let scheduleTitleLabel = UILabel().then {
-        $0.applySectionTitleStyle(text: "여행 일정")
+        $0.applySectionTitleStyle(text: NSLocalizedString("travel_schedule", comment: "Travel schedule"))
     }
 
     let timeTextField = UITextField().then {
-        $0.applyTravelStyle(placeholder: "시간 선택")
+        $0.applyTravelStyle(placeholder: NSLocalizedString("time_selection", comment: "Time selection"))
         $0.isUserInteractionEnabled = true
     }
 
     // 여행지 검색 버튼
     let locationSearchButton = UIButton(type: .system).then {
-        $0.setTitle("여행지 검색", for: .normal)
+        $0.setTitle(NSLocalizedString("search_destination", comment: "Search destination"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .systemGray6
         $0.setTitleColor(.label, for: .normal)
@@ -111,14 +115,14 @@ class TravelPlanShowViewController: UIViewController {
 
     // 선택된 장소 표시 라벨
     let selectedLocationLabel = UILabel().then {
-        $0.text = "장소를 선택해주세요"
+        $0.text = NSLocalizedString("select_place", comment: "Select place")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         $0.textColor = .secondaryLabel
         $0.isHidden = true
     }
 
     let addScheduleItemButton = UIButton(type: .system).then {
-        $0.applyMainActionStyle(title: "일정 추가하기")
+        $0.applyMainActionStyle(title: NSLocalizedString("add_schedule", comment: "Add schedule"))
         $0.isEnabled = false
         $0.backgroundColor = .systemGray4
     }
@@ -130,7 +134,7 @@ class TravelPlanShowViewController: UIViewController {
     }
 
     let scheduleDescriptionLabel = UILabel().then {
-        $0.applyDescriptionStyle(text: "각 시간대 일정을 추가하거나 수정할 수 있습니다.")
+        $0.applyDescriptionStyle(text: NSLocalizedString("each_time_schedule", comment: "Each time schedule description"))
     }
 
 
@@ -142,7 +146,7 @@ class TravelPlanShowViewController: UIViewController {
 
     // 하단 버튼들
     let editButton = UIButton(type: .system).then {
-        $0.setTitle("수정", for: .normal)
+        $0.setTitle(NSLocalizedString("edit", comment: "Edit"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .skyBlue
         $0.setTitleColor(.white, for: .normal)
@@ -151,7 +155,7 @@ class TravelPlanShowViewController: UIViewController {
     }
 
     let saveButton = UIButton(type: .system).then {
-        $0.setTitle("저장", for: .normal)
+        $0.setTitle(NSLocalizedString("save", comment: "Save"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .skyBlue
         $0.setTitleColor(.white, for: .normal)
@@ -160,7 +164,7 @@ class TravelPlanShowViewController: UIViewController {
     }
 
     let cancelButton = UIButton(type: .system).then {
-        $0.setTitle("취소", for: .normal)
+        $0.setTitle(NSLocalizedString("cancel", comment: "Cancel"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .systemGray
         $0.setTitleColor(.white, for: .normal)
@@ -201,9 +205,14 @@ class TravelPlanShowViewController: UIViewController {
 
     // MARK: - Search Modal Methods
     func presentSearchModal() {
+        print("🔍 TravelPlanShow: presentSearchModal 호출")
+        print("🌍 현재 countryType: '\(countryType)'")
+
         let searchVC = TravelSearchViewController()
         searchVC.delegate = self
         searchVC.countryType = countryType
+        print("🔄 TravelSearchViewController에 countryType 전달: '\(countryType)'")
+
         searchVC.modalPresentationStyle = .overFullScreen
         searchVC.modalTransitionStyle = .crossDissolve
         present(searchVC, animated: true)

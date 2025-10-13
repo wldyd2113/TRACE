@@ -33,7 +33,7 @@ class TravelRecordPhotoViewController: UIViewController {
     }()
 
     private let selectButton = UIButton(type: .system).then {
-        $0.setTitle("선택", for: .normal)
+        $0.setTitle(NSLocalizedString("select", comment: "Select"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.setTitleColor(.systemBlue, for: .normal)
     }
@@ -122,28 +122,28 @@ class TravelRecordPhotoViewController: UIViewController {
         let selectedCount = selectedAssets.count
 
         if selectedCount > 0 {
-            statusLabel.text = "\(selectedCount)개 선택됨"
+            statusLabel.text = String(format: NSLocalizedString("photos_selected_format", comment: "Photos selected format"), selectedCount)
         } else {
-            statusLabel.text = "총 \(totalCount)개 사진"
+            statusLabel.text = String(format: NSLocalizedString("total_photos_format", comment: "Total photos format"), totalCount)
         }
     }
 
     private func showPermissionDeniedAlert() {
-        statusLabel.text = "사진 접근 권한이 필요합니다\n설정에서 권한을 허용해주세요"
+        statusLabel.text = NSLocalizedString("photo_permission_required", comment: "Photo permission required")
 
         let alert = UIAlertController(
-            title: "사진 접근 권한 필요",
-            message: "여행 기록을 위해 사진 라이브러리 접근 권한이 필요합니다.",
+            title: NSLocalizedString("photo_permission_title", comment: "Photo permission title"),
+            message: NSLocalizedString("photo_permission_message", comment: "Photo permission message"),
             preferredStyle: .alert
         )
 
-        alert.addAction(UIAlertAction(title: "설정으로 이동", style: .default) { _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("go_to_settings", comment: "Go to settings"), style: .default) { _ in
             if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(settingsUrl)
             }
         })
 
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: "Cancel"), style: .cancel))
 
         present(alert, animated: true)
     }
@@ -278,8 +278,8 @@ class TravelRecordPhotoViewController: UIViewController {
 
     @objc private func selectButtonTapped() {
         if selectedAssets.isEmpty {
-            let alert = UIAlertController(title: "알림", message: "선택된 사진이 없습니다.", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "확인", style: .default))
+            let alert = UIAlertController(title: NSLocalizedString("notification", comment: "Notification"), message: NSLocalizedString("no_photos_selected", comment: "No photos selected"), preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: "OK"), style: .default))
             present(alert, animated: true)
             return
         }
@@ -356,7 +356,7 @@ extension TravelRecordPhotoViewController: DesiginProtocolBind {
 
     func configureUI() {
         // Navigation Bar 설정
-        navigationItem.title = "사진 선택"
+        navigationItem.title = NSLocalizedString("photo_selection", comment: "Photo selection")
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "chevron.left"),
             style: .plain,

@@ -15,6 +15,9 @@ class PlanDetailViewModel: BaseViewModel {
 
     private let disposeBag = DisposeBag()
 
+    // 국가 타입 (API 분기용)
+    private var countryType: String = "국내"
+
     // MARK: - Input
     struct Input {
         let budgetText: Observable<String>
@@ -356,14 +359,14 @@ class PlanDetailViewModel: BaseViewModel {
         } catch {
             print("❌ Realm 저장 실패: \(error.localizedDescription)")
             // 실패 결과 emit
-            saveResult.onNext((success: false, message: "여행 계획 저장에 실패했습니다. 다시 시도해주세요."))
+            saveResult.onNext((success: false, message: NSLocalizedString("travel_plan_save_retry", comment: "Travel plan save retry")))
         }
     }
 
     private func createNewTravelPlan(in realm: Realm) -> TravelPlan {
         let newPlan = TravelPlan()
         newPlan.nation = "임시"
-        newPlan.travelName = "여행 계획"
+        newPlan.travelName = NSLocalizedString("travel_plan", comment: "Travel plan")
         newPlan.startDate = Date()
         newPlan.endDate = Date()
 
@@ -408,6 +411,12 @@ class PlanDetailViewModel: BaseViewModel {
         }
 
         saveTravelPlan(storage: filteredStorage)
+    }
+
+    // MARK: - CountryType Methods
+    func setCountryType(_ type: String) {
+        countryType = type
+        print("🌍 PlanDetailViewModel: countryType 설정됨 - \(type)")
     }
 
     // MARK: - Public Methods
@@ -468,21 +477,56 @@ class PlanDetailViewModel: BaseViewModel {
     }
 
     private func searchPlaces(query: String) -> Observable<[KakaoPlace]> {
-        print("🔍 ViewModel: 검색 시작 - \(query)")
+        print("🔍 ViewModel: 검색 시작 - \(query) (countryType: \(countryType))")
 
-        return NetworkManger.shared.searchKakaoPlaces(query: query)
-            .map { [weak self] result in
-                switch result {
-                case .success(let response):
-                    print("🔍 ViewModel: 검색 성공 - \(response.documents.count)개 결과")
-                    let filteredPlace = self?.selectBestMatch(places: response.documents, query: query)
-                    return filteredPlace != nil ? [filteredPlace!] : []
-                case .failure(let error):
-                    print("🔍 ViewModel: 검색 실패 - \(error.localizedDescription)")
-                    return []
+        // countryType에 따라 API 분기
+        if countryType == "해외" {
+            // 해외 검색: Google Places API 사용
+            return NetworkManger.shared.searchGooglePlaces(query: query)
+                .map { [weak self] result in
+                    switch result {
+                    case .success(let response):
+                        print("🔍 ViewModel: Google 검색 성공 - \(response.results.count)개 결과")
+                        // Google Places 결과를 KakaoPlace 형식으로 변환
+                        let kakaoPlaces = response.results.map { googlePlace in
+                            return KakaoPlace(
+                                id: googlePlace.placeId,
+                                placeName: googlePlace.name,
+                                categoryName: googlePlace.types.joined(separator: ", "),
+                                categoryGroupCode: "",
+                                categoryGroupName: "",
+                                phone: "",
+                                addressName: googlePlace.formattedAddress ?? "",
+                                roadAddressName: googlePlace.formattedAddress ?? "",
+                                x: String(googlePlace.geometry.location.lng),
+                                y: String(googlePlace.geometry.location.lat),
+                                placeUrl: "",
+                                distance: "0"
+                            )
+                        }
+                        return kakaoPlaces
+                    case .failure(let error):
+                        print("🔍 ViewModel: Google 검색 실패 - \(error.localizedDescription)")
+                        return []
+                    }
                 }
-            }
-            .catchAndReturn([])
+                .catchAndReturn([])
+        } else {
+            // 국내 검색: Kakao Places API 사용
+            return NetworkManger.shared.searchKakaoPlaces(query: query)
+                .map { [weak self] result in
+                    switch result {
+                    case .success(let response):
+                        print("🔍 ViewModel: Kakao 검색 성공 - \(response.documents.count)개 결과")
+                        let filteredPlace = self?.selectBestMatch(places: response.documents, query: query)
+                        return filteredPlace != nil ? [filteredPlace!] : []
+                    case .failure(let error):
+                        print("🔍 ViewModel: Kakao 검색 실패 - \(error.localizedDescription)")
+                        return []
+                    }
+                }
+                .catchAndReturn([])
+        }
     }
 
     private func selectBestMatch(places: [KakaoPlace], query: String) -> KakaoPlace? {

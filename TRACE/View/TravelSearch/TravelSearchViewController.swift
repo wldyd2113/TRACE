@@ -42,7 +42,7 @@ class TravelSearchViewController: UIViewController {
     }
 
     private let titleLabel = UILabel().then {
-        $0.text = "여행지 검색"
+        $0.text = NSLocalizedString("search_destination", comment: "Search destination")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.textColor = .label
         $0.textAlignment = .center
@@ -54,7 +54,7 @@ class TravelSearchViewController: UIViewController {
     }
 
     private let searchBar = UISearchBar().then {
-        $0.placeholder = "검색할 장소를 입력하세요"
+        $0.placeholder = NSLocalizedString("search_place_placeholder", comment: "Search place placeholder")
         $0.searchBarStyle = .minimal
         $0.backgroundColor = .systemGray6
         $0.layer.cornerRadius = 12
@@ -74,7 +74,7 @@ class TravelSearchViewController: UIViewController {
     }
 
     private let emptyStateLabel = UILabel().then {
-        $0.text = "검색 결과가 없습니다.\n다른 키워드로 검색해보세요."
+        $0.text = NSLocalizedString("no_search_results", comment: "No search results")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.textColor = .secondaryLabel
         $0.textAlignment = .center
@@ -254,14 +254,13 @@ class TravelSearchViewController: UIViewController {
     }
 
     private func updateCountryTypeLabel() {
-        let emoji = countryType == "해외" ? "🌍" : "🇰🇷"
-        let apiName = countryType == "해외" ? "Google" : "카카오맵"
-        countryTypeLabel.text = "\(emoji) \(countryType) 검색 (\(apiName))"
+        let countryKey = countryType == "해외" ? "country_type_international" : "country_type_domestic"
+        countryTypeLabel.text = NSLocalizedString(countryKey, comment: "Country type label")
     }
 
     private func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "검색 오류", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        let alert = UIAlertController(title: NSLocalizedString("search_error", comment: "Search error"), message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: "OK"), style: .default))
         present(alert, animated: true)
     }
 }

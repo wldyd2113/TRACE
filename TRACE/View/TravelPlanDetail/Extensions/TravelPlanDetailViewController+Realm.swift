@@ -46,6 +46,11 @@ extension TravelPlanDetailViewController {
                 day: travelDay
             )
 
+            // countryType 설정 (해외면 Google API, 국내면 Kakao API 사용)
+            let planCountryType = tempInfo.country == "해외" ? "해외" : "국내"
+            setCountryType(planCountryType)
+            print("🌍 임시 여행 정보에서 countryType 설정됨: \(planCountryType)")
+
             // Realm에 TravelPlan 저장
             do {
                 let realm = try Realm()

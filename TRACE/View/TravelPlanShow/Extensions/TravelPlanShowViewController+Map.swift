@@ -228,17 +228,34 @@ extension TravelPlanShowViewController: MapManagerDelegate {
 
         alert.message = infoMessage
 
-        // 카카오맵에서 좌표로 검색하는 버튼 추가
-        alert.addAction(UIAlertAction(title: "카카오맵에서 위치 보기", style: .default) { _ in
-            let kakaoMapURL = "kakaomap://look?p=\(place.coordinate.latitude),\(place.coordinate.longitude)"
-            let webURL = "https://map.kakao.com/link/map/\(place.placeName),\(place.coordinate.latitude),\(place.coordinate.longitude)"
+        // countryType에 따라 다른 맵 연결
+        if countryType == "해외" {
+            // 해외인 경우 구글맵 연결
+            alert.addAction(UIAlertAction(title: "구글맵에서 위치 보기", style: .default) { _ in
+                let lat = place.coordinate.latitude
+                let lng = place.coordinate.longitude
+                let placeName = place.placeName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
 
-            if let url = URL(string: kakaoMapURL), UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url)
-            } else if let url = URL(string: webURL) {
-                UIApplication.shared.open(url)
-            }
-        })
+                // 구글맵 URL 생성
+                if let url = URL(string: "https://maps.google.com/?q=\(lat),\(lng)") {
+                    UIApplication.shared.open(url)
+                } else if let url = URL(string: "https://maps.google.com/?q=\(placeName)") {
+                    UIApplication.shared.open(url)
+                }
+            })
+        } else {
+            // 국내인 경우 카카오맵 연결
+            alert.addAction(UIAlertAction(title: "카카오맵에서 위치 보기", style: .default) { _ in
+                let kakaoMapURL = "kakaomap://look?p=\(place.coordinate.latitude),\(place.coordinate.longitude)"
+                let webURL = "https://map.kakao.com/link/map/\(place.placeName),\(place.coordinate.latitude),\(place.coordinate.longitude)"
+
+                if let url = URL(string: kakaoMapURL), UIApplication.shared.canOpenURL(url) {
+                    UIApplication.shared.open(url)
+                } else if let url = URL(string: webURL) {
+                    UIApplication.shared.open(url)
+                }
+            })
+        }
 
         // 편집 모드에서만 일정 추가 버튼 표시
         if isEditMode {

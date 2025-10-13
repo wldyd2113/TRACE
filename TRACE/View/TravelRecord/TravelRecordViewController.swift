@@ -24,7 +24,7 @@ class TravelRecordViewController: UIViewController {
 
     // MARK: - UI Components
     private let titleLabel = UILabel().then {
-        $0.text = "여행기록"
+        $0.text = NSLocalizedString("travel_record", comment: "Travel Record title")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 24)
         $0.textColor = .label
         $0.textAlignment = .left
@@ -37,7 +37,7 @@ class TravelRecordViewController: UIViewController {
     }
 
     private let recordCountLabel = UILabel().then {
-        $0.text = "5\n게시물"
+        $0.text = String(format: NSLocalizedString("posts_format", comment: "Posts count format"), 0)
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.textColor = .label
         $0.textAlignment = .center
@@ -211,9 +211,9 @@ class TravelRecordViewController: UIViewController {
             KakaoPlace(
                 id: record.id.stringValue,
                 placeName: location.location,
-                categoryName: "여행지",
+                categoryName: NSLocalizedString("travel_destination_category", comment: "Travel destination category"),
                 categoryGroupCode: "AT4",
-                categoryGroupName: "관광명소",
+                categoryGroupName: NSLocalizedString("tourist_attraction", comment: "Tourist attraction"),
                 phone: "",
                 addressName: location.location,
                 roadAddressName: "",

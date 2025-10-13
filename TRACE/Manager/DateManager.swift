@@ -15,7 +15,7 @@ class DateManager {
     // MARK: - DateFormatters
     private lazy var koreanDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 MM월 dd일"
+        formatter.dateFormat = "yyyy-MM-dd"
         formatter.locale = Locale(identifier: "ko_KR")
         return formatter
     }()

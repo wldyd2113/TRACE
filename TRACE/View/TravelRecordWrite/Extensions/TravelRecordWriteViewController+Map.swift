@@ -55,24 +55,41 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
         let infoMessage = """
         📍 주소: \(place.addressName)
         🏢 카테고리: \(place.categoryName)
-        📞 전화번호: \(place.phone.isEmpty ? "정보 없음" : place.phone)
+        📞 전화번호: \(place.phone.isEmpty ? NSLocalizedString("no_info", comment: "No info") : place.phone)
         🌐 카카오맵: \(place.placeUrl)
         📏 거리: \(place.distance)m
         """
 
         alert.message = infoMessage
 
-        alert.addAction(UIAlertAction(title: "카카오맵에서 보기", style: .default) { _ in
-            if let url = URL(string: place.placeUrl) {
-                UIApplication.shared.open(url)
-            }
-        })
+        // countryType에 따라 다른 맵 연결
+        if countryType == "해외" {
+            // 해외인 경우 구글맵 연결
+            alert.addAction(UIAlertAction(title: NSLocalizedString("view_google_map", comment: "View google map"), style: .default) { _ in
+                let lat = place.coordinate.latitude
+                let lng = place.coordinate.longitude
+                let placeName = place.placeName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
 
-        alert.addAction(UIAlertAction(title: "경로에 추가", style: .default) { [weak self] _ in
+                if let url = URL(string: "https://maps.google.com/?q=\(lat),\(lng)") {
+                    UIApplication.shared.open(url)
+                } else if let url = URL(string: "https://maps.google.com/?q=\(placeName)") {
+                    UIApplication.shared.open(url)
+                }
+            })
+        } else {
+            // 국내인 경우 카카오맵 연결
+            alert.addAction(UIAlertAction(title: NSLocalizedString("view_kakao_map", comment: "View kakao map"), style: .default) { _ in
+                if let url = URL(string: place.placeUrl) {
+                    UIApplication.shared.open(url)
+                }
+            })
+        }
+
+        alert.addAction(UIAlertAction(title: NSLocalizedString("add_to_route", comment: "Add to route"), style: .default) { [weak self] _ in
             self?.addPlaceToRoute(place: place)
         })
 
-        alert.addAction(UIAlertAction(title: "닫기", style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("close", comment: "Close"), style: .cancel))
 
         // iPad 대응
         if let popover = alert.popoverPresentationController {
@@ -102,23 +119,23 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
         let alert = UIAlertController(title: place.name, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        📍 주소: \(place.formattedAddress ?? "정보 없음")
-        🏢 카테고리: \(place.types.first ?? "정보 없음")
+        📍 주소: \(place.formattedAddress ?? NSLocalizedString("no_info", comment: "No info"))
+        🏢 카테고리: \(place.types.first ?? NSLocalizedString("no_info", comment: "No info"))
         🌐 구글맵: Google Maps
         📏 좌표: \(place.geometry.location.lat), \(place.geometry.location.lng)
         """
 
         alert.message = infoMessage
 
-        alert.addAction(UIAlertAction(title: "구글맵에서 보기", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("view_google_map", comment: "View google map"), style: .default) { [weak self] _ in
             self?.openInGoogleMaps(place: place)
         })
 
-        alert.addAction(UIAlertAction(title: "경로에 추가", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("add_to_route", comment: "Add to route"), style: .default) { [weak self] _ in
             self?.addGooglePlaceToRoute(place: place)
         })
 
-        alert.addAction(UIAlertAction(title: "닫기", style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("close", comment: "Close"), style: .cancel))
 
         // iPad 대응
         if let popover = alert.popoverPresentationController {
@@ -210,10 +227,10 @@ extension TravelRecordWriteViewController {
     @objc func clearSearchResults() {
         mapManager.clearAllSearchResults()
         selectedPlace = nil
-        selectedRouteLabel.text = "여행지를 선택해주세요"
+        selectedRouteLabel.text = NSLocalizedString("select_destination", comment: "Select destination")
         selectedRouteLabel.textColor = .secondaryLabel
         selectedRouteLabel.isHidden = true
-        routeSearchButton.setTitle("여행지 검색", for: .normal)
+        routeSearchButton.setTitle(NSLocalizedString("search_destination", comment: "Search destination"), for: .normal)
         routeSearchButton.setTitleColor(.label, for: .normal)
         currentSearchedPlaces.removeAll()
         currentGooglePlaces.removeAll()
@@ -257,12 +274,12 @@ extension TravelRecordWriteViewController {
     private func showNoSearchResultsAlert(query: String) {
         DispatchQueue.main.async { [weak self] in
             let alert = UIAlertController(
-                title: "검색 결과 없음",
-                message: "'\(query)'에 대한 검색 결과가 없습니다.\n다른 키워드로 검색해보세요.",
+                title: NSLocalizedString("no_search_results_title", comment: "No search results title"),
+                message: String(format: NSLocalizedString("no_search_results_message", comment: "No search results message"), query),
                 preferredStyle: .alert
             )
 
-            alert.addAction(UIAlertAction(title: "확인", style: .default))
+            alert.addAction(UIAlertAction(title: NSLocalizedString("confirm", comment: "Confirm"), style: .default))
 
             self?.present(alert, animated: true)
         }

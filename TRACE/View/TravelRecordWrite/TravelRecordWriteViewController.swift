@@ -43,7 +43,7 @@ class TravelRecordWriteViewController: UIViewController {
 
     // 사진 표시 섹션 (추가 기능 없이 보기만)
     private let photoSectionLabel = UILabel().then {
-        $0.text = "선택된 여행 사진"
+        $0.text = NSLocalizedString("selected_travel_photos", comment: "Selected travel photos")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.textColor = .label
         $0.textAlignment = .center
@@ -63,14 +63,14 @@ class TravelRecordWriteViewController: UIViewController {
 
     // 여행 경로 섹션
     private let routeSectionLabel = UILabel().then {
-        $0.text = "여행 경로"
+        $0.text = NSLocalizedString("travel_route", comment: "Travel route")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.textColor = .label
     }
 
     // 여행지 검색 버튼
     let routeSearchButton = UIButton(type: .system).then {
-        $0.setTitle("여행지 검색", for: .normal)
+        $0.setTitle(NSLocalizedString("search_destination", comment: "Search destination"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .systemGray6
         $0.setTitleColor(.label, for: .normal)
@@ -83,14 +83,14 @@ class TravelRecordWriteViewController: UIViewController {
 
     // 선택된 장소 표시 라벨
     let selectedRouteLabel = UILabel().then {
-        $0.text = "여행지를 선택해주세요"
+        $0.text = NSLocalizedString("select_destination", comment: "Please select destination")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         $0.textColor = .secondaryLabel
         $0.isHidden = true
     }
 
     private let routeDescriptionLabel = UILabel().then {
-        $0.text = "여행 경로를 누르면 맵 선택 일정이 나옵니다."
+        $0.text = NSLocalizedString("route_description", comment: "Route description")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         $0.textColor = .secondaryLabel
     }
@@ -102,7 +102,7 @@ class TravelRecordWriteViewController: UIViewController {
 
     // 여행 일기 섹션
     private let diarySectionLabel = UILabel().then {
-        $0.text = "여행 일지 작성"
+        $0.text = NSLocalizedString("travel_diary", comment: "Travel diary")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.textColor = .label
     }
@@ -118,20 +118,20 @@ class TravelRecordWriteViewController: UIViewController {
     }
 
     private let diaryPlaceholderLabel = UILabel().then {
-        $0.text = "오늘의 여행을 기록하세요..."
+        $0.text = NSLocalizedString("diary_placeholder", comment: "Diary placeholder")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.textColor = .placeholderText
     }
 
     private let diaryDescriptionLabel = UILabel().then {
-        $0.text = "여행 중의 느낀 점이나 이야기를 적어주세요."
+        $0.text = NSLocalizedString("diary_description", comment: "Diary description")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         $0.textColor = .secondaryLabel
     }
 
     // 하단 버튼들
     private let cancelButton = UIButton(type: .system).then {
-        $0.setTitle("취소", for: .normal)
+        $0.setTitle(NSLocalizedString("cancel", comment: "Cancel"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.backgroundColor = .systemGray4
         $0.setTitleColor(.label, for: .normal)
@@ -139,7 +139,7 @@ class TravelRecordWriteViewController: UIViewController {
     }
 
     private let saveButton = UIButton(type: .system).then {
-        $0.setTitle("저장", for: .normal)
+        $0.setTitle(NSLocalizedString("save", comment: "Save"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.backgroundColor = .skyBlue
         $0.setTitleColor(.white, for: .normal)
@@ -227,12 +227,12 @@ class TravelRecordWriteViewController: UIViewController {
     // MARK: - Actions
     @objc private func cancelButtonTapped() {
         let alert = UIAlertController(
-            title: "작성 취소",
-            message: "작성 중인 내용이 사라집니다. 정말 취소하시겠습니까?",
+            title: NSLocalizedString("cancel_writing", comment: "Cancel writing"),
+            message: NSLocalizedString("cancel_writing_message", comment: "Cancel writing message"),
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "계속 작성", style: .cancel))
-        alert.addAction(UIAlertAction(title: "취소", style: .destructive) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("continue_writing", comment: "Continue writing"), style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: "Cancel"), style: .destructive) { [weak self] _ in
             self?.navigationController?.popViewController(animated: true)
         })
         present(alert, animated: true)
@@ -408,7 +408,7 @@ extension TravelRecordWriteViewController: DesiginProtocolBind {
 
     func configureUI() {
         // Navigation Bar 설정
-        navigationItem.title = "여행 기록"
+        navigationItem.title = NSLocalizedString("travel_record", comment: "Travel record")
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "chevron.left"),
             style: .plain,
@@ -594,21 +594,21 @@ extension TravelRecordWriteViewController {
 
     // MARK: - Country Selection Alert
     internal func showCountrySelectionAlert() {
-        let alert = UIAlertController(title: "여행지 선택", message: "검색할 여행지가 국내입니까? 해외입니까?", preferredStyle: .alert)
+        let alert = UIAlertController(title: NSLocalizedString("destination_selection", comment: "Destination selection"), message: NSLocalizedString("destination_location_question", comment: "Destination location question"), preferredStyle: .alert)
 
-        alert.addAction(UIAlertAction(title: "국내", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("domestic", comment: "Domestic"), style: .default) { [weak self] _ in
             self?.countryType = "국내"
             print("🇰🇷 국내 선택됨")
             self?.presentSearchModal()
         })
 
-        alert.addAction(UIAlertAction(title: "해외", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("international", comment: "International"), style: .default) { [weak self] _ in
             self?.countryType = "해외"
             print("🌍 해외 선택됨")
             self?.presentSearchModal()
         })
 
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: "Cancel"), style: .cancel))
 
         present(alert, animated: true)
     }

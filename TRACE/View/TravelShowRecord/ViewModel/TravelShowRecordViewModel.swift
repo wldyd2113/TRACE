@@ -90,7 +90,7 @@ class TravelShowRecordViewModel {
         return Output(
             recordData: recordDataRelay.asDriver(),
             isEditMode: isEditModeRelay.asDriver(),
-            showAlert: showAlertRelay.asDriver(onErrorJustReturn: AlertData(title: "오류", message: "알 수 없는 오류가 발생했습니다")),
+            showAlert: showAlertRelay.asDriver(onErrorJustReturn: AlertData(title: NSLocalizedString("error", comment: "Error"), message: NSLocalizedString("unknown_error", comment: "Unknown error"))),
             isLoading: isLoadingRelay.asDriver(),
             navigateBack: navigateBackRelay.asDriver(onErrorJustReturn: ())
         )
@@ -109,8 +109,8 @@ class TravelShowRecordViewModel {
             print("❌ Realm 접근 실패")
             isLoadingRelay.accept(false)
             showAlertRelay.accept(AlertData(
-                title: "오류",
-                message: "데이터베이스 연결에 실패했습니다"
+                title: NSLocalizedString("error", comment: "Error"),
+                message: NSLocalizedString("database_connection_failed", comment: "Database connection failed")
             ))
             return
         }
@@ -125,15 +125,15 @@ class TravelShowRecordViewModel {
             } else {
                 print("❌ 해당 ID의 여행 기록을 찾을 수 없습니다: \(recordId)")
                 showAlertRelay.accept(AlertData(
-                    title: "오류",
-                    message: "여행 기록을 찾을 수 없습니다"
+                    title: NSLocalizedString("error", comment: "Error"),
+                    message: NSLocalizedString("record_not_found", comment: "Record not found")
                 ))
             }
         } catch {
             print("❌ ObjectId 변환 실패: \(error)")
             showAlertRelay.accept(AlertData(
-                title: "오류",
-                message: "잘못된 여행 기록 ID입니다"
+                title: NSLocalizedString("error", comment: "Error"),
+                message: NSLocalizedString("invalid_record_id", comment: "Invalid record ID")
             ))
         }
 
@@ -189,8 +189,8 @@ class TravelShowRecordViewModel {
               let realm = RealmManager.shared.getRealm() else {
             print("❌ 저장 실패: Realm 접근 불가")
             showAlertRelay.accept(AlertData(
-                title: "저장 실패",
-                message: "데이터베이스 연결에 실패했습니다"
+                title: NSLocalizedString("save_failed", comment: "Save failed"),
+                message: NSLocalizedString("database_connection_failed", comment: "Database connection failed")
             ))
             return
         }
@@ -234,8 +234,8 @@ class TravelShowRecordViewModel {
         } catch {
             print("❌ 여행 기록 저장 실패: \(error)")
             showAlertRelay.accept(AlertData(
-                title: "저장 실패",
-                message: "여행 기록 저장 중 오류가 발생했습니다"
+                title: NSLocalizedString("save_failed", comment: "Save failed"),
+                message: NSLocalizedString("record_save_error", comment: "Record save error")
             ))
         }
 
@@ -255,8 +255,8 @@ class TravelShowRecordViewModel {
               let realm = RealmManager.shared.getRealm() else {
             print("❌ 삭제 실패: Realm 접근 불가")
             showAlertRelay.accept(AlertData(
-                title: "삭제 실패",
-                message: "데이터베이스 연결에 실패했습니다"
+                title: NSLocalizedString("error", comment: "Error"),
+                message: NSLocalizedString("database_connection_failed", comment: "Database connection failed")
             ))
             return
         }
@@ -284,15 +284,15 @@ class TravelShowRecordViewModel {
             } else {
                 print("❌ 삭제할 여행 기록을 찾을 수 없습니다: \(recordId)")
                 showAlertRelay.accept(AlertData(
-                    title: "삭제 실패",
-                    message: "삭제할 여행 기록을 찾을 수 없습니다"
+                    title: NSLocalizedString("error", comment: "Error"),
+                    message: NSLocalizedString("record_delete_not_found", comment: "Record delete not found")
                 ))
             }
         } catch {
             print("❌ 여행 기록 삭제 실패: \(error)")
             showAlertRelay.accept(AlertData(
-                title: "삭제 실패",
-                message: "여행 기록 삭제 중 오류가 발생했습니다"
+                title: NSLocalizedString("error", comment: "Error"),
+                message: NSLocalizedString("record_delete_error", comment: "Record delete error")
             ))
         }
 

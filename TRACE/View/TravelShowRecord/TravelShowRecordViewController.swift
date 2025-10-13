@@ -41,7 +41,7 @@ class TravelShowRecordViewController: UIViewController {
 
     // 사진 섹션
     private let photoSectionLabel = UILabel().then {
-        $0.text = "여행의 순간들을 담은 사진"
+        $0.text = NSLocalizedString("travel_moments_photos", comment: "Travel moments photos")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.textColor = .label
         $0.textAlignment = .center
@@ -60,7 +60,7 @@ class TravelShowRecordViewController: UIViewController {
 
     // 여행 경로 섹션
     private let routeTitleLabel = UILabel().then {
-        $0.text = "여행 경로"
+        $0.text = NSLocalizedString("travel_route", comment: "Travel route")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.textColor = .label
     }
@@ -73,7 +73,7 @@ class TravelShowRecordViewController: UIViewController {
 
     // 여행지 검색 버튼
     let routeSearchButton = UIButton(type: .system).then {
-        $0.setTitle("여행지 검색", for: .normal)
+        $0.setTitle(NSLocalizedString("search_destination", comment: "Search destination"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .systemGray6
         $0.setTitleColor(.label, for: .normal)
@@ -87,14 +87,14 @@ class TravelShowRecordViewController: UIViewController {
 
     // 선택된 장소 표시 라벨
     let selectedRouteLabel = UILabel().then {
-        $0.text = "편집 모드에서 여행지를 추가할 수 있습니다"
+        $0.text = NSLocalizedString("edit_mode_add_destination", comment: "Edit mode add destination")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         $0.textColor = .secondaryLabel
         $0.isHidden = true
     }
 
     private let mapDescriptionLabel = UILabel().then {
-        $0.text = "여행 경로를 선택할 수 있는 맵"
+        $0.text = NSLocalizedString("route_selection_map", comment: "Route selection map")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         $0.textColor = .systemBlue
         $0.textAlignment = .center
@@ -102,7 +102,7 @@ class TravelShowRecordViewController: UIViewController {
 
     // 여행 기록 작성 섹션
     private let recordTitleLabel = UILabel().then {
-        $0.text = "여행 기록 작성"
+        $0.text = NSLocalizedString("travel_record_writing", comment: "Travel record writing")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 18)
         $0.textColor = .label
     }
@@ -119,13 +119,13 @@ class TravelShowRecordViewController: UIViewController {
     }
 
     private let recordPlaceholderLabel = UILabel().then {
-        $0.text = "여행의 정말 좋은 기록하세요..."
+        $0.text = NSLocalizedString("record_placeholder", comment: "Record placeholder")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.textColor = .placeholderText
     }
 
     private let recordDescriptionLabel = UILabel().then {
-        $0.text = "사진을 추가하고, 후기를 남겨주세요."
+        $0.text = NSLocalizedString("record_description", comment: "Record description")
         $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 14)
         $0.textColor = .secondaryLabel
     }
@@ -133,7 +133,7 @@ class TravelShowRecordViewController: UIViewController {
 
     // 편집 모드 버튼들
     private let editButton = UIButton(type: .system).then {
-        $0.setTitle("수정", for: .normal)
+        $0.setTitle(NSLocalizedString("edit", comment: "Edit"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .skyBlue
         $0.setTitleColor(.white, for: .normal)
@@ -142,7 +142,7 @@ class TravelShowRecordViewController: UIViewController {
     }
 
     private let saveButton = UIButton(type: .system).then {
-        $0.setTitle("저장", for: .normal)
+        $0.setTitle(NSLocalizedString("save", comment: "Save"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .skyBlue
         $0.setTitleColor(.white, for: .normal)
@@ -151,7 +151,7 @@ class TravelShowRecordViewController: UIViewController {
     }
 
     private let cancelButton = UIButton(type: .system).then {
-        $0.setTitle("취소", for: .normal)
+        $0.setTitle(NSLocalizedString("cancel", comment: "Cancel"), for: .normal)
         $0.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 16)
         $0.backgroundColor = .systemGray
         $0.setTitleColor(.white, for: .normal)
@@ -353,7 +353,7 @@ class TravelShowRecordViewController: UIViewController {
 
     private func showAlert(title: String, message: String, completion: (() -> Void)?) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default) { _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("confirm", comment: "Confirm"), style: .default) { _ in
             completion?()
         })
         present(alert, animated: true)
@@ -525,7 +525,7 @@ extension TravelShowRecordViewController: DesiginProtocolBind {
 
     func configureUI() {
         // Navigation Bar 설정
-        navigationItem.title = "여행 기록"
+        navigationItem.title = NSLocalizedString("travel_record", comment: "Travel record")
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "chevron.left"),
             style: .plain,
@@ -658,14 +658,14 @@ extension TravelShowRecordViewController {
 
     private func showDeleteConfirmationAlert() {
         let alert = UIAlertController(
-            title: "게시물 삭제",
-            message: "이 여행 기록을 정말 삭제하시겠습니까?\n삭제된 기록은 복구할 수 없습니다.",
+            title: NSLocalizedString("delete_post", comment: "Delete post"),
+            message: NSLocalizedString("delete_confirmation_message", comment: "Delete confirmation message"),
             preferredStyle: .alert
         )
 
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: "Cancel"), style: .cancel))
 
-        alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("delete", comment: "Delete"), style: .destructive) { [weak self] _ in
             self?.deleteRecord()
         })
 

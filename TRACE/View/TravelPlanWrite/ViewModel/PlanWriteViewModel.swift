@@ -88,7 +88,7 @@ class PlanWriteViewModel {
         let end = endDate.value
 
         guard !country.isEmpty, !destination.isEmpty else {
-            showAlert.accept((title: "오류", message: "모든 필드를 입력해주세요.", completion: nil))
+            showAlert.accept((title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("all_fields_required", comment: ""), completion: nil))
             return
         }
 
@@ -113,9 +113,12 @@ class PlanWriteViewModel {
         travelDay.latitude = 0.0
         travelDay.longitude = 0.0
 
+        // NSLocalizedString 값을 고정값으로 변환
+        let nationValue = country == NSLocalizedString("international", comment: "") ? "해외" : "국내"
+
         // TravelPlan 생성
         let travelPlan = TravelPlan(
-            nation: country,
+            nation: nationValue,
             travelName: destination,
             startDate: start,
             endDate: end,
@@ -151,8 +154,8 @@ class PlanWriteViewModel {
             print("❌ ===== Realm 저장 실패 =====")
             print("오류 내용: Realm 인스턴스를 가져올 수 없습니다")
             showAlert.accept((
-                title: "저장 실패",
-                message: "데이터베이스 연결에 실패했습니다",
+                title: NSLocalizedString("save_failed", comment: ""),
+                message: NSLocalizedString("database_connection_failed", comment: ""),
                 completion: nil
             ))
             return
@@ -182,8 +185,8 @@ class PlanWriteViewModel {
 
             // 성공 알림과 함께 화면 이동 콜백
             showAlert.accept((
-                title: "완료",
-                message: "여행 계획이 생성되었습니다!",
+                title: NSLocalizedString("completion", comment: ""),
+                message: NSLocalizedString("travel_plan_created", comment: ""),
                 completion: nil
             ))
 
@@ -191,7 +194,7 @@ class PlanWriteViewModel {
             print("❌ ===== Realm 저장 실패 =====")
             print("오류 내용: \(error.localizedDescription)")
             print("================================")
-            showAlert.accept((title: "오류", message: "여행 계획 저장에 실패했습니다.", completion: nil))
+            showAlert.accept((title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("travel_plan_save_failed", comment: ""), completion: nil))
         }
     }
 

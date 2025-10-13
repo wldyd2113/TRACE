@@ -1,0 +1,179 @@
+/*
+  Localizable.strings
+  TRACE
+
+  Created by 차지용 on 9/26/25.
+
+*/
+
+// TravelPlanWrite Screen
+"travel_plan" = "여행 계획";
+"travel_country" = "여행 국가";
+"travel_country_placeholder" = "국내/해외 선택";
+"travel_country_description" = "원하시는 여행지를 입력해주세요.";
+"travel_destination" = "여행지 입력";
+"travel_destination_placeholder" = "예: 파리";
+"travel_destination_description" = "원하시는 여행지를 입력해주세요.";
+"travel_date_input" = "여행일자 입력";
+"travel_start_date_placeholder" = "여행 시작일";
+"travel_end_date_placeholder" = "여행 종료일";
+"travel_date_description" = "여행 시작일과 종료일을 입력해주세요.";
+"plan_travel_button" = "여행 계획하기";
+
+// Country Selection
+"country_selection_title" = "여행 국가 선택";
+"country_selection_message" = "여행 지역을 선택해주세요";
+"domestic" = "국내";
+"international" = "해외";
+"cancel" = "취소";
+
+// Alert Messages
+"error" = "오류";
+"completion" = "완료";
+"all_fields_required" = "모든 필드를 입력해주세요.";
+"travel_plan_created" = "여행 계획이 생성되었습니다!";
+"save_failed" = "저장 실패";
+"database_connection_failed" = "데이터베이스 연결에 실패했습니다";
+"travel_plan_save_failed" = "여행 계획 저장에 실패했습니다.";
+
+// Back Navigation
+"new_travel_plan" = "새로운 여행 계획";
+"back_navigation_message" = "뒤로가기 후 바로 새로운 여행 계획을 만드시겠습니까?";
+"yes" = "예";
+"no" = "아니오";
+
+// TravelRecord Screen
+"travel_record" = "여행기록";
+"posts" = "게시물";
+"posts_format" = "%d\n게시물";
+"travel_destination_category" = "여행지";
+"tourist_attraction" = "관광명소";
+
+// TravelPlanMain Screen
+"travel_destinations" = "여행지";
+"where_to_travel" = "어디로 여행을 가나요?";
+"add_travel" = "여행 추가하기";
+"travel_plan_list" = "여행 계획 리스트";
+"my_travel_plan" = "나의 여행 계획";
+"no_upcoming_travel" = "다가오는 여행 없음";
+"plan_new_travel" = "새로운 여행을 계획해보세요!";
+"ok" = "확인";
+
+// TravelRecordPhoto Screen
+"select" = "선택";
+"photos_selected_format" = "%d개 선택됨";
+"total_photos_format" = "총 %d개 사진";
+"photo_permission_required" = "사진 접근 권한이 필요합니다\n설정에서 권한을 허용해주세요";
+"photo_permission_title" = "사진 접근 권한 필요";
+"photo_permission_message" = "여행 기록을 위해 사진 라이브러리 접근 권한이 필요합니다.";
+"go_to_settings" = "설정으로 이동";
+"notification" = "알림";
+"no_photos_selected" = "선택된 사진이 없습니다.";
+"photo_selection" = "사진 선택";
+
+// TravelSearch Screen
+"search_destination" = "여행지 검색";
+"search_place_placeholder" = "검색할 장소를 입력하세요";
+"no_search_results" = "검색 결과가 없습니다.\n다른 키워드로 검색해보세요.";
+"search_error" = "검색 오류";
+"country_type_domestic" = "🇰🇷 국내 검색 (카카오맵)";
+"country_type_international" = "🌍 해외 검색 (Google)";
+
+// TravelPlanShow Screen
+"estimated_budget" = "예상 경비";
+"travel_schedule" = "여행 일정";
+"select_place" = "장소를 선택해주세요";
+"add_schedule" = "일정 추가하기";
+"edit" = "수정";
+"save" = "저장";
+
+// TravelRecordWrite Screen
+"selected_travel_photos" = "선택된 여행 사진";
+"travel_route" = "여행 경로";
+"select_destination" = "여행지를 선택해주세요";
+"route_description" = "여행 경로를 누르면 맵 선택 일정이 나옵니다.";
+"travel_diary" = "여행 일지 작성";
+"diary_placeholder" = "오늘의 여행을 기록하세요...";
+"diary_description" = "여행 중의 느낀 점이나 이야기를 적어주세요.";
+"cancel_writing" = "작성 취소";
+"cancel_writing_message" = "작성 중인 내용이 사라집니다. 정말 취소하시겠습니까?";
+"continue_writing" = "계속 작성";
+"travel_record" = "여행 기록";
+"destination_selection" = "여행지 선택";
+"destination_location_question" = "검색할 여행지가 국내입니까? 해외입니까?";
+
+// TravelShowRecord Screen
+"travel_moments_photos" = "여행의 순간들을 담은 사진";
+"edit_mode_add_destination" = "편집 모드에서 여행지를 추가할 수 있습니다";
+"route_selection_map" = "여행 경로를 선택할 수 있는 맵";
+"travel_record_writing" = "여행 기록 작성";
+"record_placeholder" = "여행의 정말 좋은 기록하세요...";
+"record_description" = "사진을 추가하고, 후기를 남겨주세요.";
+"add_destination_instruction" = "여행지를 추가하려면 검색 버튼을 눌러주세요";
+"delete_post" = "게시물 삭제";
+"delete_confirmation_message" = "이 여행 기록을 정말 삭제하시겠습니까?\n삭제된 기록은 복구할 수 없습니다.";
+"delete" = "삭제";
+
+// TravelPlanDetail Screen
+"add_travel_schedule" = "여행 일정 추가";
+"each_time_schedule" = "각 시간대 일정 추가";
+"save_travel_plan" = "여행 계획 저장하기";
+"start_travel" = "여행 시작하기";
+"cancel_edit" = "편집 취소";
+"cancel_edit_message" = "작성 중인 내용이 저장되지 않습니다. 정말 나가시겠습니까?";
+"continue_editing" = "계속 편집";
+"exit" = "나가기";
+
+// Time and Date
+"time_selection" = "시간 선택";
+
+// Day format
+"day_format" = "%d일차";
+
+// Tab bar titles
+"plan_tab" = "계획";
+"record_tab" = "기록";
+"route_tab" = "경로";
+
+// Navigation titles
+"view_travel_plan" = "여행 계획 보기";
+"travel_photo_placeholder" = "여행 사진을 추가하세요";
+"time_unscheduled" = "시간 미정";
+"location_unscheduled" = "장소 미정";
+"confirm" = "확인";
+"schedule_delete_title" = "일정 삭제";
+"schedule_delete_message" = "'%@' 일정을 삭제하시겠습니까?";
+"save_complete" = "저장 완료";
+"delete_complete" = "삭제 완료";
+"travel_plan_delete" = "여행 계획 삭제";
+"travel_plan_delete_message" = "이 여행 계획을 완전히 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.";
+"plan_delete_complete_message" = "여행 계획이 성공적으로 삭제되었습니다.";
+"day_data_delete" = "Day %d 데이터 삭제";
+"day_data_delete_message" = "해당 일차의 모든 데이터(예산, 일정, 경로)를 삭제하시겠습니까?";
+"day_data_deleted" = "Day %d의 모든 데이터가 삭제되었습니다.";
+"no_search_results_title" = "검색 결과 없음";
+"no_search_results_message" = "'%@'에 대한 검색 결과가 없습니다.\n다른 키워드로 검색해보세요.";
+"view_kakao_map" = "카카오맵에서 보기";
+"add_to_schedule" = "일정에 추가";
+"close" = "닫기";
+"view_google_map" = "구글맵에서 보기";
+"no_info" = "정보 없음";
+"place_type" = "종류";
+"place_id" = "장소 ID";
+"add_to_route" = "경로에 추가";
+
+// Error Messages
+"unknown_error" = "알 수 없는 오류가 발생했습니다.";
+"korea" = "대한민국";
+"travel_plan_not_found" = "여행 계획을 찾을 수 없습니다.";
+"load_travel_plan_failed" = "여행 계획을 불러오는데 실패했습니다.";
+"no_travel_plan_to_save" = "저장할 여행 계획이 없습니다.";
+"travel_plan_saved_successfully" = "여행 계획이 성공적으로 저장되었습니다!";
+"travel_plan_save_retry" = "여행 계획 저장에 실패했습니다. 다시 시도해주세요.";
+"record_not_found" = "여행 기록을 찾을 수 없습니다";
+"invalid_record_id" = "잘못된 여행 기록 ID입니다";
+"record_save_error" = "여행 기록 저장 중 오류가 발생했습니다";
+"record_delete_not_found" = "삭제할 여행 기록을 찾을 수 없습니다";
+"record_delete_error" = "여행 기록 삭제 중 오류가 발생했습니다";
+"search_failed_retry" = "검색에 실패했습니다. 다시 시도해주세요.";
+"network_error" = "네트워크 오류가 발생했습니다.";
