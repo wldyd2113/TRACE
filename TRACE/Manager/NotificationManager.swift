@@ -73,6 +73,7 @@ class NotificationManager {
             return
         }
 
+        let now = Date()
         print("🕐 시간 비교:")
         print("   • 현재 시간: \(DateManager.shared.formatToKoreanString(from: now))")
         print("   • 알림 예정 시간: \(DateManager.shared.formatToKoreanString(from: scheduledTime))")
