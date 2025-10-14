@@ -7,12 +7,18 @@
 
 import UIKit
 import CoreLocation
+import UserNotifications
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
     private let locationManager = CLLocationManager()
+    private var hasRequestedInitialPermissions = false
 
+    override init() {
+        super.init()
+        setupLocationManagerDelegate()
+    }
 
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
@@ -97,8 +103,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
 
-        // 위치 권한 요청
-        requestLocationPermissionIfNeeded()
+        // 권한 요청 (처음 앱 실행 시만)
+        if !hasRequestedInitialPermissions {
+            requestLocationPermissionIfNeeded()
+            hasRequestedInitialPermissions = true
+        }
 
         // 네트워크 모니터링 시작
         NetworkAlertManager.shared.startMonitoring()
@@ -139,6 +148,50 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         NetworkAlertManager.shared.stopMonitoring()
     }
 
+    // MARK: - Location Manager Setup
+    private func setupLocationManagerDelegate() {
+        locationManager.delegate = self
+    }
 
+    // MARK: - Notification Permission Request
+    private func requestNotificationPermissionIfNeeded() {
+        NotificationManager.shared.checkNotificationPermission { isAuthorized in
+            if !isAuthorized {
+                print("📱 App startup: Requesting notification permission")
+                NotificationManager.shared.requestNotificationPermission { granted in
+                    print("📱 Notification permission: \(granted ? "granted" : "denied")")
+                }
+            } else {
+                print("📱 App startup: Notification permission already granted")
+            }
+        }
+    }
+
+}
+
+// MARK: - CLLocationManagerDelegate
+extension SceneDelegate: CLLocationManagerDelegate {
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        print("📍 Location authorization changed to: \(manager.authorizationStatus.rawValue)")
+
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            print("📍 Location permission granted, now requesting notification permission")
+            // 위치 권한이 허용되면 알림 권한 요청
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                self?.requestNotificationPermissionIfNeeded()
+            }
+        case .denied, .restricted:
+            print("📍 Location permission denied/restricted, still requesting notification permission")
+            // 위치 권한이 거부되어도 알림 권한은 요청
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                self?.requestNotificationPermissionIfNeeded()
+            }
+        case .notDetermined:
+            print("📍 Location permission not yet determined")
+        @unknown default:
+            break
+        }
+    }
 }
 

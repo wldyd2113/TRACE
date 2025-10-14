@@ -139,6 +139,9 @@ class PlanWriteViewModel {
 
         // Realm에 저장
         saveTravelPlan(travelPlan)
+
+        // 여행 전날 알림 스케줄링
+        NotificationManager.shared.scheduleTravelReminder(for: travelPlan)
     }
 
     private func saveTravelPlan(_ travelPlan: TravelPlan) {

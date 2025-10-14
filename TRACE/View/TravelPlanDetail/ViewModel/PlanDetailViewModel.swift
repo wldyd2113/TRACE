@@ -411,6 +411,20 @@ class PlanDetailViewModel: BaseViewModel {
         }
 
         saveTravelPlan(storage: filteredStorage)
+
+        // 여행 계획 수정 시 알림도 업데이트 (메인 스레드에서 실행)
+        DispatchQueue.main.async {
+            do {
+                let realm = try Realm()
+                if let currentPlan = realm.objects(TravelPlan.self).last {
+                    // 기존 알림 조용히 취소 후 새로운 알림 스케줄링
+                    NotificationManager.shared.cancelTravelReminder(for: currentPlan, silent: true)
+                    NotificationManager.shared.scheduleTravelReminder(for: currentPlan)
+                }
+            } catch {
+                print("❌ Realm 접근 오류: \(error.localizedDescription)")
+            }
+        }
     }
 
     // MARK: - CountryType Methods
