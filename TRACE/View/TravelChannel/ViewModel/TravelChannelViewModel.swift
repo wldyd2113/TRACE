@@ -113,23 +113,33 @@ class TravelChannelViewModel: BaseViewModel {
     private func loadCurrentTravelRoutes() {
         isLoadingRelay.accept(true)
 
+        // 안전한 Realm 접근
+        guard let realm = RealmManager.shared.safeRealm() else {
+            print("❌ Realm 초기화 실패")
+            errorRelay.accept("데이터베이스 연결에 실패했습니다.")
+            isLoadingRelay.accept(false)
+            return
+        }
+
         do {
-            let realm = try Realm()
             let today = Date()
             let calendar = Calendar.current
 
             print("📅 현재 여행 경로 로드 시작")
 
-            // 모든 여행 계획 가져오기
-            let allTravelPlans = realm.objects(TravelPlan.self)
-                .sorted(byKeyPath: "startDate", ascending: true)
+            // 모든 여행 계획 가져오기 (안전한 접근)
+            let allTravelPlans = Array(realm.objects(TravelPlan.self)
+                .sorted(byKeyPath: "startDate", ascending: true))
 
             var currentRoutes: [TravelRouteData] = []
 
             for travelPlan in allTravelPlans {
-                let routeData = getCurrentDayRouteData(for: travelPlan, today: today, calendar: calendar)
-                if let routeData = routeData {
-                    currentRoutes.append(routeData)
+                // Realm 객체가 유효한지 확인
+                if !travelPlan.isInvalidated {
+                    let routeData = getCurrentDayRouteData(for: travelPlan, today: today, calendar: calendar)
+                    if let routeData = routeData {
+                        currentRoutes.append(routeData)
+                    }
                 }
             }
 
@@ -138,13 +148,17 @@ class TravelChannelViewModel: BaseViewModel {
                 print("   • \(route.travelName) - \(route.currentDay)일차 (\(route.routes.count)개 장소)")
             }
 
-            travelRoutesRelay.accept(currentRoutes)
-            isLoadingRelay.accept(false)
+            DispatchQueue.main.async { [weak self] in
+                self?.travelRoutesRelay.accept(currentRoutes)
+                self?.isLoadingRelay.accept(false)
+            }
 
         } catch {
             print("❌ 여행 경로 로드 실패: \(error.localizedDescription)")
-            errorRelay.accept("여행 경로를 불러오는데 실패했습니다.")
-            isLoadingRelay.accept(false)
+            DispatchQueue.main.async { [weak self] in
+                self?.errorRelay.accept("여행 경로를 불러오는데 실패했습니다.")
+                self?.isLoadingRelay.accept(false)
+            }
         }
     }
 

@@ -13,10 +13,22 @@ import MapKit
 extension TravelChannelViewController: CLLocationManagerDelegate {
 
     func setupLocationManager() {
+        guard locationManager.delegate == nil else {
+            print("⚠️ LocationManager가 이미 설정됨")
+            return
+        }
+
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         locationManager.distanceFilter = 10.0 // 10미터마다 위치 업데이트
-        locationManager.requestAlwaysAuthorization()
+
+        // 위치 권한 상태 확인 후 요청
+        let authStatus = locationManager.authorizationStatus
+        if authStatus == .notDetermined {
+            locationManager.requestAlwaysAuthorization()
+        }
+
+        print("✅ LocationManager 설정 완료 - 권한 상태: \(authStatus.rawValue)")
     }
 
     func startRouteTracking() {
@@ -50,9 +62,23 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
     private func startLocationUpdates() {
         // CLLocationManager.locationServicesEnabled() 호출을 제거하여 UI 차단 방지
         // 권한이 허용된 상태에서만 호출되므로 직접 위치 업데이트 시작
+        if let location = locationManager.location {
+            guard !location.horizontalAccuracy.isNaN else {
+                print("❌ 위치 정확도가 유효하지 않음")
+                return
+            }
+        }
+
         locationManager.startUpdatingLocation()
+
+        // 백그라운드 위치 업데이트 안전하게 설정
         if #available(iOS 9.0, *) {
-            locationManager.allowsBackgroundLocationUpdates = true
+            do {
+                locationManager.allowsBackgroundLocationUpdates = true
+                print("✅ 백그라운드 위치 업데이트 활성화")
+            } catch {
+                print("❌ 백그라운드 위치 업데이트 설정 실패: \(error)")
+            }
         }
         print("📍 위치 업데이트 시작")
     }
@@ -60,8 +86,15 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
     func stopRouteTracking() {
         isTrackingRoute = false
         locationManager.stopUpdatingLocation()
+
+        // 백그라운드 위치 업데이트 안전하게 비활성화
         if #available(iOS 9.0, *) {
-            locationManager.allowsBackgroundLocationUpdates = false
+            do {
+                locationManager.allowsBackgroundLocationUpdates = false
+                print("✅ 백그라운드 위치 업데이트 비활성화")
+            } catch {
+                print("❌ 백그라운드 위치 업데이트 비활성화 실패: \(error)")
+            }
         }
         print("📍 경로 추적 종료")
     }

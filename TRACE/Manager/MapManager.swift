@@ -21,8 +21,20 @@ class MapManager: NSObject {
 
     override init() {
         super.init()
-        setupMapView()
-        setupLocationManager()
+        do {
+            setupMapView()
+            setupLocationManager()
+            print("✅ MapManager 초기화 완료")
+        } catch {
+            print("❌ MapManager 초기화 실패: \(error)")
+        }
+    }
+
+    deinit {
+        print("🗑️ MapManager 메모리 해제")
+        delegate = nil
+        locationManager.delegate = nil
+        mapView.delegate = nil
     }
 
     // MARK: - Setup Methods

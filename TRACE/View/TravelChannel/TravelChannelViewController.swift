@@ -74,28 +74,45 @@ class TravelChannelViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .background
 
-        configureHierarchy()
-        configureUI()
-        configureLayout()
-        bind()
+        // 안전한 초기화 순서
+        do {
+            configureHierarchy()
+            configureUI()
+            configureLayout()
+            bind()
 
-        // 맵 관리자 설정
-        setupMapManager()
+            // 맵 관리자 설정
+            setupMapManager()
 
-        // 위치 관리자 설정
-        setupLocationManager()
+            // 위치 관리자 설정
+            setupLocationManager()
 
-        // ViewModel 바인딩
-        bindViewModel()
+            // ViewModel 바인딩
+            bindViewModel()
+
+            print("✅ TravelChannelViewController 초기화 완료")
+        } catch {
+            print("❌ TravelChannelViewController 초기화 실패: \(error)")
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: animated)
 
-        // 뷰가 나타날 때마다 데이터 새로고침
+        // 뷰가 나타날 때마다 데이터 새로고침 (안전하게)
         print("📍 TravelChannel 화면 나타남 - 데이터 새로고침")
-        viewModel.refreshData()
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel.refreshData()
+        }
+    }
+
+    deinit {
+        // 메모리 해제 시 추적 중단
+        if isTrackingRoute {
+            stopRouteTracking()
+        }
+        print("🗑️ TravelChannelViewController 메모리 해제")
     }
 }
 
