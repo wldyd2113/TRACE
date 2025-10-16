@@ -273,6 +273,26 @@ extension MapManager: CLLocationManagerDelegate {
 
 // MARK: - MKMapViewDelegate
 extension MapManager: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        if annotation is MKUserLocation {
+            let identifier = "UserLocation"
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+
+            if annotationView == nil {
+                annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                annotationView?.canShowCallout = true
+            } else {
+                annotationView?.annotation = annotation
+            }
+
+            annotationView?.image = UIImage(named: "현재위치 이미지")
+            annotationView?.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+
+            return annotationView
+        }
+        return nil
+    }
+
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         print("🎯 ===== 마커 클릭 이벤트 발생 =====")
         print("   • 어노테이션 타이틀: \(view.annotation?.title ?? "nil")")
