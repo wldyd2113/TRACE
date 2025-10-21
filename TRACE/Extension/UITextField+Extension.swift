@@ -21,7 +21,7 @@ extension UITextField {
     /// 검색용 텍스트필드 스타일 설정
     func applySearchStyle(placeholder: String) {
         self.placeholder = placeholder
-        self.font = FontManager.onglapFont(14)
+        self.font = FontManager.onglapFont(22) // applyDescriptionStyle 크기
         self.backgroundColor = .systemGray6
         self.layer.cornerRadius = 12
         self.layer.borderWidth = 1
@@ -34,9 +34,9 @@ extension UITextField {
     }
 
     /// 폼 입력용 텍스트필드 스타일 설정
-    func applyFormStyle(placeholder: String, fontSize: CGFloat = 14) {
+    func applyFormStyle(placeholder: String, fontSize: CGFloat = 22) {
         self.placeholder = placeholder
-        self.font = FontManager.onglapFont(fontSize)
+        self.font = FontManager.onglapFont(fontSize) // applyDescriptionStyle 크기 기본값
         self.borderStyle = .none
         self.backgroundColor = .systemGray6
         self.layer.cornerRadius = 8

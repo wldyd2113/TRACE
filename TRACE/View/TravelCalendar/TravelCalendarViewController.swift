@@ -34,7 +34,7 @@ class TravelCalendarViewController: UIViewController {
     }
 
     private lazy var selectedDateLabel = UILabel().then {
-        $0.applySectionTitleStyle(text: "", fontSize: 24)
+        $0.applySubtitleStyle(text: "")
         $0.textAlignment = .center
     }
 
@@ -66,17 +66,17 @@ extension TravelCalendarViewController: DesiginProtocolBind {
     func configureUI() {
         view.backgroundColor = .background
 
-        // Calendar 스타일 설정
+        // Calendar 스타일 설정 - UILabel+Extension 폰트 크기 적용
         calendar.do {
             $0.backgroundColor = .background
-            $0.appearance.headerTitleColor = .label
-            $0.appearance.headerTitleFont = FontManager.onglapBoldFont(24)
+            $0.appearance.headerTitleColor = .labelLight
+            $0.appearance.headerTitleFont = FontManager.onglapBoldFont(26) // applySectionTitleStyle 크기
             $0.appearance.weekdayTextColor = .systemGray
-            $0.appearance.weekdayFont = FontManager.onglapFont(22)
-            $0.appearance.titleDefaultColor = .label
+            $0.appearance.weekdayFont = FontManager.onglapFont(22) // applyDescriptionStyle 크기
+            $0.appearance.titleDefaultColor = .labelLight
             $0.appearance.titleTodayColor = .white
             $0.appearance.titleSelectionColor = .white
-            $0.appearance.titleFont = FontManager.onglapFont(22)
+            $0.appearance.titleFont = FontManager.onglapFont(22) // applyDescriptionStyle 크기
 
             // 오늘 날짜 스타일
             $0.appearance.todayColor = .skyBlue

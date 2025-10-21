@@ -31,14 +31,12 @@ class TravelPlanMainViewController: UIViewController {
     }
     
     private let dDayLabel = UILabel().then {
-        $0.text = "D-30"
-        $0.font = FontManager.onglapFont(14)
+        $0.applyCaptionStyle(text: "D-30")
         $0.textColor = .labelLight
-        $0.textAlignment = .left
+        $0.textAlignment = .center
         $0.backgroundColor = UIColor.black.withAlphaComponent(0.6)
         $0.layer.cornerRadius = 8
         $0.clipsToBounds = true
-        $0.textAlignment = .center
     }
     
     private let mainImageView = UIImageView().then {
@@ -49,22 +47,16 @@ class TravelPlanMainViewController: UIViewController {
     }
     
     private let imagePlaceholderLabel = UILabel().then {
-        $0.text = NSLocalizedString("travel_photo_placeholder", comment: "Travel photo placeholder")
-        $0.font = FontManager.onglapFont(16)
-        $0.textColor = .label
+        $0.applyDescriptionStyle(text: NSLocalizedString("travel_photo_placeholder", comment: "Travel photo placeholder"))
         $0.textAlignment = .center
     }
     
     private let countryLabel = UILabel().then {
-        $0.text = NSLocalizedString("sample_country", comment: "Sample country")
-        $0.font = FontManager.onglapFont(14)
-        $0.textColor = .systemGray
+        $0.applyCaptionStyle(text: NSLocalizedString("sample_country", comment: "Sample country"))
     }
     
     private let dateLabel = UILabel().then {
-        $0.text = "2024-03-15"
-        $0.font = FontManager.onglapFont(16)
-        $0.textColor = .label
+        $0.applyDescriptionStyle(text: "2024-03-15")
     }
     
     private let flagImageView = UIImageView().then {

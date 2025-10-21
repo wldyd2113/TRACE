@@ -19,19 +19,16 @@ class TravelPlanTableViewCell: UITableViewCell {
     }
 
     private let locationLabel = UILabel().then {
-        $0.font = FontManager.onglapFont(16)
+        $0.applyDescriptionStyle(text: "")
         $0.textColor = .labelLight
     }
 
     private let countryLabel = UILabel().then {
-        $0.font = FontManager.onglapFont(16)
-        $0.textColor = .systemGray
+        $0.applyDescriptionStyle(text: "")
     }
 
     private let dateLabel = UILabel().then {
-        $0.font = FontManager.onglapFont(16)
-        $0.textColor = .systemGray
-        $0.textAlignment = .right
+        $0.applyDateStyle(text: "")
     }
 
     private let editIconImageView = UIImageView().then {
