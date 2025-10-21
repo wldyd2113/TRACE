@@ -131,7 +131,8 @@
 "day_format" = "%d일차";
 
 // Tab bar titles
-"plan_tab" = "계획";
+"airplane_tab" = "계획";
+"calendar_tab" = "달력";
 "record_tab" = "기록";
 "route_tab" = "경로";
 

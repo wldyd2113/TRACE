@@ -131,7 +131,8 @@
 "day_format" = "Day %d";
 
 // Tab bar titles
-"plan_tab" = "Plan";
+"airplane_tab" = "Plan";
+"calendar_tab" = "Calendar";
 "record_tab" = "Record";
 "route_tab" = "Route";
 

@@ -147,7 +147,8 @@
 "day_format" = "%d日目";
 
 // Tab bar titles
-"plan_tab" = "計画";
+"airplane_tab" = "計画";
+"calendar_tab" = "カレンダー";
 "record_tab" = "記録";
 "route_tab" = "ルート";
 
