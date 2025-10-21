@@ -135,6 +135,7 @@
 "calendar_tab" = "달력";
 "record_tab" = "기록";
 "route_tab" = "경로";
+"today" = "오늘";
 
 // Navigation titles
 "view_travel_plan" = "여행 계획 보기";

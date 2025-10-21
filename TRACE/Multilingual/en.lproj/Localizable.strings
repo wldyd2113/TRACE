@@ -135,6 +135,7 @@
 "calendar_tab" = "Calendar";
 "record_tab" = "Record";
 "route_tab" = "Route";
+"today" = "Today";
 
 // Navigation titles
 "view_travel_plan" = "View Travel Plan";

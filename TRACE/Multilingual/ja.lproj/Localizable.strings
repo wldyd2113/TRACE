@@ -151,6 +151,7 @@
 "calendar_tab" = "カレンダー";
 "record_tab" = "記録";
 "route_tab" = "ルート";
+"today" = "今日";
 
 // Navigation titles
 "view_travel_plan" = "旅行計画を見る";
