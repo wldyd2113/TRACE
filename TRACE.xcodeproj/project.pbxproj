@@ -10,6 +10,7 @@
 		3B33D35A2E8FB1050034DD6E /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3B33D3592E8FB1050034DD6E /* FirebaseAnalyticsCore */; };
 		3B33D35C2E8FB1050034DD6E /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3B33D35B2E8FB1050034DD6E /* FirebaseCrashlytics */; };
 		3B33D35E2E8FB1050034DD6E /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 3B33D35D2E8FB1050034DD6E /* FirebaseMessaging */; };
+		3B533C132EA7890200301F27 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 3B533C122EA7890200301F27 /* FSCalendar */; };
 		3B6AB3AB2E85354800FBADF6 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3AA2E85354800FBADF6 /* RxCocoa */; };
 		3B6AB3AD2E85354800FBADF6 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3AC2E85354800FBADF6 /* RxSwift */; };
 		3B6AB3B02E85355A00FBADF6 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3AF2E85355A00FBADF6 /* SnapKit */; };
@@ -66,6 +67,7 @@
 				3B6AB3B62E85358700FBADF6 /* Alamofire in Frameworks */,
 				3B33D35E2E8FB1050034DD6E /* FirebaseMessaging in Frameworks */,
 				3B6AB3B32E85357700FBADF6 /* RealmSwift in Frameworks */,
+				3B533C132EA7890200301F27 /* FSCalendar in Frameworks */,
 				3B6AB46B2E8577A500FBADF6 /* Then in Frameworks */,
 				3B6AB3AD2E85354800FBADF6 /* RxSwift in Frameworks */,
 				3B6AB3B02E85355A00FBADF6 /* SnapKit in Frameworks */,
@@ -125,6 +127,7 @@
 				3B33D3592E8FB1050034DD6E /* FirebaseAnalyticsCore */,
 				3B33D35B2E8FB1050034DD6E /* FirebaseCrashlytics */,
 				3B33D35D2E8FB1050034DD6E /* FirebaseMessaging */,
+				3B533C122EA7890200301F27 /* FSCalendar */,
 			);
 			productName = TRACE;
 			productReference = 3B6AB3112E8532DF00FBADF6 /* TRACE.app */;
@@ -163,6 +166,7 @@
 				3B6AB3B42E85358700FBADF6 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				3B6AB4692E8577A500FBADF6 /* XCRemoteSwiftPackageReference "Then" */,
 				3B33D3582E8FB1050034DD6E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				3B533C112EA7890200301F27 /* XCRemoteSwiftPackageReference "FSCalendar" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3B6AB3122E8532DF00FBADF6 /* Products */;
@@ -444,6 +448,14 @@
 				minimumVersion = 12.3.0;
 			};
 		};
+		3B533C112EA7890200301F27 /* XCRemoteSwiftPackageReference "FSCalendar" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/WenchaoD/FSCalendar.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.8.4;
+			};
+		};
 		3B6AB3A92E85354800FBADF6 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ReactiveX/RxSwift";
@@ -501,6 +513,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3B33D3582E8FB1050034DD6E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
+		};
+		3B533C122EA7890200301F27 /* FSCalendar */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B533C112EA7890200301F27 /* XCRemoteSwiftPackageReference "FSCalendar" */;
+			productName = FSCalendar;
 		};
 		3B6AB3AA2E85354800FBADF6 /* RxCocoa */ = {
 			isa = XCSwiftPackageProductDependency;
