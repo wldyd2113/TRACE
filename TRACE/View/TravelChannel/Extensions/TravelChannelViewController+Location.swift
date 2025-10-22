@@ -22,10 +22,10 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
         locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         locationManager.distanceFilter = 10.0 // 10미터마다 위치 업데이트
 
-        // 위치 권한 상태 확인 후 요청
+        // 위치 권한 상태 확인 후 요청 (When In Use만 요청)
         let authStatus = locationManager.authorizationStatus
         if authStatus == .notDetermined {
-            locationManager.requestAlwaysAuthorization()
+            locationManager.requestWhenInUseAuthorization()
         }
 
         print("✅ LocationManager 설정 완료 - 권한 상태: \(authStatus.rawValue)")
@@ -45,21 +45,30 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
         // authorizationStatus를 직접 확인하여 UI 차단 방지
         let authStatus = locationManager.authorizationStatus
         switch authStatus {
-        case .authorizedAlways, .authorizedWhenInUse:
+        case .authorizedWhenInUse:
+            startLocationUpdates()
+        case .authorizedAlways:
             startLocationUpdates()
         case .notDetermined:
             print("📍 위치 권한 요청")
-            locationManager.requestAlwaysAuthorization()
+            locationManager.requestWhenInUseAuthorization()
         case .denied, .restricted:
             print("📍 위치 권한이 거부됨")
             showLocationPermissionAlert()
         @unknown default:
             print("📍 알 수 없는 위치 권한 상태")
-            locationManager.requestAlwaysAuthorization()
+            locationManager.requestWhenInUseAuthorization()
         }
     }
 
     private func startLocationUpdates() {
+        // 권한 상태 재확인
+        let authStatus = locationManager.authorizationStatus
+        guard authStatus == .authorizedWhenInUse || authStatus == .authorizedAlways else {
+            print("❌ 위치 권한이 없어 위치 업데이트를 시작할 수 없음")
+            return
+        }
+
         // CLLocationManager.locationServicesEnabled() 호출을 제거하여 UI 차단 방지
         // 권한이 허용된 상태에서만 호출되므로 직접 위치 업데이트 시작
         if let location = locationManager.location {
@@ -70,32 +79,12 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
         }
 
         locationManager.startUpdatingLocation()
-
-        // 백그라운드 위치 업데이트 안전하게 설정
-        if #available(iOS 9.0, *) {
-            do {
-                locationManager.allowsBackgroundLocationUpdates = true
-                print("✅ 백그라운드 위치 업데이트 활성화")
-            } catch {
-                print("❌ 백그라운드 위치 업데이트 설정 실패: \(error)")
-            }
-        }
-        print("📍 위치 업데이트 시작")
+        print("📍 위치 업데이트 시작 (포그라운드에서만)")
     }
 
     func stopRouteTracking() {
         isTrackingRoute = false
         locationManager.stopUpdatingLocation()
-
-        // 백그라운드 위치 업데이트 안전하게 비활성화
-        if #available(iOS 9.0, *) {
-            do {
-                locationManager.allowsBackgroundLocationUpdates = false
-                print("✅ 백그라운드 위치 업데이트 비활성화")
-            } catch {
-                print("❌ 백그라운드 위치 업데이트 비활성화 실패: \(error)")
-            }
-        }
         print("📍 경로 추적 종료")
     }
 
@@ -112,7 +101,7 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
         print("📍 위치 권한 상태 변경: \(status.rawValue)")
 
         switch status {
-        case .authorizedAlways, .authorizedWhenInUse:
+        case .authorizedWhenInUse, .authorizedAlways:
             print("📍 위치 권한 허용됨")
             if isTrackingRoute {
                 startLocationUpdates()

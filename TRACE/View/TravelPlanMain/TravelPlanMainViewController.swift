@@ -40,10 +40,16 @@ class TravelPlanMainViewController: UIViewController {
     }
     
     private let mainImageView = UIImageView().then {
-        $0.backgroundColor = .systemGray4
+        $0.backgroundColor = .clear
+        $0.contentMode = .scaleAspectFit
+        $0.clipsToBounds = true
+    }
+
+    // 이미지 컨테이너 뷰 (이미지가 잘리는 것을 방지)
+    private let imageContainerView = UIView().then {
+        $0.backgroundColor = .systemGray6
         $0.layer.cornerRadius = 8
         $0.clipsToBounds = true
-        $0.contentMode = .scaleAspectFill
     }
     
     private let imagePlaceholderLabel = UILabel().then {
@@ -56,7 +62,7 @@ class TravelPlanMainViewController: UIViewController {
     }
     
     private let dateLabel = UILabel().then {
-        $0.applyDescriptionStyle(text: "2024-03-15")
+        $0.applyCaptionStyle(text: "2024-03-15")
     }
     
     private let flagImageView = UIImageView().then {
@@ -241,14 +247,15 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
         view.addSubview(tableView)
         
         // 메인 컨테이너 내부 요소들
-        mainTravelContainerView.addSubview(mainImageView)
+        mainTravelContainerView.addSubview(imageContainerView)
+        imageContainerView.addSubview(mainImageView)
         mainTravelContainerView.addSubview(countryLabel)
         mainTravelContainerView.addSubview(dateLabel)
         mainTravelContainerView.addSubview(flagImageView)
 
         // 이미지 내부 요소들
-        mainImageView.addSubview(imagePlaceholderLabel)
-        mainImageView.addSubview(dDayLabel)
+        imageContainerView.addSubview(imagePlaceholderLabel)
+        imageContainerView.addSubview(dDayLabel)
     }
     
     func configureUI() {
@@ -270,13 +277,19 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
         mainTravelContainerView.snp.makeConstraints {
             $0.top.equalTo(subtitleLabel.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(300)
+            $0.height.equalTo(320)
         }
-        
-        mainImageView.snp.makeConstraints {
+
+        imageContainerView.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(250)
+            $0.height.equalTo(240)
+        }
+
+        mainImageView.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.lessThanOrEqualToSuperview()
+            $0.height.lessThanOrEqualToSuperview()
         }
 
         dDayLabel.snp.makeConstraints {
@@ -287,17 +300,18 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
         }
         
         imagePlaceholderLabel.snp.makeConstraints {
-            $0.center.equalTo(mainImageView)
+            $0.center.equalTo(imageContainerView)
         }
         
         countryLabel.snp.makeConstraints {
-            $0.top.equalTo(mainImageView.snp.bottom).offset(16)
+            $0.top.equalTo(imageContainerView.snp.bottom).offset(12)
             $0.leading.equalToSuperview().offset(16)
         }
-        
+
         dateLabel.snp.makeConstraints {
-            $0.top.equalTo(countryLabel.snp.bottom).offset(4)
+            $0.top.equalTo(countryLabel.snp.bottom).offset(6)
             $0.leading.equalTo(countryLabel)
+            $0.bottom.lessThanOrEqualToSuperview().offset(-16)
         }
         
         flagImageView.snp.makeConstraints {
