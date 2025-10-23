@@ -18,6 +18,7 @@ class TravelCalendarViewController: UIViewController {
     private lazy var calendar = FSCalendar().then {
         $0.delegate = self
         $0.dataSource = self
+        $0.register(TravelCalendarCell.self, forCellReuseIdentifier: "TravelCalendarCell")
     }
 
     private lazy var headerView = UIView().then {
@@ -43,6 +44,9 @@ class TravelCalendarViewController: UIViewController {
     private lazy var travelInfoView = UIView().then {
         $0.applyCardStyle()
         $0.isHidden = true
+        $0.isUserInteractionEnabled = true
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(travelInfoViewTapped))
+        $0.addGestureRecognizer(tapGesture)
     }
 
     private lazy var travelTitleLabel = UILabel().then {
@@ -61,6 +65,7 @@ class TravelCalendarViewController: UIViewController {
     private var selectedDate: Date = Date()
     private let viewModel = CalendarViewModel()
     private let disposeBag = DisposeBag()
+    private var currentTravelPlan: TravelPlan? // 현재 선택된 여행 계획
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -108,19 +113,19 @@ extension TravelCalendarViewController: DesiginProtocolBind {
 
             // 날짜 숫자 스타일
             $0.appearance.titleDefaultColor = .labelLight
-            $0.appearance.titleTodayColor = .white
+            $0.appearance.titleTodayColor = .labelLight // 오늘 날짜도 보이는 색상으로
             $0.appearance.titleSelectionColor = .white
             $0.appearance.titleFont = FontManager.onglapFont(22) // applyDescriptionStyle 크기
 
             // 서브타이틀 (여행지 이름) 스타일
             $0.appearance.subtitleDefaultColor = .systemGray // 기본은 회색
-            $0.appearance.subtitleTodayColor = .white
+            $0.appearance.subtitleTodayColor = .labelLight // 오늘 날짜도 보이는 색상으로
             $0.appearance.subtitleSelectionColor = .white
             $0.appearance.subtitleFont = FontManager.onglapFont(14) // 작은 폰트
             $0.appearance.subtitleOffset = CGPoint(x: 0, y: 3) // 아래쪽으로 위치 조정
 
-            // 오늘 날짜 스타일
-            $0.appearance.todayColor = .skyBlue
+            // 오늘 날짜 스타일 (동그라미 제거)
+            $0.appearance.todayColor = UIColor.clear
             $0.appearance.todaySelectionColor = .skyBlue
 
             // 선택된 날짜 스타일
@@ -167,7 +172,7 @@ extension TravelCalendarViewController: DesiginProtocolBind {
             $0.top.equalTo(headerView.snp.bottom).offset(20)
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.equalToSuperview().offset(-20)
-            $0.height.equalTo(300)
+            $0.height.equalTo(400)
         }
 
         selectedDateLabel.snp.makeConstraints {
@@ -250,8 +255,11 @@ private extension TravelCalendarViewController {
     }
 
     func updateTravelInfoUI(with travelPlan: TravelPlan?) {
+        currentTravelPlan = travelPlan // 현재 여행 계획 저장
+
         if let plan = travelPlan {
             // 여행 계획이 있는 경우
+            print("✅ [UI] 여행 정보 표시: \(plan.travelName)")
             travelInfoView.isHidden = false
             travelTitleLabel.text = plan.travelName
             travelCountryLabel.text = plan.nation
@@ -263,8 +271,29 @@ private extension TravelCalendarViewController {
             travelPeriodLabel.text = "\(startDateString) - \(endDateString)"
         } else {
             // 여행 계획이 없는 경우
+            print("❌ [UI] 여행 정보 숨김")
             travelInfoView.isHidden = true
         }
+    }
+
+    @objc private func travelInfoViewTapped() {
+        guard let travelPlan = currentTravelPlan else {
+            print("❌ [Navigation] 여행 계획이 없어서 이동할 수 없습니다")
+            return
+        }
+
+        print("🚀 [Navigation] TravelPlanShowViewController로 이동: \(travelPlan.travelName)")
+
+        let travelPlanShowVC = TravelPlanShowViewController()
+
+        // 여행 계획 ID 전달 (ObjectId를 String으로 변환)
+        travelPlanShowVC.travelPlanId = travelPlan.id.stringValue
+
+        // 국내/해외 타입 설정
+        travelPlanShowVC.setCountryType(travelPlan.nation == "대한민국" ? "국내" : "해외")
+
+        // 네비게이션으로 이동
+        navigationController?.pushViewController(travelPlanShowVC, animated: true)
     }
 
     func showErrorAlert(message: String) {
@@ -282,6 +311,8 @@ extension TravelCalendarViewController: FSCalendarDelegate {
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
         selectedDate = date
         updateSelectedDateLabel()
+
+        print("🔥 [Calendar] 날짜 선택됨: \(date)")
         viewModel.selectDate(date)
     }
 
@@ -290,32 +321,23 @@ extension TravelCalendarViewController: FSCalendarDelegate {
         return nil
     }
 
-    // 여행 계획이 있는 날짜에 여행지 이름을 서브타이틀로 표시
+    // 여행 계획이 있는 날짜에 여행지 이름을 서브타이틀로 표시 (선형 스타일에서는 비활성화)
     func calendar(_ calendar: FSCalendar, subtitleFor date: Date) -> String? {
-        guard let travelData = viewModel.getTravelInfo(for: date) else {
-            return nil
-        }
-
-        // 여행지 이름을 짧게 표시 (4글자 이하)
-        let displayName = travelData.travelName.count > 4 ?
-            String(travelData.travelName.prefix(3)) + "..." :
-            travelData.travelName
-
-        return displayName
+        return nil // 아이폰 캘린더 스타일을 위해 서브타이틀 제거
     }
 
-    // 여행 계획이 있는 날짜의 배경색 커스터마이징
+    // 여행 계획이 있는 날짜의 배경색 커스터마이징 (아이폰 캘린더 스타일)
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, fillDefaultColorFor date: Date) -> UIColor? {
         let hasTravelPlan = viewModel.hasTravelPlan(for: date)
 
         if hasTravelPlan {
             if let travelData = viewModel.getTravelInfo(for: date) {
-                // 시작일과 종료일은 진한 색상
+                // 시작일과 종료일
                 if travelData.isStartDate || travelData.isEndDate {
-                    return UIColor.skyBlue.withAlphaComponent(0.8)
+                    return UIColor.skyBlue
                 } else {
-                    // 중간 날짜들은 연한 색상
-                    return UIColor.skyBlue.withAlphaComponent(0.3)
+                    // 중간 날짜들은 투명하게 (선으로만 표시)
+                    return UIColor.clear
                 }
             }
         }
@@ -347,7 +369,29 @@ extension TravelCalendarViewController: FSCalendarDelegate {
 // MARK: - FSCalendarDataSource
 extension TravelCalendarViewController: FSCalendarDataSource {
     func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
-        // 여행 계획이 있는 날짜에 이벤트 점 표시 (여행지 이름이 표시되므로 점은 숨김)
         return 0
+    }
+
+    func calendar(_ calendar: FSCalendar, cellFor date: Date, at position: FSCalendarMonthPosition) -> FSCalendarCell {
+        let cell = calendar.dequeueReusableCell(withIdentifier: "TravelCalendarCell", for: date, at: position) as! TravelCalendarCell
+
+        // 여행 계획 정보 가져오기
+        if let travelData = viewModel.getTravelInfo(for: date) {
+            cell.configureTravelLine(
+                isStartDate: travelData.isStartDate,
+                isEndDate: travelData.isEndDate,
+                hasTravel: true,
+                travelName: travelData.travelName,
+                showTravelName: travelData.isStartDate // 시작일에만 여행 이름 표시
+            )
+        } else {
+            cell.configureTravelLine(
+                isStartDate: false,
+                isEndDate: false,
+                hasTravel: false
+            )
+        }
+
+        return cell
     }
 }

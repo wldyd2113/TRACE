@@ -28,6 +28,7 @@ final class CalendarViewModel {
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone.current // 현재 시간대 사용
         return formatter
     }()
 
@@ -65,9 +66,16 @@ final class CalendarViewModel {
     func selectDate(_ date: Date) {
         let dateString = dateFormatter.string(from: date)
 
+        // 날짜 비교를 위해 Calendar를 사용하여 정확한 날짜 비교
+        let calendar = Calendar.current
+
         // 해당 날짜에 해당하는 여행 계획 찾기
         let travelPlan = travelPlans.value.first { plan in
-            return date >= plan.startDate && date <= plan.endDate
+            let startDay = calendar.startOfDay(for: plan.startDate)
+            let endDay = calendar.startOfDay(for: plan.endDate)
+            let selectedDay = calendar.startOfDay(for: date)
+
+            return selectedDay >= startDay && selectedDay <= endDay
         }
 
         selectedDateInfo.accept(travelPlan)
