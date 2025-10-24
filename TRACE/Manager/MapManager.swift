@@ -231,16 +231,137 @@ class MapManager: NSObject {
 
         guard coordinates.count >= 2 else { return }
 
-        // 각 세그먼트별로 다른 색상의 폴리라인 생성
-        for i in 0..<coordinates.count - 1 {
-            let segmentCoordinates = [coordinates[i], coordinates[i + 1]]
-            let polyline = CustomPolyline(coordinates: segmentCoordinates, count: 2)
-            polyline.segmentIndex = i
-            polyline.totalSegments = coordinates.count - 1
-            mapView.addOverlay(polyline)
+        print("🗺️ 실제 도로 루트 그리기 시작: \(coordinates.count)개 지점")
+
+        // 각 세그먼트별로 실제 도로 경로 요청
+        drawRealRoutes(coordinates: coordinates, segmentIndex: 0, totalSegments: coordinates.count - 1)
+    }
+
+    private func drawRealRoutes(coordinates: [CLLocationCoordinate2D], segmentIndex: Int, totalSegments: Int) {
+        guard segmentIndex < totalSegments else {
+            print("🗺️ 모든 실제 도로 루트 그리기 완료")
+            return
         }
 
-        print("🗺️ 루트 그리기: \(coordinates.count)개 지점 연결 (\(coordinates.count - 1)개 세그먼트)")
+        let startCoordinate = coordinates[segmentIndex]
+        let endCoordinate = coordinates[segmentIndex + 1]
+
+        // MKDirections 요청 생성
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: MKPlacemark(coordinate: startCoordinate))
+        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: endCoordinate))
+
+        // 교통 수단 설정 (자동차 우선, 실패시 도보)
+        request.transportType = .automobile
+        request.requestsAlternateRoutes = false
+
+        let directions = MKDirections(request: request)
+
+        directions.calculate { [weak self] response, error in
+            if let error = error {
+                print("❌ 자동차 경로 실패: \(error.localizedDescription), 도보 경로로 재시도")
+                // 자동차 경로 실패시 도보 경로로 재시도
+                self?.requestWalkingRoute(startCoordinate: startCoordinate,
+                                        endCoordinate: endCoordinate,
+                                        segmentIndex: segmentIndex,
+                                        totalSegments: totalSegments,
+                                        coordinates: coordinates)
+                return
+            }
+
+            guard let route = response?.routes.first else {
+                print("❌ 경로를 찾을 수 없음, 직선으로 대체")
+                // 실제 경로를 찾을 수 없으면 직선으로 대체
+                self?.drawStraightLine(startCoordinate: startCoordinate,
+                                     endCoordinate: endCoordinate,
+                                     segmentIndex: segmentIndex,
+                                     totalSegments: totalSegments)
+                self?.drawRealRoutes(coordinates: coordinates, segmentIndex: segmentIndex + 1, totalSegments: totalSegments)
+                return
+            }
+
+            // 실제 도로 경로 표시
+            let customPolyline = CustomPolyline(points: route.polyline.points(), count: route.polyline.pointCount)
+            customPolyline.segmentIndex = segmentIndex
+            customPolyline.totalSegments = totalSegments
+            customPolyline.isRealRoute = true
+
+            DispatchQueue.main.async {
+                self?.mapView.addOverlay(customPolyline)
+                print("✅ 실제 도로 경로 추가: 세그먼트 \(segmentIndex + 1)/\(totalSegments)")
+
+                // 다음 세그먼트 처리
+                self?.drawRealRoutes(coordinates: coordinates, segmentIndex: segmentIndex + 1, totalSegments: totalSegments)
+            }
+        }
+    }
+
+    private func requestWalkingRoute(startCoordinate: CLLocationCoordinate2D,
+                                   endCoordinate: CLLocationCoordinate2D,
+                                   segmentIndex: Int,
+                                   totalSegments: Int,
+                                   coordinates: [CLLocationCoordinate2D]) {
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: MKPlacemark(coordinate: startCoordinate))
+        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: endCoordinate))
+        request.transportType = .walking
+        request.requestsAlternateRoutes = false
+
+        let directions = MKDirections(request: request)
+
+        directions.calculate { [weak self] response, error in
+            if let error = error {
+                print("❌ 도보 경로도 실패: \(error.localizedDescription), 직선으로 대체")
+                // 도보 경로도 실패하면 직선으로 대체
+                self?.drawStraightLine(startCoordinate: startCoordinate,
+                                     endCoordinate: endCoordinate,
+                                     segmentIndex: segmentIndex,
+                                     totalSegments: totalSegments)
+                self?.drawRealRoutes(coordinates: coordinates, segmentIndex: segmentIndex + 1, totalSegments: totalSegments)
+                return
+            }
+
+            guard let route = response?.routes.first else {
+                print("❌ 도보 경로를 찾을 수 없음, 직선으로 대체")
+                self?.drawStraightLine(startCoordinate: startCoordinate,
+                                     endCoordinate: endCoordinate,
+                                     segmentIndex: segmentIndex,
+                                     totalSegments: totalSegments)
+                self?.drawRealRoutes(coordinates: coordinates, segmentIndex: segmentIndex + 1, totalSegments: totalSegments)
+                return
+            }
+
+            // 실제 도보 경로 표시
+            let customPolyline = CustomPolyline(points: route.polyline.points(), count: route.polyline.pointCount)
+            customPolyline.segmentIndex = segmentIndex
+            customPolyline.totalSegments = totalSegments
+            customPolyline.isRealRoute = true
+            customPolyline.isWalkingRoute = true
+
+            DispatchQueue.main.async {
+                self?.mapView.addOverlay(customPolyline)
+                print("✅ 실제 도보 경로 추가: 세그먼트 \(segmentIndex + 1)/\(totalSegments)")
+
+                // 다음 세그먼트 처리
+                self?.drawRealRoutes(coordinates: coordinates, segmentIndex: segmentIndex + 1, totalSegments: totalSegments)
+            }
+        }
+    }
+
+    private func drawStraightLine(startCoordinate: CLLocationCoordinate2D,
+                                 endCoordinate: CLLocationCoordinate2D,
+                                 segmentIndex: Int,
+                                 totalSegments: Int) {
+        let segmentCoordinates = [startCoordinate, endCoordinate]
+        let polyline = CustomPolyline(coordinates: segmentCoordinates, count: 2)
+        polyline.segmentIndex = segmentIndex
+        polyline.totalSegments = totalSegments
+        polyline.isRealRoute = false
+
+        DispatchQueue.main.async { [weak self] in
+            self?.mapView.addOverlay(polyline)
+            print("⚠️ 직선 경로로 대체: 세그먼트 \(segmentIndex + 1)/\(totalSegments)")
+        }
     }
 }
 
@@ -337,27 +458,41 @@ extension MapManager: MKMapViewDelegate {
         if let customPolyline = overlay as? CustomPolyline {
             let renderer = MKPolylineRenderer(polyline: customPolyline)
 
-            // 세그먼트별로 그라데이션 색상 적용
-            let progress = Float(customPolyline.segmentIndex) / Float(max(customPolyline.totalSegments - 1, 1))
+            // 실제 경로 vs 직선 경로에 따른 스타일 설정
+            if customPolyline.isRealRoute {
+                // 실제 도로/도보 경로
+                if customPolyline.isWalkingRoute {
+                    // 도보 경로: 점선으로 표시
+                    renderer.strokeColor = UIColor.systemOrange
+                    renderer.lineWidth = 4.0
+                    renderer.lineDashPattern = [8, 4] // 점선 패턴
+                    print("🚶‍♂️ 도보 경로 렌더링")
+                } else {
+                    // 차량 경로: 실선으로 표시
+                    let progress = Float(customPolyline.segmentIndex) / Float(max(customPolyline.totalSegments - 1, 1))
+                    let startColor = UIColor.systemBlue
+                    let endColor = UIColor.systemPurple
+                    let blendedColor = UIColor.blendColors(
+                        startColor: startColor,
+                        endColor: endColor,
+                        progress: CGFloat(progress)
+                    )
+                    renderer.strokeColor = blendedColor
+                    renderer.lineWidth = 5.0
+                    print("🚗 차량 경로 렌더링")
+                }
+            } else {
+                // 직선 경로 (실제 경로를 찾을 수 없는 경우)
+                renderer.strokeColor = UIColor.systemGray
+                renderer.lineWidth = 3.0
+                renderer.lineDashPattern = [4, 4] // 짧은 점선
+                renderer.alpha = 0.7
+                print("➖ 직선 경로 렌더링 (실제 경로 없음)")
+            }
 
-            // 시작점(파란색)에서 끝점(보라색)으로 그라데이션
-            let startColor = UIColor.systemBlue
-            let endColor = UIColor.systemPurple
-
-            let blendedColor = UIColor.blendColors(
-                startColor: startColor,
-                endColor: endColor,
-                progress: CGFloat(progress)
-            )
-
-            renderer.strokeColor = blendedColor
-            renderer.lineWidth = 5.0
             renderer.lineCap = .round
             renderer.lineJoin = .round
-            renderer.alpha = 0.9
-
-            // 그림자 효과
-            renderer.shouldRasterize = true
+            renderer.alpha = customPolyline.isRealRoute ? 0.9 : 0.7
 
             return renderer
         }
@@ -394,6 +529,8 @@ class PlaceAnnotation: NSObject, MKAnnotation {
 class CustomPolyline: MKPolyline {
     var segmentIndex: Int = 0
     var totalSegments: Int = 1
+    var isRealRoute: Bool = false
+    var isWalkingRoute: Bool = false
 }
 
 // MARK: - UIColor Extension
