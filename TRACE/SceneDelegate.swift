@@ -30,23 +30,29 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let plan = UINavigationController(rootViewController: planVC)
         plan.tabBarItem = UITabBarItem(title: NSLocalizedString("airplane_tab", comment: "Airplane tab"), image: UIImage(systemName: "airplane.up.right"), tag: 0)
         
+        let touristVC = TravelTouristViewController()
+        let tourist = UINavigationController(rootViewController: touristVC)
+        tourist.tabBarItem = UITabBarItem(title: NSLocalizedString("tourist_recommendation_tab", comment: "Tourist recommendation tab"), image: UIImage(systemName: "location.magnifyingglass"), tag: 1)
+        
         let calendarVC = TravelCalendarViewController()
         let calendar = UINavigationController(rootViewController: calendarVC)
-        calendar.tabBarItem = UITabBarItem(title: NSLocalizedString("calendar_tab", comment: "Calendar tab"), image: UIImage(systemName: "calendar"), tag: 1)
+        calendar.tabBarItem = UITabBarItem(title: NSLocalizedString("calendar_tab", comment: "Calendar tab"), image: UIImage(systemName: "calendar"), tag: 2)
+        
+        
         
         let recordVc = TravelRecordViewController()
         let record = UINavigationController(rootViewController: recordVc)
-        record.tabBarItem = UITabBarItem(title: NSLocalizedString("record_tab", comment: "Record tab"), image: UIImage(systemName: "text.page.fill"), tag: 2)
+        record.tabBarItem = UITabBarItem(title: NSLocalizedString("record_tab", comment: "Record tab"), image: UIImage(systemName: "text.page.fill"), tag: 3)
 
         
         let channelVC = TravelChannelViewController()
         let channel = UINavigationController(rootViewController: channelVC)
-        channel.tabBarItem = UITabBarItem(title: NSLocalizedString("route_tab", comment: "Route tab"), image: UIImage(systemName: "map.fill"), tag: 3)
+        channel.tabBarItem = UITabBarItem(title: NSLocalizedString("route_tab", comment: "Route tab"), image: UIImage(systemName: "map.fill"), tag: 4)
 
 
 
 
-        tabBarController.viewControllers = [plan,calendar,channel ,record]
+        tabBarController.viewControllers = [plan, tourist, calendar, channel ,record]
         tabBarController.tabBar.tintColor = .skyBlue
         tabBarController.tabBar.unselectedItemTintColor = .systemGray4
 

@@ -132,6 +132,7 @@
 
 // Tab bar titles
 "airplane_tab" = "계획";
+"tourist_recommendation_tab" = "추천";
 "calendar_tab" = "달력";
 "record_tab" = "기록";
 "route_tab" = "경로";

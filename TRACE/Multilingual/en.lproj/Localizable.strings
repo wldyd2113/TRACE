@@ -132,6 +132,7 @@
 
 // Tab bar titles
 "airplane_tab" = "Plan";
+"tourist_recommendation_tab" = "Recommend";
 "calendar_tab" = "Calendar";
 "record_tab" = "Record";
 "route_tab" = "Route";
