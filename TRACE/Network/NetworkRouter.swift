@@ -9,7 +9,7 @@ import Foundation
 import Alamofire
 
 enum NetworkRouter: URLRequestConvertible {
-    
+
     case kakaoMapsearch(query: String, headers: HTTPHeaders)
     case googleMapsSearch(query: String)
     
@@ -27,7 +27,6 @@ enum NetworkRouter: URLRequestConvertible {
             return "query=\(query)"
         case .googleMapsSearch(let query):
             return "query=\(query)&language=ko&key=\(APIKey.googleKey)"
-            
         }
     }
     

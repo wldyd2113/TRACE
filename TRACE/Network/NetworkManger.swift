@@ -82,4 +82,5 @@ final class NetworkManger {
         let router = NetworkRouter.googleMapsSearch(query: query)
         return request(router, type: GooglePlacesResponse.self)
     }
+
 }

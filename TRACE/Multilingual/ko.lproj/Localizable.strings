@@ -58,6 +58,13 @@
 "popular" = "인기";
 "scenic" = "성징";
 "historical" = "역사";
+"attraction_search_failed" = "'%@' 관광지 검색에 실패했습니다.";
+"country" = "국가";
+"category" = "카테고리";
+"location" = "위치";
+"description" = "설명";
+"add_to_travel_plan" = "여행 계획에 추가";
+"close" = "닫기";
 
 // TravelPlanMain Screen
 "travel_destinations" = "여행지";

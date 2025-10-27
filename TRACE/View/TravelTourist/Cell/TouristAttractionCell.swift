@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 import Then
+import Kingfisher
 
 class TouristAttractionCell: UICollectionViewCell {
 
@@ -87,7 +88,7 @@ class TouristAttractionCell: UICollectionViewCell {
 
         imageView.snp.makeConstraints {
             $0.top.leading.trailing.equalToSuperview().inset(8)
-            $0.height.equalTo(120)
+            $0.height.equalTo(180)
         }
 
         categoryBadge.snp.makeConstraints {
@@ -115,18 +116,39 @@ class TouristAttractionCell: UICollectionViewCell {
         countryLabel.text = attraction.country
         categoryBadge.text = attraction.category.localizedTitle
 
-        // 플레이스홀더 이미지 설정
-        imageView.image = UIImage(systemName: "photo")
-        imageView.tintColor = .systemGray3
+        // Kingfisher로 이미지 로딩
+        if let imageURLString = attraction.imageURL, let imageURL = URL(string: imageURLString) {
+            print("🖼️ 이미지 로딩 시작: \(attraction.name)")
 
-        // TODO: 실제 이미지 로드
-        if let imageURL = attraction.imageURL {
-            loadImage(from: imageURL)
+            // 로딩 인디케이터와 플레이스홀더 설정
+            let placeholder = UIImage(systemName: "photo")
+
+            imageView.kf.setImage(
+                with: imageURL,
+                placeholder: placeholder,
+                options: [
+                    .transition(.fade(0.3)),
+                    .cacheOriginalImage,
+                    .scaleFactor(UIScreen.main.scale)
+                ]
+            ) { [weak self] result in
+                switch result {
+                case .success(let value):
+                    print("✅ 이미지 로딩 성공: \(attraction.name)")
+                    // 이미지 로딩 성공 시 tint 제거
+                    self?.imageView.tintColor = nil
+                case .failure(let error):
+                    print("❌ 이미지 로딩 실패: \(attraction.name) - \(error.localizedDescription)")
+                    // 실패 시 플레이스홀더 아이콘으로 설정
+                    self?.imageView.image = UIImage(systemName: "photo")
+                    self?.imageView.tintColor = .systemGray3
+                }
+            }
+        } else {
+            // 이미지 URL이 없는 경우 플레이스홀더
+            imageView.image = UIImage(systemName: "photo")
+            imageView.tintColor = .systemGray3
+            print("📷 이미지 URL 없음: \(attraction.name)")
         }
-    }
-
-    private func loadImage(from urlString: String) {
-        // TODO: 이미지 로딩 구현 (Kingfisher 등 사용)
-        // 현재는 플레이스홀더만 표시
     }
 }

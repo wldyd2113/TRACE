@@ -14,6 +14,7 @@ import Then
 class TravelTouristViewController: UIViewController {
 
     private let disposeBag = DisposeBag()
+    private let viewModel = TourisViewModel()
 
     // MARK: - UI Components
     private let scrollView = UIScrollView().then {
@@ -67,18 +68,23 @@ class TravelTouristViewController: UIViewController {
         layout.minimumLineSpacing = 16
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 20, right: 0)
 
+        // 셀 크기를 더 크게 설정
+        let screenWidth = UIScreen.main.bounds.width
+        let cellWidth = (screenWidth - 60) / 2 // 양쪽 여백(40) + 중간 간격(12) + 추가 여백(8)
+        layout.itemSize = CGSize(width: cellWidth, height: 280)
+
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         collectionView.register(TouristAttractionCell.self, forCellWithReuseIdentifier: "TouristAttractionCell")
-        collectionView.delegate = self
-        collectionView.dataSource = self
 
         return collectionView
     }()
 
-    // 선택된 카테고리
+    // ViewModel Output
+    private var output: TourisViewModel.Output!
+
+    // 선택된 카테고리 (UI 상태만)
     private var selectedCategory: TouristCategory = .popular
-    private var attractions: [TouristAttraction] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -87,10 +93,8 @@ class TravelTouristViewController: UIViewController {
         configureHierarchy()
         configureUI()
         configureLayout()
+        bindViewModel()
         bind()
-
-        // 초기 데이터 로드
-        loadSampleData()
     }
 }
 
@@ -124,34 +128,58 @@ struct TouristAttraction {
 }
 
 extension TravelTouristViewController: DesiginProtocolBind {
+
+    func bindViewModel() {
+        // Input 생성
+        let searchTextInput = countrySearchTextField.rx.text.orEmpty.asObservable()
+
+        let categorySelectionInput = Observable.merge(
+            popularButton.rx.tap.map { TouristCategory.popular },
+            scenicButton.rx.tap.map { TouristCategory.scenic },
+            historicalButton.rx.tap.map { TouristCategory.historical }
+        ).startWith(.popular)
+
+        let attractionSelectionInput = attractionsCollectionView.rx.itemSelected.asObservable()
+
+        let input = TourisViewModel.Input(
+            searchText: searchTextInput,
+            categorySelection: categorySelectionInput,
+            attractionSelection: attractionSelectionInput
+        )
+
+        // ViewModel과 바인딩
+        output = viewModel.transform(input: input)
+
+        // Output 구독
+        output.filteredAttractions
+            .bind(to: attractionsCollectionView.rx.items(cellIdentifier: "TouristAttractionCell", cellType: TouristAttractionCell.self)) { index, attraction, cell in
+                cell.configure(with: attraction)
+            }
+            .disposed(by: disposeBag)
+
+        output.errorMessage
+            .subscribe(onNext: { [weak self] message in
+                self?.showErrorAlert(message: message)
+            })
+            .disposed(by: disposeBag)
+
+        output.selectedAttraction
+            .subscribe(onNext: { [weak self] attraction in
+                self?.showAttractionInfoAlert(attraction)
+            })
+            .disposed(by: disposeBag)
+
+        // 카테고리 선택 UI 업데이트
+        categorySelectionInput
+            .subscribe(onNext: { [weak self] category in
+                self?.selectedCategory = category
+                self?.updateCategoryButtons()
+            })
+            .disposed(by: disposeBag)
+    }
+
     func bind() {
-        // 검색 텍스트필드 이벤트
-        countrySearchTextField.rx.text.orEmpty
-            .debounce(.seconds(1), scheduler: MainScheduler.instance)
-            .distinctUntilChanged()
-            .subscribe(onNext: { [weak self] searchText in
-                self?.searchCountryAttractions(query: searchText)
-            })
-            .disposed(by: disposeBag)
-
-        // 카테고리 버튼 이벤트
-        popularButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.selectCategory(.popular)
-            })
-            .disposed(by: disposeBag)
-
-        scenicButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.selectCategory(.scenic)
-            })
-            .disposed(by: disposeBag)
-
-        historicalButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.selectCategory(.historical)
-            })
-            .disposed(by: disposeBag)
+        // UI 전용 바인딩 (현재 추가 바인딩 없음)
     }
 
     func configureHierarchy() {
@@ -172,8 +200,7 @@ extension TravelTouristViewController: DesiginProtocolBind {
     func configureUI() {
         navigationItem.title = NSLocalizedString("tourist_recommendation", comment: "Tourist recommendation")
 
-        // 초기 선택된 카테고리 설정
-        selectCategory(.popular)
+        updateCategoryButtons()
     }
 
     func configureLayout() {
@@ -216,19 +243,14 @@ extension TravelTouristViewController: DesiginProtocolBind {
         attractionsCollectionView.snp.makeConstraints {
             $0.top.equalTo(categoryStackView.snp.bottom).offset(20)
             $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(400) // 임시 높이, 나중에 동적으로 조정
+            $0.height.greaterThanOrEqualTo(500)
             $0.bottom.equalToSuperview().offset(-20)
         }
     }
 }
 
-// MARK: - Helper Methods
+// MARK: - Helper Methods (UI Only)
 extension TravelTouristViewController {
-    private func selectCategory(_ category: TouristCategory) {
-        selectedCategory = category
-        updateCategoryButtons()
-        filterAttractionsByCategory()
-    }
 
     private func updateCategoryButtons() {
         [popularButton, scenicButton, historicalButton].forEach { button in
@@ -250,81 +272,47 @@ extension TravelTouristViewController {
         selectedButton.setTitleColor(.white, for: .normal)
     }
 
-    private func filterAttractionsByCategory() {
-        let filteredAttractions = attractions.filter { $0.category == selectedCategory }
-        // TODO: 컬렉션뷰 업데이트
+    private func showErrorAlert(message: String) {
         DispatchQueue.main.async { [weak self] in
-            self?.attractionsCollectionView.reloadData()
+            let alert = UIAlertController(
+                title: NSLocalizedString("error", comment: "Error"),
+                message: message,
+                preferredStyle: .alert
+            )
+
+            alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: "OK"), style: .default))
+
+            self?.present(alert, animated: true)
         }
     }
 
-    private func searchCountryAttractions(query: String) {
-        print("🔍 나라 검색: \(query)")
-        // TODO: API 호출하여 해당 나라의 관광지 검색
-        if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            loadAttractionsForCountry(query)
-        }
-    }
+    private func showAttractionInfoAlert(_ attraction: TouristAttraction) {
+        let alert = UIAlertController(title: attraction.name, message: nil, preferredStyle: .actionSheet)
 
-    private func loadSampleData() {
-        // 샘플 데이터 로드
-        attractions = [
-            TouristAttraction(id: "1", name: "도쿄 타워", country: "일본", category: .popular, imageURL: nil, description: "도쿄의 상징적인 타워", latitude: 35.6586, longitude: 139.7454),
-            TouristAttraction(id: "2", name: "에펠탑", country: "프랑스", category: .popular, imageURL: nil, description: "파리의 상징", latitude: 48.8584, longitude: 2.2945),
-            TouristAttraction(id: "3", name: "후지산", country: "일본", category: .scenic, imageURL: nil, description: "일본의 명산", latitude: 35.3606, longitude: 138.7274),
-            TouristAttraction(id: "4", name: "베르사유 궁전", country: "프랑스", category: .historical, imageURL: nil, description: "프랑스 역사 궁전", latitude: 48.8049, longitude: 2.1204)
-        ]
+        let infoMessage = """
+        🌍 \(NSLocalizedString("country", comment: "Country")): \(attraction.country)
+        🏷️ \(NSLocalizedString("category", comment: "Category")): \(attraction.category.localizedTitle)
+        📍 \(NSLocalizedString("location", comment: "Location")): \(attraction.latitude), \(attraction.longitude)
+        📝 \(NSLocalizedString("description", comment: "Description")): \(attraction.description)
+        """
 
-        filterAttractionsByCategory()
-    }
+        alert.message = infoMessage
 
-    private func loadAttractionsForCountry(_ country: String) {
-        // TODO: 실제 API 연동 시 구현
-        // 현재는 샘플 데이터에서 해당 국가 필터링
-        let countryAttractions = attractions.filter { $0.country.contains(country) }
-        print("📍 \(country) 관광지 \(countryAttractions.count)개 발견")
-    }
-}
+        alert.addAction(UIAlertAction(title: NSLocalizedString("add_to_travel_plan", comment: "Add to travel plan"), style: .default) { _ in
+            print("📋 여행 계획에 추가: \(attraction.name)")
+            // TODO: 여행 계획에 추가 기능 구현
+        })
 
-// MARK: - UICollectionViewDataSource
-extension TravelTouristViewController: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return attractions.filter { $0.category == selectedCategory }.count
-    }
+        alert.addAction(UIAlertAction(title: NSLocalizedString("close", comment: "Close"), style: .cancel))
 
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TouristAttractionCell", for: indexPath) as! TouristAttractionCell
-
-        let filteredAttractions = attractions.filter { $0.category == selectedCategory }
-        if indexPath.item < filteredAttractions.count {
-            let attraction = filteredAttractions[indexPath.item]
-            cell.configure(with: attraction)
+        // iPad 대응
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = view
+            popover.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
         }
 
-        return cell
+        present(alert, animated: true)
     }
 }
 
-// MARK: - UICollectionViewDelegateFlowLayout
-extension TravelTouristViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = (collectionView.frame.width - 12) / 2 // 2열 레이아웃
-        return CGSize(width: width, height: 200)
-    }
-}
-
-// MARK: - UICollectionViewDelegate
-extension TravelTouristViewController: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let filteredAttractions = attractions.filter { $0.category == selectedCategory }
-        if indexPath.item < filteredAttractions.count {
-            let attraction = filteredAttractions[indexPath.item]
-            showAttractionDetail(attraction)
-        }
-    }
-
-    private func showAttractionDetail(_ attraction: TouristAttraction) {
-        print("📍 관광지 선택됨: \(attraction.name)")
-        // TODO: 상세 화면으로 이동 또는 상세 정보 표시
-    }
-}

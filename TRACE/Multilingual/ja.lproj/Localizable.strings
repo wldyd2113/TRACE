@@ -58,6 +58,13 @@
 "popular" = "人気";
 "scenic" = "景勝";
 "historical" = "歴史";
+"attraction_search_failed" = "'%@'の観光地検索に失敗しました。";
+"country" = "国";
+"category" = "カテゴリ";
+"location" = "位置";
+"description" = "説明";
+"add_to_travel_plan" = "旅行計画に追加";
+"close" = "閉じる";
 
 // TravelPlanMain Screen
 "travel_destinations" = "旅行先";

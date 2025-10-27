@@ -58,6 +58,13 @@
 "popular" = "Popular";
 "scenic" = "Scenic";
 "historical" = "Historical";
+"attraction_search_failed" = "Failed to search attractions for '%@'.";
+"country" = "Country";
+"category" = "Category";
+"location" = "Location";
+"description" = "Description";
+"add_to_travel_plan" = "Add to Travel Plan";
+"close" = "Close";
 
 // TravelPlanMain Screen
 "travel_destinations" = "Travel Destinations";
