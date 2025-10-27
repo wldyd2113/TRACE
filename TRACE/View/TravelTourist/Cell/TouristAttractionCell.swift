@@ -127,9 +127,11 @@ class TouristAttractionCell: UICollectionViewCell {
                 with: imageURL,
                 placeholder: placeholder,
                 options: [
-                    .transition(.fade(0.3)),
+                    .transition(.fade(0.2)),
                     .cacheOriginalImage,
-                    .scaleFactor(UIScreen.main.scale)
+                    .backgroundDecode,
+                    .scaleFactor(UIScreen.main.scale),
+                    .processor(DownsamplingImageProcessor(size: CGSize(width: 400, height: 400)))
                 ]
             ) { [weak self] result in
                 switch result {
