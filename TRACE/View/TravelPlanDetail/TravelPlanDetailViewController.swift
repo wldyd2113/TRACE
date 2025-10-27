@@ -525,9 +525,17 @@ extension TravelPlanDetailViewController: TravelSearchDelegate {
 
         print("📍 장소 선택됨: \(place.placeName)")
 
-        // 선택된 장소를 지도에 표시 (선택된 장소만)
-        currentSearchedPlaces = [place]
-        mapManager.displaySearchResults(places: [place])
+        // 중복 검사 후 장소 누적 추가
+        if !currentSearchedPlaces.contains(where: { $0.placeName == place.placeName }) {
+            currentSearchedPlaces.append(place)
+            print("📍 새 장소 추가됨: \(place.placeName) (총 \(currentSearchedPlaces.count)개)")
+        } else {
+            print("📍 이미 존재하는 장소: \(place.placeName)")
+        }
+
+        // 모든 누적된 장소들을 지도에 표시 (POI + 루트)
+        mapManager.displaySearchResults(places: currentSearchedPlaces)
+        print("📍 지도에 \(currentSearchedPlaces.count)개 POI 표시 및 루트 그리기")
     }
 }
 

@@ -328,4 +328,5 @@ extension TravelPlanDetailViewController {
             print("📱 CollectionView 업데이트: \(self?.totalDays ?? 0)개 일차")
         }
     }
+
 }

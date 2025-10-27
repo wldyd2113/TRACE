@@ -195,15 +195,20 @@ extension TravelPlanDetailViewController {
                     print("✅ 카카오 검색 성공: \(response.documents.count)개 결과")
                     // 카카오 검색 시 구글 장소 정보 초기화
                     self?.currentGooglePlaces.removeAll()
+
+                    // 검색된 장소들을 currentSearchedPlaces에 누적 저장
+                    self?.currentSearchedPlaces.append(contentsOf: response.documents)
+
                     if let bestMatch = self?.selectBestMatch(places: response.documents, query: query) {
-                        self?.mapManager.displaySearchResults(places: [bestMatch])
-                        print("🎯 최적 결과 선택: \(bestMatch.placeName)")
+                        self?.mapManager.displaySearchResults(places: response.documents)
+                        print("🎯 검색 결과 지도에 표시: \(response.documents.count)개 POI")
                     } else {
                         print("⚠️ 검색 결과 없음")
                         self?.showNoSearchResultsAlert(query: query)
                     }
                 case .failure(let error):
                     print("❌ 카카오 검색 실패: \(error.localizedDescription)")
+                    self?.showErrorAlert(title: "검색 실패", message: "카카오 검색에 실패했습니다: \(error.localizedDescription)")
                 }
             })
             .disposed(by: disposeBag)
@@ -237,29 +242,19 @@ extension TravelPlanDetailViewController {
                         )
                     }
 
-                    if let bestMatch = response.results.first {
-                        // 맵에 표시용으로는 변환된 KakaoPlace 사용
-                        let kakaoPlace = KakaoPlace(
-                            id: bestMatch.placeId,
-                            placeName: bestMatch.name,
-                            categoryName: bestMatch.types.first ?? "",
-                            categoryGroupCode: "",
-                            categoryGroupName: "",
-                            phone: "",
-                            addressName: bestMatch.formattedAddress ?? "",
-                            roadAddressName: bestMatch.formattedAddress ?? "",
-                            x: String(bestMatch.geometry.location.lng),
-                            y: String(bestMatch.geometry.location.lat),
-                            placeUrl: "",
-                            distance: ""
-                        )
-                        self?.mapManager.displaySearchResults(places: [kakaoPlace])
+                    // 검색된 장소들을 currentSearchedPlaces에 누적 저장
+                    self?.currentSearchedPlaces.append(contentsOf: kakaoPlaces)
+
+                    if !kakaoPlaces.isEmpty {
+                        self?.mapManager.displaySearchResults(places: kakaoPlaces)
+                        print("🎯 검색 결과 지도에 표시: \(kakaoPlaces.count)개 POI")
                     } else {
                         print("⚠️ 검색 결과 없음")
                         self?.showNoSearchResultsAlert(query: query)
                     }
                 case .failure(let error):
                     print("❌ 구글 검색 실패: \(error.localizedDescription)")
+                    self?.showErrorAlert(title: "검색 실패", message: "구글 검색에 실패했습니다: \(error.localizedDescription)")
                 }
             })
             .disposed(by: disposeBag)
@@ -389,6 +384,20 @@ extension TravelPlanDetailViewController {
             let alert = UIAlertController(
                 title: NSLocalizedString("no_search_results_title", comment: "No search results title"),
                 message: String(format: NSLocalizedString("no_search_results_message", comment: "No search results message"), query),
+                preferredStyle: .alert
+            )
+
+            alert.addAction(UIAlertAction(title: NSLocalizedString("confirm", comment: "Confirm"), style: .default))
+
+            self?.present(alert, animated: true)
+        }
+    }
+
+    private func showErrorAlert(title: String, message: String) {
+        DispatchQueue.main.async { [weak self] in
+            let alert = UIAlertController(
+                title: title,
+                message: message,
                 preferredStyle: .alert
             )
 
