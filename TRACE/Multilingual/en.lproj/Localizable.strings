@@ -49,6 +49,16 @@
 "travel_destination_category" = "Travel Destination";
 "tourist_attraction" = "Tourist Attraction";
 
+// TravelTourist Screen
+"tourist_recommendation" = "Tourist Recommendation";
+"country_search" = "Country Search";
+"enter_country_name" = "Enter country name";
+"country_example" = "e.g., Japan, France";
+"recommended_attractions" = "Recommended Attractions";
+"popular" = "Popular";
+"scenic" = "Scenic";
+"historical" = "Historical";
+
 // TravelPlanMain Screen
 "travel_destinations" = "Travel Destinations";
 "where_to_travel" = "Where would you like to travel?";

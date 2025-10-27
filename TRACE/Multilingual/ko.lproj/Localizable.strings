@@ -49,6 +49,16 @@
 "travel_destination_category" = "여행지";
 "tourist_attraction" = "관광명소";
 
+// TravelTourist Screen
+"tourist_recommendation" = "관광지 추천";
+"country_search" = "나라 검색";
+"enter_country_name" = "나라 이름을 입력하세요";
+"country_example" = "예: 일본, 프랑스";
+"recommended_attractions" = "추천 관광지";
+"popular" = "인기";
+"scenic" = "성징";
+"historical" = "역사";
+
 // TravelPlanMain Screen
 "travel_destinations" = "여행지";
 "where_to_travel" = "어디로 여행을 가나요?";

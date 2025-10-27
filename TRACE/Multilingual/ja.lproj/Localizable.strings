@@ -49,6 +49,16 @@
 "travel_destination_category" = "旅行先";
 "tourist_attraction" = "観光地";
 
+// TravelTourist Screen
+"tourist_recommendation" = "観光地推薦";
+"country_search" = "国検索";
+"enter_country_name" = "国名を入力してください";
+"country_example" = "例：日本、フランス";
+"recommended_attractions" = "おすすめ観光地";
+"popular" = "人気";
+"scenic" = "景勝";
+"historical" = "歴史";
+
 // TravelPlanMain Screen
 "travel_destinations" = "旅行先";
 "where_to_travel" = "どこに旅行に行きますか？";

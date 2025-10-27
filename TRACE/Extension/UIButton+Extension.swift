@@ -62,4 +62,15 @@ extension UIButton {
         self.backgroundColor = .buttonLight
         self.layer.cornerRadius = 10
     }
+
+    /// 카테고리 버튼 스타일 설정
+    func applyCategoryButtonStyle(title: String, fontSize: CGFloat = 14) {
+        self.setTitle(title, for: .normal)
+        self.titleLabel?.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: fontSize)
+        self.setTitleColor(.label, for: .normal)
+        self.backgroundColor = .systemGray6
+        self.layer.cornerRadius = 12
+        self.layer.borderWidth = 1
+        self.layer.borderColor = UIColor.systemGray4.cgColor
+    }
 }
