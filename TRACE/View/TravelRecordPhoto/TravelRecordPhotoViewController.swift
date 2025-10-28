@@ -50,7 +50,7 @@ class TravelRecordPhotoViewController: UIViewController {
     private let imageManager = PHCachingImageManager()
     private var thumbnailSize: CGSize!
     private var mainImageSize: CGSize!
-    private var selectedAssets: Set<PHAsset> = []
+    private var selectedAssets: [PHAsset] = []
     private var currentMainAsset: PHAsset?
 
     // MARK: - Cell Registration
@@ -244,10 +244,10 @@ class TravelRecordPhotoViewController: UIViewController {
     }
 
     private func toggleMultiSelection(asset: PHAsset, at indexPath: IndexPath) {
-        if selectedAssets.contains(asset) {
-            selectedAssets.remove(asset)
+        if let index = selectedAssets.firstIndex(of: asset) {
+            selectedAssets.remove(at: index)
         } else {
-            selectedAssets.insert(asset)
+            selectedAssets.append(asset)
         }
 
         // 셀 업데이트
@@ -300,17 +300,16 @@ class TravelRecordPhotoViewController: UIViewController {
     }
 
     private func convertSelectedAssetsToImages(completion: @escaping ([UIImage]) -> Void) {
-        var images: [UIImage] = []
         let group = DispatchGroup()
 
-        let sortedAssets = selectedAssets.sorted { asset1, asset2 in
-            guard let date1 = asset1.creationDate, let date2 = asset2.creationDate else {
-                return false
-            }
-            return date1 < date2
-        }
+        // 선택한 순서 그대로 사용 (정렬하지 않음)
+        let assetsInSelectionOrder = selectedAssets
 
-        for asset in sortedAssets {
+        // 순서를 보장하기 위해 인덱스와 함께 저장
+        var indexedImages: [(index: Int, image: UIImage)] = []
+        let lock = NSLock()
+
+        for (index, asset) in assetsInSelectionOrder.enumerated() {
             group.enter()
 
             let options = PHImageRequestOptions()
@@ -325,14 +324,20 @@ class TravelRecordPhotoViewController: UIViewController {
                 options: options
             ) { image, _ in
                 if let image = image {
-                    images.append(image)
+                    lock.lock()
+                    indexedImages.append((index: index, image: image))
+                    lock.unlock()
                 }
                 group.leave()
             }
         }
 
         group.notify(queue: .main) {
-            completion(images)
+            // 인덱스 순서로 정렬하여 선택한 순서 보장
+            let sortedImages = indexedImages
+                .sorted { $0.index < $1.index }
+                .map { $0.image }
+            completion(sortedImages)
         }
     }
 
