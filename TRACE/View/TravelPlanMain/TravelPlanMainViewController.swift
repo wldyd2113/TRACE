@@ -77,7 +77,7 @@ class TravelPlanMainViewController: UIViewController {
     }
 
     private let travelListLabel = UILabel().then {
-        $0.applyTitleStyle(text: NSLocalizedString("travel_plan_list", comment: "Travel plan list"), fontSize: 18)
+        $0.applyTitleStyle(text: NSLocalizedString("travel_plan_list", comment: "Travel plan list"), fontSize: 22)
     }
 
     private let myTravelLabel = UILabel().then {
