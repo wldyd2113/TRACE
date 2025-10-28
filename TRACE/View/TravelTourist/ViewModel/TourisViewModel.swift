@@ -80,7 +80,7 @@ final class TourisViewModel {
             filteredAttractions: filteredAttractions,
             isLoading: isLoadingRelay.asObservable(),
             errorMessage: errorMessageRelay.asObservable(),
-            selectedAttraction: selectedAttractionRelay.asObservable()
+            selectedAttraction: selectedAttraction
         )
     }
 
@@ -162,12 +162,18 @@ final class TourisViewModel {
         let category = determineCategoryFromGoogleTypes(types: place.types)
         let imageURL = place.photos?.first?.getPhotoURL(maxWidth: 400)
 
+        // 여러 이미지 URL 생성 (최대 5개)
+        let imageURLs = place.photos?.prefix(5).map { photo in
+            photo.getPhotoURL(maxWidth: 400)
+        }
+
         return TouristAttraction(
             id: place.placeId,
             name: place.name,
             country: country,
             category: category,
             imageURL: imageURL,
+            imageURLs: imageURLs,
             description: place.formattedAddress ?? "",
             latitude: place.geometry.location.lat,
             longitude: place.geometry.location.lng
@@ -214,19 +220,19 @@ final class TourisViewModel {
     private func loadSampleData() {
         let sampleAttractions = [
             // 인기 관광지
-            TouristAttraction(id: "1", name: "경복궁", country: "한국", category: .popular, imageURL: nil, description: "조선 왕조의 대표 궁궐", latitude: 37.5796, longitude: 126.9770),
-            TouristAttraction(id: "2", name: "명동", country: "한국", category: .popular, imageURL: nil, description: "서울의 대표 쇼핑 거리", latitude: 37.5636, longitude: 126.9828),
-            TouristAttraction(id: "3", name: "부산 해운대해수욕장", country: "한국", category: .popular, imageURL: nil, description: "부산의 대표 해수욕장", latitude: 35.1584, longitude: 129.1600),
+            TouristAttraction(id: "1", name: "경복궁", country: "한국", category: .popular, imageURL: nil, imageURLs: nil, description: "조선 왕조의 대표 궁궐", latitude: 37.5796, longitude: 126.9770),
+            TouristAttraction(id: "2", name: "명동", country: "한국", category: .popular, imageURL: nil, imageURLs: nil, description: "서울의 대표 쇼핑 거리", latitude: 37.5636, longitude: 126.9828),
+            TouristAttraction(id: "3", name: "부산 해운대해수욕장", country: "한국", category: .popular, imageURL: nil, imageURLs: nil, description: "부산의 대표 해수욕장", latitude: 35.1584, longitude: 129.1600),
 
             // 자연/경치
-            TouristAttraction(id: "4", name: "제주도 한라산", country: "한국", category: .scenic, imageURL: nil, description: "제주도의 최고봉", latitude: 33.3617, longitude: 126.5292),
-            TouristAttraction(id: "5", name: "설악산 국립공원", country: "한국", category: .scenic, imageURL: nil, description: "강원도의 아름다운 산", latitude: 38.1197, longitude: 128.4656),
-            TouristAttraction(id: "6", name: "남이섬", country: "한국", category: .scenic, imageURL: nil, description: "춘천의 아름다운 섬", latitude: 37.7914, longitude: 127.5267),
+            TouristAttraction(id: "4", name: "제주도 한라산", country: "한국", category: .scenic, imageURL: nil, imageURLs: nil, description: "제주도의 최고봉", latitude: 33.3617, longitude: 126.5292),
+            TouristAttraction(id: "5", name: "설악산 국립공원", country: "한국", category: .scenic, imageURL: nil, imageURLs: nil, description: "강원도의 아름다운 산", latitude: 38.1197, longitude: 128.4656),
+            TouristAttraction(id: "6", name: "남이섬", country: "한국", category: .scenic, imageURL: nil, imageURLs: nil, description: "춘천의 아름다운 섬", latitude: 37.7914, longitude: 127.5267),
 
             // 역사 문화
-            TouristAttraction(id: "7", name: "불국사", country: "한국", category: .historical, imageURL: nil, description: "경주의 유네스코 세계문화유산", latitude: 35.7898, longitude: 129.3320),
-            TouristAttraction(id: "8", name: "창덕궁", country: "한국", category: .historical, imageURL: nil, description: "조선 왕조의 이궁", latitude: 37.5804, longitude: 126.9910),
-            TouristAttraction(id: "9", name: "안동 하회마을", country: "한국", category: .historical, imageURL: nil, description: "전통 한옥 마을", latitude: 36.5392, longitude: 128.5185)
+            TouristAttraction(id: "7", name: "불국사", country: "한국", category: .historical, imageURL: nil, imageURLs: nil, description: "경주의 유네스코 세계문화유산", latitude: 35.7898, longitude: 129.3320),
+            TouristAttraction(id: "8", name: "창덕궁", country: "한국", category: .historical, imageURL: nil, imageURLs: nil, description: "조선 왕조의 이궁", latitude: 37.5804, longitude: 126.9910),
+            TouristAttraction(id: "9", name: "안동 하회마을", country: "한국", category: .historical, imageURL: nil, imageURLs: nil, description: "전통 한옥 마을", latitude: 36.5392, longitude: 128.5185)
         ]
 
         attractionsRelay.accept(sampleAttractions)
@@ -241,6 +247,7 @@ extension TouristAttraction {
         country: "",
         category: .popular,
         imageURL: nil,
+        imageURLs: nil,
         description: "",
         latitude: 0,
         longitude: 0

@@ -122,6 +122,7 @@ struct TouristAttraction {
     let country: String
     let category: TouristCategory
     let imageURL: String?
+    let imageURLs: [String]?  // 여러 이미지 URL
     let description: String
     let latitude: Double
     let longitude: Double
@@ -165,7 +166,7 @@ extension TravelTouristViewController: DesiginProtocolBind {
 
         output.selectedAttraction
             .subscribe(onNext: { [weak self] attraction in
-                self?.showAttractionInfoAlert(attraction)
+                self?.navigateToDetail(attraction)
             })
             .disposed(by: disposeBag)
 
@@ -284,6 +285,11 @@ extension TravelTouristViewController {
 
             self?.present(alert, animated: true)
         }
+    }
+
+    private func navigateToDetail(_ attraction: TouristAttraction) {
+        let detailVC = TravelTouristDetailViewController(attraction: attraction)
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 
     private func showAttractionInfoAlert(_ attraction: TouristAttraction) {
