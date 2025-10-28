@@ -43,14 +43,6 @@ class TouristAttractionCell: UICollectionViewCell {
         $0.textAlignment = .center
     }
 
-    private let categoryBadge = UILabel().then {
-        $0.font = UIFont(name: FontManager.onglapUIyeon.fontName, size: 10)
-        $0.textColor = .white
-        $0.backgroundColor = .skyBlue
-        $0.textAlignment = .center
-        $0.layer.cornerRadius = 8
-        $0.clipsToBounds = true
-    }
 
     // MARK: - Initialization
     override init(frame: CGRect) {
@@ -67,14 +59,13 @@ class TouristAttractionCell: UICollectionViewCell {
         imageView.image = nil
         nameLabel.text = nil
         countryLabel.text = nil
-        categoryBadge.text = nil
     }
 
     // MARK: - Setup
     private func setupUI() {
         contentView.addSubview(containerView)
 
-        [imageView, nameLabel, countryLabel, categoryBadge].forEach {
+        [imageView, nameLabel, countryLabel].forEach {
             containerView.addSubview($0)
         }
 
@@ -91,12 +82,6 @@ class TouristAttractionCell: UICollectionViewCell {
             $0.height.equalTo(180)
         }
 
-        categoryBadge.snp.makeConstraints {
-            $0.top.equalTo(imageView).offset(8)
-            $0.trailing.equalTo(imageView).offset(-8)
-            $0.width.equalTo(50)
-            $0.height.equalTo(16)
-        }
 
         nameLabel.snp.makeConstraints {
             $0.top.equalTo(imageView.snp.bottom).offset(8)
@@ -114,7 +99,6 @@ class TouristAttractionCell: UICollectionViewCell {
     func configure(with attraction: TouristAttraction) {
         nameLabel.text = attraction.name
         countryLabel.text = attraction.country
-        categoryBadge.text = attraction.category.localizedTitle
 
         // Kingfisher로 이미지 로딩
         if let imageURLString = attraction.imageURL, let imageURL = URL(string: imageURLString) {

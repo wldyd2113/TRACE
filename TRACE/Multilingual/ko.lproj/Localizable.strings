@@ -52,11 +52,11 @@
 // TravelTourist Screen
 "tourist_recommendation" = "관광지 추천";
 "country_search" = "나라 검색";
-"enter_country_name" = "나라 이름을 입력하세요";
+"enter_country_name" = "나라및 지역을 입력하세요";
 "country_example" = "예: 일본, 프랑스";
 "recommended_attractions" = "추천 관광지";
 "popular" = "인기";
-"scenic" = "성징";
+"scenic" = "성지";
 "historical" = "역사";
 "attraction_search_failed" = "'%@' 관광지 검색에 실패했습니다.";
 "country" = "국가";

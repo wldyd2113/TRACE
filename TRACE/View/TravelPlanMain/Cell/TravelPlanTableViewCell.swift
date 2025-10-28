@@ -13,8 +13,7 @@ class TravelPlanTableViewCell: UITableViewCell {
 
     // MARK: - UI Components
     private let locationIconImageView = UIImageView().then {
-        $0.image = UIImage(systemName: "mappin.and.ellipse")
-        $0.tintColor = .systemRed
+        $0.image = UIImage(named: "현재위치 이미지")
         $0.contentMode = .scaleAspectFit
     }
 
@@ -31,11 +30,6 @@ class TravelPlanTableViewCell: UITableViewCell {
         $0.applyDateStyle(text: "")
     }
 
-    private let editIconImageView = UIImageView().then {
-        $0.image = UIImage(systemName: "pencil")
-        $0.tintColor = .systemOrange
-        $0.contentMode = .scaleAspectFit
-    }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -54,12 +48,11 @@ class TravelPlanTableViewCell: UITableViewCell {
         contentView.addSubview(locationLabel)
         contentView.addSubview(countryLabel)
         contentView.addSubview(dateLabel)
-        contentView.addSubview(editIconImageView)
 
         locationIconImageView.snp.makeConstraints {
             $0.leading.equalToSuperview().offset(16)
             $0.centerY.equalToSuperview()
-            $0.width.height.equalTo(20)
+            $0.width.height.equalTo(28)
         }
 
         locationLabel.snp.makeConstraints {
@@ -73,14 +66,8 @@ class TravelPlanTableViewCell: UITableViewCell {
             $0.bottom.equalToSuperview().offset(-12)
         }
 
-        editIconImageView.snp.makeConstraints {
-            $0.trailing.equalToSuperview().offset(-16)
-            $0.centerY.equalToSuperview()
-            $0.width.height.equalTo(16)
-        }
-
         dateLabel.snp.makeConstraints {
-            $0.trailing.equalTo(editIconImageView.snp.leading).offset(-8)
+            $0.trailing.equalToSuperview().offset(-16)
             $0.centerY.equalToSuperview()
         }
     }

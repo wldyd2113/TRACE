@@ -32,9 +32,9 @@ class TravelPlanMainViewController: UIViewController {
     
     private let dDayLabel = UILabel().then {
         $0.applyCaptionStyle(text: "D-30")
-        $0.textColor = .labelLight
+        $0.textColor = .white
         $0.textAlignment = .center
-        $0.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        $0.backgroundColor = .skyBlue
         $0.layer.cornerRadius = 8
         $0.clipsToBounds = true
     }

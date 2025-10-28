@@ -32,9 +32,6 @@ class TravelTouristViewController: UIViewController {
         $0.applyTravelStyle(placeholder: NSLocalizedString("enter_country_name", comment: "Enter country name"), fontSize: 16)
     }
 
-    private let countryExampleLabel = UILabel().then {
-        $0.applyDescriptionStyle(text: NSLocalizedString("country_example", comment: "e.g., Japan, France"))
-    }
 
     // 추천 관광지 섹션
     private let recommendationTitleLabel = UILabel().then {
@@ -59,6 +56,7 @@ class TravelTouristViewController: UIViewController {
     private let historicalButton = UIButton(type: .system).then {
         $0.applyCategoryButtonStyle(title: NSLocalizedString("historical", comment: "Historical"))
     }
+
 
     // 관광지 컬렉션 뷰
     private lazy var attractionsCollectionView: UICollectionView = {
@@ -85,6 +83,7 @@ class TravelTouristViewController: UIViewController {
 
     // 선택된 카테고리 (UI 상태만)
     private var selectedCategory: TouristCategory = .popular
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -192,7 +191,7 @@ extension TravelTouristViewController: DesiginProtocolBind {
             categoryStackView.addArrangedSubview($0)
         }
 
-        [countrySearchTitleLabel, countrySearchTextField, countryExampleLabel,
+        [countrySearchTitleLabel, countrySearchTextField,
          recommendationTitleLabel, categoryStackView, attractionsCollectionView].forEach {
             contentView.addSubview($0)
         }
@@ -202,6 +201,7 @@ extension TravelTouristViewController: DesiginProtocolBind {
         navigationItem.title = NSLocalizedString("tourist_recommendation", comment: "Tourist recommendation")
 
         updateCategoryButtons()
+
     }
 
     func configureLayout() {
@@ -225,13 +225,8 @@ extension TravelTouristViewController: DesiginProtocolBind {
             $0.height.equalTo(44)
         }
 
-        countryExampleLabel.snp.makeConstraints {
-            $0.top.equalTo(countrySearchTextField.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(20)
-        }
-
         recommendationTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(countryExampleLabel.snp.bottom).offset(30)
+            $0.top.equalTo(countrySearchTextField.snp.bottom).offset(30)
             $0.leading.trailing.equalToSuperview().inset(20)
         }
 
@@ -272,6 +267,7 @@ extension TravelTouristViewController {
         selectedButton.backgroundColor = .skyBlue
         selectedButton.setTitleColor(.white, for: .normal)
     }
+
 
     private func showErrorAlert(message: String) {
         DispatchQueue.main.async { [weak self] in
