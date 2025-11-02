@@ -98,10 +98,16 @@ class PlanMainViewModel: BaseViewModel {
                 let mainData = MainTravelData(from: nextPlan)
                 mainTravelData.accept(mainData)
 
+                // 위젯용 데이터 업데이트
+                updateWidgetData(from: nextPlan)
+
                 print("🏆 메인 여행 계획: \(mainData.country) (\(mainData.dDay))")
             } else {
                 print("⚠️ 다가오는 여행 계획이 없습니다")
                 mainTravelData.accept(nil)
+
+                // 위젯 데이터 클리어
+                WidgetDataManager.shared.saveUpcomingTravelData(nil)
             }
 
             // 여행 계획 리스트는 모든 계획 표시 (과거+미래)
@@ -127,6 +133,20 @@ class PlanMainViewModel: BaseViewModel {
             print("❌ Realm 데이터 로드 실패: \(error.localizedDescription)")
             errorRelay.accept(NSLocalizedString("load_travel_plan_failed", comment: "Load travel plan failed"))
         }
+    }
+
+    // MARK: - Private Helper Methods
+    private func updateWidgetData(from travelPlan: TravelPlan) {
+        let widgetData = WidgetTravelData(
+            destination: "\(travelPlan.travelName), \(travelPlan.nation)",
+            location: travelPlan.travelName,
+            nation: travelPlan.nation,
+            startDate: travelPlan.startDate,
+            hasUpcomingTravel: true
+        )
+
+        WidgetDataManager.shared.saveUpcomingTravelData(widgetData)
+        print("🔄 위젯 데이터 업데이트 완료: \(widgetData.destination)")
     }
 
     // MARK: - Public Methods

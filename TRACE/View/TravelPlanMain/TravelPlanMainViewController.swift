@@ -104,7 +104,11 @@ class TravelPlanMainViewController: UIViewController {
         configureLayout()
         bind()
         bindViewModel()
+
+        // 개발용: Realm에 샘플 데이터가 없으면 추가
+        addSampleDataIfNeeded()
     }
+
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -118,6 +122,61 @@ class TravelPlanMainViewController: UIViewController {
         super.viewWillDisappear(animated)
         // 다른 화면으로 이동할 때는 Navigation Bar 다시 보이기
         navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+
+    // MARK: - Sample Data Methods
+    private func addSampleDataIfNeeded() {
+        guard let realm = RealmManager.shared.getRealm() else {
+            print("❌ Realm 인스턴스를 가져올 수 없습니다")
+            return
+        }
+
+        let existingPlans = realm.objects(TravelPlan.self)
+        if existingPlans.isEmpty {
+            print("📝 Realm에 여행 계획이 없습니다. 샘플 데이터를 추가합니다...")
+            addSampleTravelPlans()
+        } else {
+            print("📋 Realm에 \(existingPlans.count)개의 여행 계획이 있습니다")
+            for plan in existingPlans {
+                print("   • \(plan.travelName), \(plan.nation) - \(DateManager.shared.formatToStandardString(from: plan.startDate))")
+            }
+        }
+    }
+
+    private func addSampleTravelPlans() {
+        guard let realm = RealmManager.shared.getRealm() else { return }
+
+        do {
+            try realm.write {
+                // 샘플 여행 계획 1: 7일 후 도쿄 여행
+                let tokyoTrip = TravelPlan()
+                tokyoTrip.nation = "일본"
+                tokyoTrip.travelName = "도쿄"
+                tokyoTrip.startDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
+                tokyoTrip.endDate = Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date()
+                realm.add(tokyoTrip)
+
+                // 샘플 여행 계획 2: 15일 후 파리 여행
+                let parisTrip = TravelPlan()
+                parisTrip.nation = "프랑스"
+                parisTrip.travelName = "파리"
+                parisTrip.startDate = Calendar.current.date(byAdding: .day, value: 15, to: Date()) ?? Date()
+                parisTrip.endDate = Calendar.current.date(byAdding: .day, value: 20, to: Date()) ?? Date()
+                realm.add(parisTrip)
+
+                // 샘플 여행 계획 3: 30일 후 제주도 여행
+                let jejuTrip = TravelPlan()
+                jejuTrip.nation = "대한민국"
+                jejuTrip.travelName = "제주도"
+                jejuTrip.startDate = Calendar.current.date(byAdding: .day, value: 30, to: Date()) ?? Date()
+                jejuTrip.endDate = Calendar.current.date(byAdding: .day, value: 33, to: Date()) ?? Date()
+                realm.add(jejuTrip)
+
+                print("✅ 샘플 여행 계획 3개를 추가했습니다")
+            }
+        } catch {
+            print("❌ 샘플 데이터 추가 실패: \(error)")
+        }
     }
 }
 

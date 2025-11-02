@@ -63,6 +63,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         window?.rootViewController = tabBarController
         window?.makeKeyAndVisible()
+
+        // 앱 시작 시 위젯 데이터 즉시 업데이트
+        updateWidgetDataOnAppLaunch()
     }
 
     // MARK: - Navigation Bar Configuration
@@ -173,6 +176,44 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 }
             } else {
                 print("📱 App startup: Notification permission already granted")
+            }
+        }
+    }
+
+    // MARK: - Widget Data Management
+    private func updateWidgetDataOnAppLaunch() {
+        print("🚀 앱 시작 시 위젯 데이터 업데이트...")
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            // Realm이 초기화된 후 데이터 로드
+            guard let realm = RealmManager.shared.getRealm() else {
+                print("❌ 앱 시작 시 Realm을 가져올 수 없습니다")
+                return
+            }
+
+            do {
+                let allPlans = realm.objects(TravelPlan.self).sorted(byKeyPath: "startDate", ascending: true)
+                let today = Date()
+                let upcomingPlans = allPlans.filter { $0.startDate >= today }
+
+                if let nextPlan = upcomingPlans.first {
+                    let widgetData = WidgetTravelData(
+                        destination: "\(nextPlan.travelName), \(nextPlan.nation)",
+                        location: nextPlan.travelName,
+                        nation: nextPlan.nation,
+                        startDate: nextPlan.startDate,
+                        hasUpcomingTravel: true
+                    )
+
+                    WidgetDataManager.shared.saveUpcomingTravelData(widgetData)
+                    print("🎯 앱 시작 시 위젯 데이터 업데이트 완료: \(widgetData.destination)")
+                } else {
+                    WidgetDataManager.shared.saveUpcomingTravelData(nil)
+                    print("📭 앱 시작 시 다가오는 여행 없음 - 위젯 데이터 클리어")
+                }
+
+            } catch {
+                print("❌ 앱 시작 시 여행 데이터 로드 실패: \(error)")
             }
         }
     }
