@@ -17,7 +17,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Realm 초기화
         _ = RealmManager.shared
-        FirebaseApp.configure()
+
+        // Firebase 설정 - 여러 경로에서 plist 파일 검색
+        if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+           let options = FirebaseOptions(contentsOfFile: path) {
+            FirebaseApp.configure(options: options)
+            print("✅ Firebase 초기화 완료 (명시적 경로)")
+        } else {
+            // fallback: 기본 Firebase 초기화 방식 사용
+            print("⚠️ GoogleService-Info.plist 파일을 번들에서 찾을 수 없습니다. 기본 방식으로 초기화합니다.")
+
+            // Bundle의 모든 plist 파일 검색 (디버그용)
+            let bundlePath = Bundle.main.bundlePath
+            print("📁 Bundle path: \(bundlePath)")
+            let fileManager = FileManager.default
+            if let contents = try? fileManager.contentsOfDirectory(atPath: bundlePath) {
+                let plistFiles = contents.filter { $0.hasSuffix(".plist") }
+                print("📋 Bundle에 있는 plist 파일들: \(plistFiles)")
+            }
+
+            FirebaseApp.configure()
+            print("✅ Firebase 기본 초기화 완료")
+        }
 
         // 알림 대리자 설정
 
