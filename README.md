@@ -272,3 +272,6 @@ open TRACE.xcodeproj
 - 이미지 lazy loading
 - 백그라운드 스레드에서 무거운 작업 처리
 
+## 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 배포됩니다.
