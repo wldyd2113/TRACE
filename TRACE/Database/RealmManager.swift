@@ -7,6 +7,7 @@
 
 import Foundation
 import RealmSwift
+import UIKit
 
 class RealmManager {
     static let shared = RealmManager()
@@ -19,17 +20,23 @@ class RealmManager {
     private func initializeRealm() {
         do {
             // App Groups를 사용하여 위젯과 메인 앱이 같은 Realm 데이터베이스를 공유
-            let appGroupIdentifier = "group.com.jiyong.TRACE"
+            let appGroupIdentifier = "group.jiyong.TRACE"
             let realmURL: URL
 
+            // 기기별 고유 식별자 생성 (사용자 데이터 격리를 위해)
+            let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "default"
+            let realmFileName = "\(deviceID).realm"
+
             if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) {
-                realmURL = groupURL.appendingPathComponent("default.realm")
+                realmURL = groupURL.appendingPathComponent(realmFileName)
                 print("✅ App Groups 경로 사용: \(realmURL.path)")
+                print("✅ 기기 식별자: \(deviceID)")
             } else {
                 // App Groups가 설정되지 않은 경우 기본 Documents 경로 사용
                 let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-                realmURL = documentsURL.appendingPathComponent("default.realm")
+                realmURL = documentsURL.appendingPathComponent(realmFileName)
                 print("⚠️ App Groups가 설정되지 않아 기본 Documents 경로를 사용합니다: \(realmURL.path)")
+                print("✅ 기기 식별자: \(deviceID)")
             }
 
             let config = Realm.Configuration(

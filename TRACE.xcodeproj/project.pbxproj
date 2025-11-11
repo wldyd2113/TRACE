@@ -73,8 +73,8 @@
 		3B6AB3232E8532E000FBADF6 /* Exceptions for "TRACE" folder in "TRACE" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"GoogleService-Info.plist",
 				Info.plist,
-				GoogleService-Info.plist,
 			);
 			target = 3B6AB3102E8532DF00FBADF6 /* TRACE */;
 		};
