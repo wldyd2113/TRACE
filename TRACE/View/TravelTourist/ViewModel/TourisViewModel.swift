@@ -36,7 +36,8 @@ final class TourisViewModel {
 
     // MARK: - Initialization
     init() {
-        loadKoreanTouristAttractions()
+        // 초기화 시에는 아무것도 로드하지 않음
+        // 사용자가 검색할 때만 데이터 표시
     }
 
     // MARK: - Transform
@@ -87,7 +88,8 @@ final class TourisViewModel {
     // MARK: - Private Methods
     private func searchCountryAttractions(query: String) {
         guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            loadKoreanTouristAttractions()
+            // 검색어가 비어있으면 목록을 비움
+            attractionsRelay.accept([])
             return
         }
 
@@ -147,9 +149,9 @@ final class TourisViewModel {
             self?.isLoadingRelay.accept(false)
 
             if allAttractions.isEmpty {
-                print("⚠️ 검색 결과 없음, 한국 샘플 데이터 사용")
+                print("⚠️ 검색 결과 없음")
                 self?.errorMessageRelay.accept("'\(country)' 관광지 검색에 실패했습니다.")
-                self?.loadSampleData()
+                self?.attractionsRelay.accept([]) // 빈 배열로 설정
             } else {
                 print("✅ 총 \(allAttractions.count)개 관광지 발견")
                 let uniqueAttractions = self?.removeDuplicateAttractions(allAttractions) ?? []

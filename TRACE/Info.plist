@@ -14,6 +14,8 @@
 	<string>여행 기록에 사진을 추가하기 위해 사진 라이브러리에 접근합니다.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>여행 기록 사진을 저장하기 위해 사진 라이브러리에 접근합니다.</string>
+	<key>GoogleAPIKey</key>
+	<string>AIzaSyDuX6GiXzJIJYdulfoMDABe-5CK4dg2AxA</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

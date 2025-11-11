@@ -29,7 +29,7 @@ enum NetworkRouter: URLRequestConvertible {
             return "query=\(query)&language=ko&key=\(APIKey.googleKey)"
         }
     }
-    
+
     var method: HTTPMethod {
         switch self {
         case .kakaoMapsearch(query: let query, headers: let headers):
