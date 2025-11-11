@@ -92,4 +92,7 @@ fastlane/test_output
 
 iOSInjectionProject/
 
-# End of https://www.toptal.com/developers/gitignore/api/swiftTRACE/GoogleService-Info.plist
+# End of https://www.toptal.com/developers/gitignore/api/swift
+
+# Project specific
+TRACE/GoogleService-Info.plist
