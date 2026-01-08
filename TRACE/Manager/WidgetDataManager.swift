@@ -35,7 +35,9 @@ class WidgetDataManager {
         return UserDefaults(suiteName: appGroupIdentifier)
     }
 
-    private init() {}
+    private init() {
+        setupFirstLaunchListener()
+    }
 
     // 메인 앱에서 호출하여 위젯용 데이터 저장
     func saveUpcomingTravelData(_ data: WidgetTravelData?) {
@@ -110,5 +112,40 @@ class WidgetDataManager {
     private func getDeviceSpecificKey() -> String {
         let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "default"
         return "\(userDefaultsKey)_\(deviceID)"
+    }
+
+    // MARK: - First Launch Handling
+    private func setupFirstLaunchListener() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleFirstLaunch),
+            name: .firstLaunch,
+            object: nil
+        )
+    }
+
+    @objc private func handleFirstLaunch() {
+        print("🗑️ 첫 실행으로 인한 위젯 데이터 초기화 시작...")
+        clearAllWidgetData()
+    }
+
+    func clearAllWidgetData() {
+        let deviceKey = getDeviceSpecificKey()
+
+        // App Group UserDefaults 초기화
+        if let sharedDefaults = sharedUserDefaults {
+            sharedDefaults.removeObject(forKey: deviceKey)
+            sharedDefaults.synchronize()
+            print("✅ App Group 위젯 데이터 삭제 완료")
+        }
+
+        // 일반 UserDefaults도 초기화 (fallback으로 저장된 데이터)
+        UserDefaults.standard.removeObject(forKey: deviceKey)
+        UserDefaults.standard.synchronize()
+        print("✅ 일반 UserDefaults 위젯 데이터 삭제 완료")
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }

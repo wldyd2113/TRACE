@@ -15,6 +15,7 @@ class RealmManager {
 
     private init() {
         initializeRealm()
+        setupFirstLaunchListener()
     }
 
     private func initializeRealm() {
@@ -81,5 +82,40 @@ class RealmManager {
             print("❌ Realm 생성 실패: \(error)")
             return nil
         }
+    }
+
+    // MARK: - First Launch Handling
+    private func setupFirstLaunchListener() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleFirstLaunch),
+            name: .firstLaunch,
+            object: nil
+        )
+    }
+
+    @objc private func handleFirstLaunch() {
+        print("🗑️ 첫 실행으로 인한 Realm 데이터베이스 초기화 시작...")
+        clearAllData()
+    }
+
+    func clearAllData() {
+        guard let realm = getRealm() else {
+            print("❌ Realm을 가져올 수 없어 데이터 초기화에 실패했습니다")
+            return
+        }
+
+        do {
+            try realm.write {
+                realm.deleteAll()
+                print("✅ 모든 Realm 데이터가 삭제되었습니다")
+            }
+        } catch {
+            print("❌ Realm 데이터 초기화 실패: \(error)")
+        }
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }

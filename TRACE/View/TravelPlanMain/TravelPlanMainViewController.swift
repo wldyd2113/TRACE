@@ -105,8 +105,8 @@ class TravelPlanMainViewController: UIViewController {
         bind()
         bindViewModel()
 
-        // 개발용: Realm에 샘플 데이터가 없으면 추가
-        addSampleDataIfNeeded()
+        // 개발용: 샘플 데이터 추가 로직 제거 (프로덕션 버전에서는 사용하지 않음)
+        // addSampleDataIfNeeded()
     }
 
 

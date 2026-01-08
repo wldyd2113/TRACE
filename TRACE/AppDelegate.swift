@@ -15,6 +15,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // 첫 실행 감지 및 초기화
+        checkAndHandleFirstLaunch()
+
         // Realm 초기화
         _ = RealmManager.shared
 
@@ -64,6 +67,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // FCM 토큰 요청은 APNS 토큰 설정 후에 수행됩니다
 
         return true
+    }
+
+    // MARK: - First Launch Detection
+    private func checkAndHandleFirstLaunch() {
+        let isFirstLaunchKey = "isFirstLaunch"
+        let hasLaunchedBefore = UserDefaults.standard.bool(forKey: isFirstLaunchKey)
+
+        if !hasLaunchedBefore {
+            print("🎯 앱 첫 실행 감지 - 데이터 초기화를 수행합니다.")
+
+            // 첫 실행 표시 저장
+            UserDefaults.standard.set(true, forKey: isFirstLaunchKey)
+            UserDefaults.standard.synchronize()
+
+            // RealmManager에 첫 실행임을 알림
+            NotificationCenter.default.post(name: .firstLaunch, object: nil)
+
+            print("✅ 첫 실행 처리 완료")
+        } else {
+            print("📱 기존 사용자 실행 감지")
+        }
     }
 
     // MARK: UISceneSession Lifecycle
@@ -127,6 +151,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 }
 
 
+
+// MARK: - Notification Name Extension
+extension Notification.Name {
+    static let firstLaunch = Notification.Name("firstLaunch")
+}
 
 extension AppDelegate: MessagingDelegate {
     
