@@ -11,7 +11,6 @@
 		3B33D35C2E8FB1050034DD6E /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3B33D35B2E8FB1050034DD6E /* FirebaseCrashlytics */; };
 		3B33D35E2E8FB1050034DD6E /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 3B33D35D2E8FB1050034DD6E /* FirebaseMessaging */; };
 		3B533C132EA7890200301F27 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 3B533C122EA7890200301F27 /* FSCalendar */; };
-		3B6AB3562E8532E000FBADF6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B6AB3552E8532E000FBADF6 /* GoogleService-Info.plist */; };
 		3B6AB3AB2E85354800FBADF6 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3AA2E85354800FBADF6 /* RxCocoa */; };
 		3B6AB3AD2E85354800FBADF6 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3AC2E85354800FBADF6 /* RxSwift */; };
 		3B6AB3B02E85355A00FBADF6 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3B6AB3AF2E85355A00FBADF6 /* SnapKit */; };
@@ -62,7 +61,6 @@
 
 /* Begin PBXFileReference section */
 		3B6AB3112E8532DF00FBADF6 /* TRACE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TRACE.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		3B6AB3552E8532E000FBADF6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "TRACE/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3BC907382EB2FE5A00C792EB /* TraceBasicIntentWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TraceBasicIntentWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BC9073A2EB2FE5A00C792EB /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		3BC9073C2EB2FE5A00C792EB /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -73,7 +71,6 @@
 		3B6AB3232E8532E000FBADF6 /* Exceptions for "TRACE" folder in "TRACE" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"GoogleService-Info.plist",
 				Info.plist,
 			);
 			target = 3B6AB3102E8532DF00FBADF6 /* TRACE */;
@@ -141,7 +138,6 @@
 			isa = PBXGroup;
 			children = (
 				3BC907542EB335D000C792EB /* TraceBasicIntentWidgetExtension.entitlements */,
-				3B6AB3552E8532E000FBADF6 /* GoogleService-Info.plist */,
 				3B6AB3132E8532DF00FBADF6 /* TRACE */,
 				3BC9073E2EB2FE5A00C792EB /* TraceBasicIntentWidget */,
 				3BC907392EB2FE5A00C792EB /* Frameworks */,
@@ -292,7 +288,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B6AB3562E8532E000FBADF6 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
