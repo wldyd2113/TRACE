@@ -255,11 +255,6 @@ open TRACE.xcodeproj
 - MVVM 패턴 일관성 유지
 - Protocol-Oriented Programming 적극 활용
 
-### Git 전략
-- Git Flow 브랜치 전략 사용
-- Feature 브랜치 단위 개발
-- Pull Request 기반 코드 리뷰
-
 ## 📈 성능 최적화
 
 ### 메모리 관리
