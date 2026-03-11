@@ -139,18 +139,18 @@ class TravelPlanWriteViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        print("🔄 TravelPlanWrite: viewWillAppear - isComingFromBackNavigation: \(isComingFromBackNavigation)")
+        print(" TravelPlanWrite: viewWillAppear - isComingFromBackNavigation: \(isComingFromBackNavigation)")
 
         // 뒤로가기로 인한 재진입인 경우에만 특별 처리
         if isComingFromBackNavigation {
-            print("🔄 TravelPlanWrite: viewWillAppear - 뒤로가기로 인한 재진입")
+            print(" TravelPlanWrite: viewWillAppear - 뒤로가기로 인한 재진입")
             // 5초 후에 자동으로 해제
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
                 self?.isComingFromBackNavigation = false
                 print("⏰ TravelPlanWrite: 5초 후 뒤로가기 상태 해제")
             }
         } else {
-            print("✅ TravelPlanWrite: viewWillAppear - 새로운 진입 또는 정상 진입")
+            print(" TravelPlanWrite: viewWillAppear - 새로운 진입 또는 정상 진입")
         }
 
         // 항상 기본 상태로 리셋 (뒤로가기가 아닌 경우)
@@ -165,11 +165,11 @@ class TravelPlanWriteViewController: UIViewController {
 
         // 뒤로가기로 인한 종료인지 확인
         if isMovingFromParent {
-            print("🚫 TravelPlanWrite: 뒤로가기 버튼으로 종료 - 자동 저장 방지")
+            print(" TravelPlanWrite: 뒤로가기 버튼으로 종료 - 자동 저장 방지")
             shouldPreventAutoSave = true
             viewModel.enableAutoSavePrevention()
         } else {
-            print("ℹ️ TravelPlanWrite: 다른 이유로 viewWillDisappear")
+            print(" TravelPlanWrite: 다른 이유로 viewWillDisappear")
         }
     }
  
@@ -199,7 +199,7 @@ class TravelPlanWriteViewController: UIViewController {
         )
 
         alert.addAction(UIAlertAction(title: NSLocalizedString("yes", comment: ""), style: .default) { [weak self] _ in
-            print("✅ 사용자가 새로운 여행 계획 생성 확인")
+            print(" 사용자가 새로운 여행 계획 생성 확인")
             self?.isComingFromBackNavigation = false
             self?.shouldPreventAutoSave = false
             self?.viewModel.disableAutoSavePrevention()
@@ -207,7 +207,7 @@ class TravelPlanWriteViewController: UIViewController {
         })
 
         alert.addAction(UIAlertAction(title: NSLocalizedString("no", comment: ""), style: .cancel) { _ in
-            print("❌ 사용자가 새로운 여행 계획 생성 취소")
+            print(" 사용자가 새로운 여행 계획 생성 취소")
         })
 
         present(alert, animated: true)
@@ -300,7 +300,7 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
                     let selectedCountry = selectedCountryText == NSLocalizedString("international", comment: "") ? "해외" : "국내"
                     print("🚀 TravelPlanWrite: 선택된 국가 - '\(selectedCountry)' (원본: '\(selectedCountryText)')")
                     detailVC.setCountryType(selectedCountry)
-                    print("✅ TravelPlanWrite: setCountryType 호출 완료")
+                    print(" TravelPlanWrite: setCountryType 호출 완료")
                     self?.navigationController?.pushViewController(detailVC, animated: true)
                 }
             })
@@ -309,13 +309,13 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
         // 여행 계획하기 버튼 액션
         planButton.rx.tap
             .subscribe(onNext: { [weak self] in
-                print("🔍 여행 계획하기 버튼 탭됨")
+                print(" 여행 계획하기 버튼 탭됨")
                 print("   • shouldPreventAutoSave: \(self?.shouldPreventAutoSave ?? false)")
                 print("   • isComingFromBackNavigation: \(self?.isComingFromBackNavigation ?? false)")
 
                 // 뒤로가기로 인한 재진입 상태인지 확인
                 if self?.isComingFromBackNavigation == true {
-                    print("🚫 뒤로가기 재진입 상태에서 버튼 탭 무시됨")
+                    print(" 뒤로가기 재진입 상태에서 버튼 탭 무시됨")
 
                     // 사용자가 정말 새로운 계획을 만들고 싶다면 플래그를 해제
                     self?.showBackNavigationAlert()
@@ -325,12 +325,12 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
                 // 뒤로가기 버튼을 최근에 눌렀는지 확인 (3초 이내)
                 if let lastBackTime = self?.lastBackButtonTapTime,
                    Date().timeIntervalSince(lastBackTime) < 3.0 {
-                    print("🚫 뒤로가기 후 3초 이내 버튼 탭 무시됨")
+                    print(" 뒤로가기 후 3초 이내 버튼 탭 무시됨")
                     return
                 }
 
                 // 여행 계획 생성 없이 TravelPlanDetailViewController로 이동만
-                print("✅ TravelPlanDetailViewController로 이동 (자동 저장 없음)")
+                print(" TravelPlanDetailViewController로 이동 (자동 저장 없음)")
                 let detailVC = TravelPlanDetailViewController()
                 let selectedCountryText = self?.countryTextField.text ?? NSLocalizedString("domestic", comment: "")
                 // NSLocalizedString 값을 고정값으로 변환
@@ -497,7 +497,7 @@ extension TravelPlanWriteViewController: DesiginProtocolBind {
 // MARK: - UINavigationControllerDelegate
 extension TravelPlanWriteViewController: UINavigationControllerDelegate {
     func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
-        print("🔍 Navigation willShow: \(type(of: viewController)), current VC count: \(navigationController.viewControllers.count)")
+        print(" Navigation willShow: \(type(of: viewController)), current VC count: \(navigationController.viewControllers.count)")
 
         // 다른 뷰컨트롤러에서 현재 뷰컨트롤러로 돌아오는 경우 (뒤로가기)
         if viewController == self {
@@ -506,10 +506,10 @@ extension TravelPlanWriteViewController: UINavigationControllerDelegate {
                                  navigationController.viewControllers.last != self
 
             if isBackNavigation {
-                print("🚫 TravelPlanWrite: 뒤로가기로 재진입 감지")
+                print(" TravelPlanWrite: 뒤로가기로 재진입 감지")
                 isComingFromBackNavigation = true
             } else {
-                print("✅ TravelPlanWrite: 새로운 진입 감지")
+                print(" TravelPlanWrite: 새로운 진입 감지")
                 isComingFromBackNavigation = false
             }
         }
@@ -521,7 +521,7 @@ extension TravelPlanWriteViewController: UIGestureRecognizerDelegate {
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         // 스와이프 뒤로가기 제스처가 시작될 때 자동 저장 방지
         if gestureRecognizer == navigationController?.interactivePopGestureRecognizer {
-            print("🚫 TravelPlanWrite: 스와이프 뒤로가기 감지 - 자동 저장 방지")
+            print(" TravelPlanWrite: 스와이프 뒤로가기 감지 - 자동 저장 방지")
             shouldPreventAutoSave = true
             viewModel.enableAutoSavePrevention()
         }

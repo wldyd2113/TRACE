@@ -64,7 +64,7 @@ class TravelRecordViewController: UIViewController {
 
         // Realm 초기화 체크
         if RealmManager.shared.safeRealm() == nil {
-            print("❌ Realm 초기화 실패 - 앱을 종료합니다")
+            print(" Realm 초기화 실패 - 앱을 종료합니다")
             return
         }
 
@@ -105,7 +105,7 @@ class TravelRecordViewController: UIViewController {
 
     // MARK: - Actions
     @objc private func addButtonTapped() {
-        print("📝 새 여행 기록 추가")
+        print(" 새 여행 기록 추가")
         let writeVC = TravelRecordPhotoViewController()
         navigationController?.pushViewController(writeVC, animated: true)
     }
@@ -159,7 +159,7 @@ class TravelRecordViewController: UIViewController {
 
         // ViewModel에서 기록 조회
         guard let record = viewModel.getRecord(by: recordId) else {
-            print("❌ 기록을 찾을 수 없습니다: \(recordId)")
+            print(" 기록을 찾을 수 없습니다: \(recordId)")
             return
         }
 
@@ -197,7 +197,7 @@ class TravelRecordViewController: UIViewController {
                     images.append(image)
                 }
             } catch {
-                print("❌ 사진 로드 실패: \(fileName)")
+                print(" 사진 로드 실패: \(fileName)")
             }
         }
 
@@ -291,7 +291,7 @@ extension TravelRecordViewController: UICollectionViewDataSource, UICollectionVi
         print("📱 CollectionView cellForItemAt: \(indexPath.item)")
 
         guard indexPath.item < displayModels.count else {
-            print("❌ IndexPath out of bounds: \(indexPath.item) >= \(displayModels.count)")
+            print(" IndexPath out of bounds: \(indexPath.item) >= \(displayModels.count)")
             // 임시로 빈 셀 반환
             return UICollectionViewCell()
         }

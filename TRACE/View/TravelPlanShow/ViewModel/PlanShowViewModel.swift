@@ -162,14 +162,14 @@ class PlanShowViewModel: BaseViewModel {
 
     // MARK: - Public Methods
     func loadTravelPlan(id: String) {
-        print("📊 여행 계획 로드 시작: ID \(id)")
+        print(" 여행 계획 로드 시작: ID \(id)")
 
         do {
             let realm = try Realm()
             let objectId = try ObjectId(string: id)
 
             guard let travelPlan = realm.object(ofType: TravelPlan.self, forPrimaryKey: objectId) else {
-                print("❌ 여행 계획을 찾을 수 없습니다: ID \(id)")
+                print(" 여행 계획을 찾을 수 없습니다: ID \(id)")
                 errorRelay.accept("여행 계획을 찾을 수 없습니다.")
                 return
             }
@@ -181,12 +181,12 @@ class PlanShowViewModel: BaseViewModel {
             // 저장된 일차별 데이터 로드
             loadDayDataFromRealm(travelPlan: travelPlan)
 
-            print("✅ 여행 계획 로드 완료: \(planData.travelName)")
+            print(" 여행 계획 로드 완료: \(planData.travelName)")
             print("   • 기간: \(DateManager.shared.formatToKoreanString(from: planData.startDate)) ~ \(DateManager.shared.formatToKoreanString(from: planData.endDate))")
             print("   • 총 일차: \(planData.totalDays)일")
 
         } catch {
-            print("❌ 여행 계획 로드 실패: \(error.localizedDescription)")
+            print(" 여행 계획 로드 실패: \(error.localizedDescription)")
             errorRelay.accept("여행 계획을 불러오는데 실패했습니다.")
         }
     }
@@ -194,7 +194,7 @@ class PlanShowViewModel: BaseViewModel {
     private func loadDayDataFromRealm(travelPlan: TravelPlan) {
         var storage: [Int: DayData] = [:]
 
-        print("📋 ===== Realm 데이터 로드 시작 =====")
+        print(" ===== Realm 데이터 로드 시작 =====")
         print("   • 전체 일차 개수: \(travelPlan.travelDays.count)개")
 
         for dayDetail in travelPlan.travelDays {
@@ -202,11 +202,11 @@ class PlanShowViewModel: BaseViewModel {
             dayData.budget = dayDetail.budget
             dayData.route = dayDetail.route
 
-            print("📋 Day \(dayDetail.dayNumber) 로드 중...")
-            print("   💰 예산: '\(dayDetail.budget)'")
-            print("   🚗 경로: '\(dayDetail.route)'")
-            print("   📍 저장된 좌표 개수: \(dayDetail.routeCoordinates.count)개")
-            print("   📋 일정 개수: \(dayDetail.schedules.count)개")
+            print(" Day \(dayDetail.dayNumber) 로드 중...")
+            print("    예산: '\(dayDetail.budget)'")
+            print("    경로: '\(dayDetail.route)'")
+            print("    저장된 좌표 개수: \(dayDetail.routeCoordinates.count)개")
+            print("    일정 개수: \(dayDetail.schedules.count)개")
 
             // 일정 아이템 로드
             let scheduleItems = dayDetail.schedules.map { schedule in
@@ -217,7 +217,7 @@ class PlanShowViewModel: BaseViewModel {
             // 좌표 데이터를 KakaoPlace로 변환 (모든 좌표 출력)
             var places: [KakaoPlace] = []
             for (index, coordinate) in dayDetail.routeCoordinates.enumerated() {
-                print("   📍 좌표 \(index + 1): \(coordinate.placeName) (\(coordinate.latitude), \(coordinate.longitude))")
+                print("    좌표 \(index + 1): \(coordinate.placeName) (\(coordinate.latitude), \(coordinate.longitude))")
 
                 let place = KakaoPlace(
                     id: coordinate.placeName,
@@ -238,15 +238,15 @@ class PlanShowViewModel: BaseViewModel {
             dayData.searchedPlaces = places
 
             storage[dayDetail.dayNumber] = dayData
-            print("   ✅ Day \(dayDetail.dayNumber) 로드 완료: \(places.count)개 좌표")
+            print("    Day \(dayDetail.dayNumber) 로드 완료: \(places.count)개 좌표")
         }
 
         dayDataStorage.accept(storage)
-        print("📋 ===== 일차별 데이터 로드 완료: \(storage.count)개 일차 =====")
+        print(" ===== 일차별 데이터 로드 완료: \(storage.count)개 일차 =====")
 
         // 전체 저장된 좌표 개수 요약
         let totalCoordinates = storage.values.reduce(0) { $0 + $1.searchedPlaces.count }
-        print("📍 전체 저장된 좌표: \(totalCoordinates)개")
+        print(" 전체 저장된 좌표: \(totalCoordinates)개")
     }
 
     func getCurrentDay() -> Int {
@@ -283,7 +283,7 @@ class PlanShowViewModel: BaseViewModel {
         currentStorage[day]?.searchedPlaces = places
         dayDataStorage.accept(currentStorage)
 
-        print("📍 검색된 장소 업데이트됨 - Day \(day): \(places.count)개")
+        print(" 검색된 장소 업데이트됨 - Day \(day): \(places.count)개")
 
         // 검색된 장소 업데이트 후 지연된 자동 저장 (디바운싱)
         scheduleAutoSave()
@@ -314,7 +314,7 @@ class PlanShowViewModel: BaseViewModel {
         currentStorage[day] = dayData
         dayDataStorage.accept(currentStorage)
 
-        print("🗑️ 일정 삭제됨 - Day \(day): \(removedItem.time) \(removedItem.location)")
+        print(" 일정 삭제됨 - Day \(day): \(removedItem.time) \(removedItem.location)")
 
         // 삭제 후 지연된 자동 저장 (디바운싱)
         scheduleAutoSave()
@@ -332,12 +332,12 @@ class PlanShowViewModel: BaseViewModel {
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: saveWorkItem!)
-        print("📅 자동 저장 예약됨 (1초 후 실행)")
+        print(" 자동 저장 예약됨 (1초 후 실행)")
     }
 
     private func saveAllChangesToRealm(isManualSave: Bool = false) {
         guard let travelPlan = currentTravelPlan else {
-            print("❌ 저장할 여행 계획이 없습니다")
+            print(" 저장할 여행 계획이 없습니다")
             if isManualSave {
                 saveResult.onNext((success: false, message: "저장할 여행 계획이 없습니다."))
             }
@@ -381,17 +381,17 @@ class PlanShowViewModel: BaseViewModel {
 
                     travelPlan.travelDays.append(dayDetail)
 
-                    print("📅 Day \(day) 저장: 예산 '\(data.budget)', 경로 '\(data.route)', 일정 \(data.scheduleItems.count)개")
+                    print(" Day \(day) 저장: 예산 '\(data.budget)', 경로 '\(data.route)', 일정 \(data.scheduleItems.count)개")
                 }
             }
 
-            print("✅ 여행 계획 변경사항 저장 완료!")
+            print(" 여행 계획 변경사항 저장 완료!")
             if isManualSave {
                 saveResult.onNext((success: true, message: "여행 계획이 성공적으로 저장되었습니다!"))
             }
 
         } catch {
-            print("❌ 여행 계획 저장 실패: \(error.localizedDescription)")
+            print(" 여행 계획 저장 실패: \(error.localizedDescription)")
             if isManualSave {
                 saveResult.onNext((success: false, message: "여행 계획 저장에 실패했습니다. 다시 시도해주세요."))
             }

@@ -22,18 +22,18 @@ extension TravelPlanShowViewController {
         mapManager.clearAllSearchResults()
         currentSearchedPlaces.removeAll()
         currentGooglePlaces.removeAll()
-        print("🗑️ 모든 검색 결과 삭제")
+        print(" 모든 검색 결과 삭제")
     }
 
     func performManualSearch(query: String) {
-        print("🔍 수동 검색 실행: \(query)")
-        print("🔍 현재 countryType: \(countryType)")
+        print(" 수동 검색 실행: \(query)")
+        print(" 현재 countryType: \(countryType)")
 
         if countryType == "국내" {
-            print("🇰🇷 [수동검색] 카카오 API 사용")
+            print(" [수동검색] 카카오 API 사용")
             performKakaoSearch(query: query)
         } else {
-            print("🌍 [수동검색] 구글 API 사용")
+            print(" [수동검색] 구글 API 사용")
             performGoogleSearch(query: query)
         }
     }
@@ -43,18 +43,18 @@ extension TravelPlanShowViewController {
             .subscribe(onNext: { [weak self] result in
                 switch result {
                 case .success(let response):
-                    print("✅ 카카오 검색 성공: \(response.documents.count)개 결과")
+                    print(" 카카오 검색 성공: \(response.documents.count)개 결과")
                     // 카카오 검색 시 구글 장소 정보 초기화
                     self?.currentGooglePlaces.removeAll()
                     if let bestMatch = self?.selectBestMatch(places: response.documents, query: query) {
                         print("🎯 최적 결과 선택: \(bestMatch.placeName)")
                         self?.mapManager.displaySearchResults(places: [bestMatch])
                     } else {
-                        print("⚠️ 검색 결과 없음")
+                        print(" 검색 결과 없음")
                         self?.showNoSearchResultsAlert(query: query)
                     }
                 case .failure(let error):
-                    print("❌ 카카오 검색 실패: \(error.localizedDescription)")
+                    print(" 카카오 검색 실패: \(error.localizedDescription)")
                 }
             })
             .disposed(by: disposeBag)
@@ -65,7 +65,7 @@ extension TravelPlanShowViewController {
             .subscribe(onNext: { [weak self] result in
                 switch result {
                 case .success(let response):
-                    print("✅ 구글 검색 성공: \(response.results.count)개 결과")
+                    print(" 구글 검색 성공: \(response.results.count)개 결과")
 
                     // 원본 구글 장소 정보 저장 (마커 클릭 시 사용)
                     self?.currentGooglePlaces = response.results
@@ -88,11 +88,11 @@ extension TravelPlanShowViewController {
                         )
                         self?.mapManager.displaySearchResults(places: [kakaoPlace])
                     } else {
-                        print("⚠️ 검색 결과 없음")
+                        print(" 검색 결과 없음")
                         self?.showNoSearchResultsAlert(query: query)
                     }
                 case .failure(let error):
-                    print("❌ 구글 검색 실패: \(error.localizedDescription)")
+                    print(" 구글 검색 실패: \(error.localizedDescription)")
                 }
             })
             .disposed(by: disposeBag)
@@ -140,11 +140,11 @@ extension TravelPlanShowViewController {
 // MARK: - MapManagerDelegate
 extension TravelPlanShowViewController: MapManagerDelegate {
     func mapManagerDidUpdateLocation(_ coordinate: CLLocationCoordinate2D) {
-        print("📍 TravelPlanShow: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
+        print(" TravelPlanShow: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
     }
 
     func mapManagerDidFailToGetLocation() {
-        print("📍 TravelPlanShow: Failed to get location, using default")
+        print(" TravelPlanShow: Failed to get location, using default")
     }
 
     func mapManagerDidSelectPlace(_ place: KakaoPlace) {
@@ -152,7 +152,7 @@ extension TravelPlanShowViewController: MapManagerDelegate {
         if countryType == "해외" {
             // 구글 검색 결과에서 해당 장소 찾기
             if let googlePlace = currentGooglePlaces.first(where: { $0.name == place.placeName }) {
-                print("🌍 구글 장소 정보 표시: \(place.placeName)")
+                print(" 구글 장소 정보 표시: \(place.placeName)")
                 showGooglePlaceInfoAlert(place: googlePlace)
             } else {
                 // 구글 장소를 찾을 수 없는 경우 기본 alert 표시
@@ -162,11 +162,11 @@ extension TravelPlanShowViewController: MapManagerDelegate {
             // 국내인 경우 기존 카카오 alert 표시
             showPlaceInfoAlert(place: place)
         }
-        print("📍 TravelPlanShow: Place selected: \(place.placeName)")
+        print(" TravelPlanShow: Place selected: \(place.placeName)")
     }
 
     func mapManagerDidUpdateSearchedPlaces(_ places: [KakaoPlace]) {
-        print("📍 ===== MapManager에서 검색된 장소들 업데이트 =====")
+        print(" ===== MapManager에서 검색된 장소들 업데이트 =====")
         print("   • 편집모드: \(isEditMode)")
         print("   • ViewModel 업데이트 중: \(isUpdatingFromViewModel)")
         print("   • 검색 업데이트 중: \(isUpdatingSearchFromMap)")
@@ -179,7 +179,7 @@ extension TravelPlanShowViewController: MapManagerDelegate {
             let newPlaceNames = places.map { $0.placeName }.sorted()
 
             if currentPlaceNames != newPlaceNames {
-                print("📍 새로운 검색 결과 감지: \(currentPlaceNames) → \(newPlaceNames)")
+                print(" 새로운 검색 결과 감지: \(currentPlaceNames) → \(newPlaceNames)")
 
                 // 검색 업데이트 플래그 설정
                 isUpdatingSearchFromMap = true
@@ -193,19 +193,19 @@ extension TravelPlanShowViewController: MapManagerDelegate {
                     // 플래그 해제는 더 늦게
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         self?.isUpdatingSearchFromMap = false
-                        print("📍 ViewModel 검색 장소 업데이트 완료")
+                        print(" ViewModel 검색 장소 업데이트 완료")
                     }
                 }
 
-                print("📍 검색된 장소들 로컬 업데이트 완료")
+                print(" 검색된 장소들 로컬 업데이트 완료")
             } else {
-                print("📍 동일한 검색 결과이므로 업데이트 스킵")
+                print(" 동일한 검색 결과이므로 업데이트 스킵")
             }
         } else {
-            print("📍 검색 업데이트 스킵 (조건 불충족)")
+            print(" 검색 업데이트 스킵 (조건 불충족)")
         }
 
-        print("📍 TravelPlanShow: Searched places updated: \(places.count)개")
+        print(" TravelPlanShow: Searched places updated: \(places.count)개")
         for (index, place) in places.enumerated() {
             print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
         }
@@ -220,8 +220,8 @@ extension TravelPlanShowViewController: MapManagerDelegate {
         let alert = UIAlertController(title: place.placeName.isEmpty ? "장소 정보" : place.placeName, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        📍 위치: \(String(format: "%.6f, %.6f", place.coordinate.latitude, place.coordinate.longitude))
-        📍 주소: \(place.addressName.isEmpty ? "정보 없음" : place.addressName)
+         위치: \(String(format: "%.6f, %.6f", place.coordinate.latitude, place.coordinate.longitude))
+         주소: \(place.addressName.isEmpty ? "정보 없음" : place.addressName)
         🏢 카테고리: \(place.categoryName.isEmpty ? "정보 없음" : place.categoryName)
         📞 전화번호: \(place.phone.isEmpty ? "정보 없음" : place.phone)
         """
@@ -282,9 +282,9 @@ extension TravelPlanShowViewController: MapManagerDelegate {
         let alert = UIAlertController(title: place.name, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        📍 주소: \(place.formattedAddress ?? "정보 없음")
+         주소: \(place.formattedAddress ?? "정보 없음")
         🏢 카테고리: \(place.types.first ?? "정보 없음")
-        🌐 구글맵: Google Maps
+         구글맵: Google Maps
         📏 좌표: \(place.geometry.location.lat), \(place.geometry.location.lng)
         """
 
@@ -373,20 +373,20 @@ extension TravelPlanShowViewController: MapManagerDelegate {
         }
 
         guard let url = googleMapsURL else {
-            print("❌ 구글맵 URL 생성 실패")
+            print(" 구글맵 URL 생성 실패")
             return
         }
 
         if UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url, options: [:]) { success in
                 if success {
-                    print("✅ 구글맵 앱으로 이동 성공: \(place.name)")
+                    print(" 구글맵 앱으로 이동 성공: \(place.name)")
                 } else {
-                    print("❌ 구글맵 앱 이동 실패")
+                    print(" 구글맵 앱 이동 실패")
                 }
             }
         } else {
-            print("❌ 구글맵 URL을 열 수 없음: \(url)")
+            print(" 구글맵 URL을 열 수 없음: \(url)")
         }
     }
 

@@ -259,7 +259,7 @@ private extension TravelCalendarViewController {
 
         if let plan = travelPlan {
             // 여행 계획이 있는 경우
-            print("✅ [UI] 여행 정보 표시: \(plan.travelName)")
+            print(" [UI] 여행 정보 표시: \(plan.travelName)")
             travelInfoView.isHidden = false
             travelTitleLabel.text = plan.travelName
             travelCountryLabel.text = plan.nation
@@ -271,14 +271,14 @@ private extension TravelCalendarViewController {
             travelPeriodLabel.text = "\(startDateString) - \(endDateString)"
         } else {
             // 여행 계획이 없는 경우
-            print("❌ [UI] 여행 정보 숨김")
+            print(" [UI] 여행 정보 숨김")
             travelInfoView.isHidden = true
         }
     }
 
     @objc private func travelInfoViewTapped() {
         guard let travelPlan = currentTravelPlan else {
-            print("❌ [Navigation] 여행 계획이 없어서 이동할 수 없습니다")
+            print(" [Navigation] 여행 계획이 없어서 이동할 수 없습니다")
             return
         }
 
@@ -312,7 +312,7 @@ extension TravelCalendarViewController: FSCalendarDelegate {
         selectedDate = date
         updateSelectedDateLabel()
 
-        print("🔥 [Calendar] 날짜 선택됨: \(date)")
+        print(" [Calendar] 날짜 선택됨: \(date)")
         viewModel.selectDate(date)
     }
 

@@ -34,7 +34,7 @@ extension TravelPlanShowViewController: UICollectionViewDataSource {
 extension TravelPlanShowViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         selectDay(at: indexPath.item)
-        print("📅 CollectionView에서 선택됨: \(indexPath.item + 1)일차")
+        print(" CollectionView에서 선택됨: \(indexPath.item + 1)일차")
     }
 
     func selectDay(at index: Int) {
@@ -53,7 +53,7 @@ extension TravelPlanShowViewController: UICollectionViewDelegate {
             ])
         }
 
-        print("📅 일차 선택됨: \(currentDay)일차 (index: \(index))")
+        print(" 일차 선택됨: \(currentDay)일차 (index: \(index))")
     }
 }
 
@@ -78,7 +78,7 @@ extension TravelPlanShowViewController: UISearchBarDelegate {
         searchBar.resignFirstResponder()
 
         guard let query = searchBar.text, !query.isEmpty else {
-            print("⚠️ 빈 검색어")
+            print(" 빈 검색어")
             return
         }
 
@@ -87,7 +87,7 @@ extension TravelPlanShowViewController: UISearchBarDelegate {
             performManualSearch(query: query)
         }
 
-        print("🔍 검색바에서 검색: \(query)")
+        print(" 검색바에서 검색: \(query)")
     }
 
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
@@ -98,6 +98,6 @@ extension TravelPlanShowViewController: UISearchBarDelegate {
             return
         }
 
-        print("🔍 검색바 편집 시작")
+        print(" 검색바 편집 시작")
     }
 }

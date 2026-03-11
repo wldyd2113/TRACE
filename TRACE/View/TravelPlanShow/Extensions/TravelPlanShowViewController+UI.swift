@@ -277,7 +277,7 @@ extension TravelPlanShowViewController {
 
     func cancelEdit() {
         // 변경사항 취소하고 원래 데이터로 복원
-        print("❌ 편집 취소")
+        print(" 편집 취소")
         setReadOnlyMode()
 
         // 원래 데이터로 UI 복원
@@ -285,7 +285,7 @@ extension TravelPlanShowViewController {
         updateDayUI(with: originalDayData)
         updateScheduleUI(with: originalDayData.scheduleItems)
 
-        print("🔄 원래 데이터로 복원 완료")
+        print(" 원래 데이터로 복원 완료")
     }
 
     func addScheduleItem() {
@@ -307,17 +307,17 @@ extension TravelPlanShowViewController {
             } else {
                 planCountryType = "국내"
             }
-            print("🔄 nation 값 변환: '\(planData.nation)' → '\(planCountryType)'")
+            print(" nation 값 변환: '\(planData.nation)' → '\(planCountryType)'")
             self?.setCountryType(planCountryType)
 
             // CollectionView 업데이트
             self?.dateCollectionView.reloadData()
 
-            print("🔄 여행 계획 UI 업데이트:")
-            print("   🏝️ 여행지: \(planData.travelName)")
-            print("   🌍 국가: \(planData.nation)")
-            print("   📅 기간: \(DateManager.shared.formatToKoreanString(from: planData.startDate)) ~ \(DateManager.shared.formatToKoreanString(from: planData.endDate))")
-            print("   📊 총 일차: \(planData.totalDays)일")
+            print(" 여행 계획 UI 업데이트:")
+            print("    여행지: \(planData.travelName)")
+            print("    국가: \(planData.nation)")
+            print("    기간: \(DateManager.shared.formatToKoreanString(from: planData.startDate)) ~ \(DateManager.shared.formatToKoreanString(from: planData.endDate))")
+            print("    총 일차: \(planData.totalDays)일")
         }
     }
 
@@ -363,10 +363,10 @@ extension TravelPlanShowViewController {
                 print("🗺️ 검색 업데이트 중이므로 지도 업데이트 스킵")
             }
 
-            print("🔄 Day \(self.currentDay) UI 업데이트:")
-            print("   💰 예산: '\(dayData.budget.isEmpty ? "미설정" : dayData.budget)'")
-            print("   📋 일정: \(dayData.scheduleItems.count)개")
-            print("   📍 장소: \(dayData.searchedPlaces.count)개")
+            print(" Day \(self.currentDay) UI 업데이트:")
+            print("    예산: '\(dayData.budget.isEmpty ? "미설정" : dayData.budget)'")
+            print("    일정: \(dayData.scheduleItems.count)개")
+            print("    장소: \(dayData.searchedPlaces.count)개")
         }
     }
 
@@ -399,7 +399,7 @@ extension TravelPlanShowViewController {
                     })
                 }
 
-                print("🔄 Schedule UI 업데이트: \(scheduleItems.count)개 일정 (애니메이션 적용)")
+                print(" Schedule UI 업데이트: \(scheduleItems.count)개 일정 (애니메이션 적용)")
             }
         }
     }
@@ -458,7 +458,7 @@ extension TravelPlanShowViewController {
 
         // 유효한 인덱스인지 확인
         guard index < currentScheduleItems.count else {
-            print("❌ 잘못된 인덱스: \(index)")
+            print(" 잘못된 인덱스: \(index)")
             return
         }
 
@@ -480,7 +480,7 @@ extension TravelPlanShowViewController {
         alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: "Cancel"), style: .cancel))
         alert.addAction(UIAlertAction(title: NSLocalizedString("delete", comment: "Delete"), style: .destructive) { [weak self] _ in
             self?.viewModel.removeScheduleItem(at: index, forDay: self?.currentDay ?? 1)
-            print("🗑️ 일정 삭제 완료: \(itemToDelete.time) - \(itemToDelete.location)")
+            print(" 일정 삭제 완료: \(itemToDelete.time) - \(itemToDelete.location)")
         })
 
         present(alert, animated: true)
@@ -541,7 +541,7 @@ extension TravelPlanShowViewController {
             try realm.write {
                 if let planToDelete = realm.object(ofType: TravelPlan.self, forPrimaryKey: objectId) {
                     realm.delete(planToDelete)
-                    print("🗑️ 여행 계획 삭제 완료: \(planIdString)")
+                    print(" 여행 계획 삭제 완료: \(planIdString)")
                 }
             }
 

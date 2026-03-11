@@ -73,10 +73,10 @@ class PlanMainViewModel: BaseViewModel {
 
     // MARK: - Private Methods
     private func loadTravelData() {
-        print("📊 여행 계획 데이터 로드 시작")
+        print(" 여행 계획 데이터 로드 시작")
 
         guard let realm = RealmManager.shared.getRealm() else {
-            print("❌ Realm 인스턴스를 가져올 수 없습니다")
+            print(" Realm 인스턴스를 가져올 수 없습니다")
             errorRelay.accept(NSLocalizedString("database_connection_failed", comment: "Database connection failed"))
             return
         }
@@ -84,13 +84,13 @@ class PlanMainViewModel: BaseViewModel {
         do {
             let allPlans = realm.objects(TravelPlan.self).sorted(byKeyPath: "startDate", ascending: true)
 
-            print("📋 Realm에서 찾은 여행 계획: \(allPlans.count)개")
+            print(" Realm에서 찾은 여행 계획: \(allPlans.count)개")
 
             // 현재 날짜 기준으로 지나지 않은 여행 계획만 필터링
             let today = DateManager.shared.today()
             let upcomingPlans = allPlans.filter { $0.startDate >= today }
 
-            print("📅 오늘 날짜: \(DateManager.shared.formatToStandardString(from: today))")
+            print(" 오늘 날짜: \(DateManager.shared.formatToStandardString(from: today))")
             print("✈️ 다가오는 여행 계획: \(upcomingPlans.count)개")
 
             // 가장 가까운 미래 여행 계획을 메인으로 표시
@@ -103,7 +103,7 @@ class PlanMainViewModel: BaseViewModel {
 
                 print("🏆 메인 여행 계획: \(mainData.country) (\(mainData.dDay))")
             } else {
-                print("⚠️ 다가오는 여행 계획이 없습니다")
+                print(" 다가오는 여행 계획이 없습니다")
                 mainTravelData.accept(nil)
 
                 // 위젯 데이터 클리어
@@ -114,7 +114,7 @@ class PlanMainViewModel: BaseViewModel {
             let allTravelPlans = Array(allPlans).map { TravelPlanData(from: $0) }
             travelList.accept(allTravelPlans)
 
-            print("📋 로드된 여행 계획 리스트: \(allTravelPlans.count)개")
+            print(" 로드된 여행 계획 리스트: \(allTravelPlans.count)개")
             for plan in allTravelPlans {
                 print("   • \(plan.location) (\(plan.country)) - \(plan.date)")
             }
@@ -125,12 +125,12 @@ class PlanMainViewModel: BaseViewModel {
                 print("📜 지난 여행 계획 (숨김 처리): \(pastPlans.count)개")
                 for pastPlan in pastPlans {
                     let pastData = TravelPlanData(from: pastPlan)
-                    print("   🗓️ \(pastData.location) (\(pastData.country)) - \(pastData.date) [지남]")
+                    print("    \(pastData.location) (\(pastData.country)) - \(pastData.date) [지남]")
                 }
             }
 
         } catch {
-            print("❌ Realm 데이터 로드 실패: \(error.localizedDescription)")
+            print(" Realm 데이터 로드 실패: \(error.localizedDescription)")
             errorRelay.accept(NSLocalizedString("load_travel_plan_failed", comment: "Load travel plan failed"))
         }
     }
@@ -146,7 +146,7 @@ class PlanMainViewModel: BaseViewModel {
         )
 
         WidgetDataManager.shared.saveUpcomingTravelData(widgetData)
-        print("🔄 위젯 데이터 업데이트 완료: \(widgetData.destination)")
+        print(" 위젯 데이터 업데이트 완료: \(widgetData.destination)")
     }
 
     // MARK: - Public Methods

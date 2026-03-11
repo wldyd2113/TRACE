@@ -42,7 +42,7 @@ class WidgetDataManager {
         let deviceKey = getDeviceSpecificKey()
 
         guard let userDefaults = sharedUserDefaults else {
-            print("❌ App Groups UserDefaults를 찾을 수 없습니다")
+            print(" App Groups UserDefaults를 찾을 수 없습니다")
             return
         }
 
@@ -51,14 +51,14 @@ class WidgetDataManager {
                 let encodedData = try JSONEncoder().encode(data)
                 userDefaults.set(encodedData, forKey: deviceKey)
                 userDefaults.synchronize()
-                print("✅ 위젯용 여행 데이터 저장 완료: \(data.destination) (키: \(deviceKey))")
+                print(" 위젯용 여행 데이터 저장 완료: \(data.destination) (키: \(deviceKey))")
             } catch {
-                print("❌ 위젯용 데이터 인코딩 실패: \(error)")
+                print(" 위젯용 데이터 인코딩 실패: \(error)")
             }
         } else {
             userDefaults.removeObject(forKey: deviceKey)
             userDefaults.synchronize()
-            print("✅ 위젯용 여행 데이터 삭제 완료 (키: \(deviceKey))")
+            print(" 위젯용 여행 데이터 삭제 완료 (키: \(deviceKey))")
         }
     }
 
@@ -67,29 +67,29 @@ class WidgetDataManager {
         // 기기별 고유 키 생성
         let deviceKey = getDeviceSpecificKey()
 
-        print("🔍 위젯에서 데이터 로드 시도...")
+        print(" 위젯에서 데이터 로드 시도...")
         print("   App Group ID: \(appGroupIdentifier)")
         print("   기기별 키: \(deviceKey)")
 
         guard let userDefaults = sharedUserDefaults else {
-            print("❌ 위젯에서 App Groups UserDefaults를 찾을 수 없습니다")
+            print(" 위젯에서 App Groups UserDefaults를 찾을 수 없습니다")
             print("   위젯 타겟에도 App Groups가 설정되어 있는지 확인하세요")
             return nil
         }
 
         guard let data = userDefaults.data(forKey: deviceKey) else {
-            print("📭 저장된 여행 데이터가 없습니다 (키: \(deviceKey))")
+            print(" 저장된 여행 데이터가 없습니다 (키: \(deviceKey))")
             print("   메인 앱에서 여행 계획을 추가하고 앱을 새로고침해보세요")
             return nil
         }
 
         do {
             let travelData = try JSONDecoder().decode(WidgetTravelData.self, from: data)
-            print("✅ 위젯용 여행 데이터 로드 완료: \(travelData.destination)")
+            print(" 위젯용 여행 데이터 로드 완료: \(travelData.destination)")
             print("   D-\(travelData.daysUntil) (\(travelData.startDate))")
             return travelData
         } catch {
-            print("❌ 위젯용 데이터 디코딩 실패: \(error)")
+            print(" 위젯용 데이터 디코딩 실패: \(error)")
             return nil
         }
     }

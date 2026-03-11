@@ -411,7 +411,7 @@ extension TravelRecordPhotoViewController: DesiginProtocolBind {
 extension TravelRecordPhotoViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let allPhotos = allPhotos else {
-            print("⚠️ allPhotos가 nil입니다")
+            print(" allPhotos가 nil입니다")
             return 0
         }
         return allPhotos.count
@@ -420,7 +420,7 @@ extension TravelRecordPhotoViewController: UICollectionViewDataSource, UICollect
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let allPhotos = allPhotos,
               indexPath.item < allPhotos.count else {
-            print("❌ 잘못된 인덱스 접근: \(indexPath.item)")
+            print(" 잘못된 인덱스 접근: \(indexPath.item)")
             // 빈 셀 반환
             return UICollectionViewCell()
         }

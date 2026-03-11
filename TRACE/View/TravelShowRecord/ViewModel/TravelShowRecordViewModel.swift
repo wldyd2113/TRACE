@@ -99,14 +99,14 @@ class TravelShowRecordViewModel {
     // MARK: - Private Methods
     private func loadRecordData() {
         guard let recordId = currentRecordId else {
-            print("❌ 여행 기록 ID가 없습니다.")
+            print(" 여행 기록 ID가 없습니다.")
             return
         }
 
         isLoadingRelay.accept(true)
 
         guard let realm = RealmManager.shared.getRealm() else {
-            print("❌ Realm 접근 실패")
+            print(" Realm 접근 실패")
             isLoadingRelay.accept(false)
             showAlertRelay.accept(AlertData(
                 title: NSLocalizedString("error", comment: "Error"),
@@ -123,14 +123,14 @@ class TravelShowRecordViewModel {
                 recordDataRelay.accept(displayData)
                 print("📖 여행 기록 데이터 로드 성공: \(record.travelName)")
             } else {
-                print("❌ 해당 ID의 여행 기록을 찾을 수 없습니다: \(recordId)")
+                print(" 해당 ID의 여행 기록을 찾을 수 없습니다: \(recordId)")
                 showAlertRelay.accept(AlertData(
                     title: NSLocalizedString("error", comment: "Error"),
                     message: NSLocalizedString("record_not_found", comment: "Record not found")
                 ))
             }
         } catch {
-            print("❌ ObjectId 변환 실패: \(error)")
+            print(" ObjectId 변환 실패: \(error)")
             showAlertRelay.accept(AlertData(
                 title: NSLocalizedString("error", comment: "Error"),
                 message: NSLocalizedString("invalid_record_id", comment: "Invalid record ID")
@@ -173,7 +173,7 @@ class TravelShowRecordViewModel {
             do {
                 return try Data(contentsOf: photoPath)
             } catch {
-                print("❌ 사진 로드 실패: \(error) - 경로: \(photoPath.path)")
+                print(" 사진 로드 실패: \(error) - 경로: \(photoPath.path)")
                 return nil
             }
         }
@@ -181,13 +181,13 @@ class TravelShowRecordViewModel {
 
     private func toggleEditMode(_ edit: Bool) {
         isEditModeRelay.accept(edit)
-        print("🔄 편집 모드: \(edit ? "ON" : "OFF")")
+        print(" 편집 모드: \(edit ? "ON" : "OFF")")
     }
 
     private func saveUpdatedRecord(route: String, record: String, places: [KakaoPlace]) {
         guard let recordId = currentRecordId,
               let realm = RealmManager.shared.getRealm() else {
-            print("❌ 저장 실패: Realm 접근 불가")
+            print(" 저장 실패: Realm 접근 불가")
             showAlertRelay.accept(AlertData(
                 title: NSLocalizedString("save_failed", comment: "Save failed"),
                 message: NSLocalizedString("database_connection_failed", comment: "Database connection failed")
@@ -214,7 +214,7 @@ class TravelShowRecordViewModel {
                         recordPlace.latitude = place.coordinate.latitude
                         recordPlace.longitude = place.coordinate.longitude
                         travelRecord.locations.append(recordPlace)
-                        print("📍 장소 저장: \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
+                        print(" 장소 저장: \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
                     }
                 }
 
@@ -228,11 +228,11 @@ class TravelShowRecordViewModel {
                 // 저장 완료 후 바로 이전 화면으로 이동
                 navigateBackRelay.accept(())
 
-                print("✅ 여행 기록 수정 완료")
+                print(" 여행 기록 수정 완료")
                 print("💾 저장된 장소 개수: \(travelRecord.locations.count)")
             }
         } catch {
-            print("❌ 여행 기록 저장 실패: \(error)")
+            print(" 여행 기록 저장 실패: \(error)")
             showAlertRelay.accept(AlertData(
                 title: NSLocalizedString("save_failed", comment: "Save failed"),
                 message: NSLocalizedString("record_save_error", comment: "Record save error")
@@ -247,13 +247,13 @@ class TravelShowRecordViewModel {
             recordDataRelay.accept(originalData)
         }
         toggleEditMode(false)
-        print("❌ 편집 취소")
+        print(" 편집 취소")
     }
 
     private func deleteRecord() {
         guard let recordId = currentRecordId,
               let realm = RealmManager.shared.getRealm() else {
-            print("❌ 삭제 실패: Realm 접근 불가")
+            print(" 삭제 실패: Realm 접근 불가")
             showAlertRelay.accept(AlertData(
                 title: NSLocalizedString("error", comment: "Error"),
                 message: NSLocalizedString("database_connection_failed", comment: "Database connection failed")
@@ -276,20 +276,20 @@ class TravelShowRecordViewModel {
                     realm.delete(travelRecord)
                 }
 
-                print("✅ 여행 기록 삭제 완료: \(recordId)")
+                print(" 여행 기록 삭제 완료: \(recordId)")
 
                 // 삭제 완료 후 이전 화면으로 이동
                 navigateBackRelay.accept(())
 
             } else {
-                print("❌ 삭제할 여행 기록을 찾을 수 없습니다: \(recordId)")
+                print(" 삭제할 여행 기록을 찾을 수 없습니다: \(recordId)")
                 showAlertRelay.accept(AlertData(
                     title: NSLocalizedString("error", comment: "Error"),
                     message: NSLocalizedString("record_delete_not_found", comment: "Record delete not found")
                 ))
             }
         } catch {
-            print("❌ 여행 기록 삭제 실패: \(error)")
+            print(" 여행 기록 삭제 실패: \(error)")
             showAlertRelay.accept(AlertData(
                 title: NSLocalizedString("error", comment: "Error"),
                 message: NSLocalizedString("record_delete_error", comment: "Record delete error")
@@ -307,10 +307,10 @@ class TravelShowRecordViewModel {
             do {
                 if FileManager.default.fileExists(atPath: photoPath.path) {
                     try FileManager.default.removeItem(at: photoPath)
-                    print("🗑️ 사진 파일 삭제 완료: \(fileName)")
+                    print(" 사진 파일 삭제 완료: \(fileName)")
                 }
             } catch {
-                print("❌ 사진 파일 삭제 실패: \(error) - 경로: \(photoPath.path)")
+                print(" 사진 파일 삭제 실패: \(error) - 경로: \(photoPath.path)")
             }
         }
     }

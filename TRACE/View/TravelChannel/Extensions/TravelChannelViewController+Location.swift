@@ -14,7 +14,7 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
 
     func setupLocationManager() {
         guard locationManager.delegate == nil else {
-            print("⚠️ LocationManager가 이미 설정됨")
+            print(" LocationManager가 이미 설정됨")
             return
         }
 
@@ -28,19 +28,19 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
             locationManager.requestWhenInUseAuthorization()
         }
 
-        print("✅ LocationManager 설정 완료 - 권한 상태: \(authStatus.rawValue)")
+        print(" LocationManager 설정 완료 - 권한 상태: \(authStatus.rawValue)")
     }
 
     func startRouteTracking() {
         guard !currentTravelRoutes.isEmpty else {
-            print("📍 추적할 경로가 없습니다")
+            print(" 추적할 경로가 없습니다")
             return
         }
 
         isTrackingRoute = true
         currentRouteIndex = 0
 
-        print("📍 경로 추적 시작: \(currentTravelRoutes.count)개 여행 경로")
+        print(" 경로 추적 시작: \(currentTravelRoutes.count)개 여행 경로")
 
         // authorizationStatus를 직접 확인하여 UI 차단 방지
         let authStatus = locationManager.authorizationStatus
@@ -50,13 +50,13 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
         case .authorizedAlways:
             startLocationUpdates()
         case .notDetermined:
-            print("📍 위치 권한 요청")
+            print(" 위치 권한 요청")
             locationManager.requestWhenInUseAuthorization()
         case .denied, .restricted:
-            print("📍 위치 권한이 거부됨")
+            print(" 위치 권한이 거부됨")
             showLocationPermissionAlert()
         @unknown default:
-            print("📍 알 수 없는 위치 권한 상태")
+            print(" 알 수 없는 위치 권한 상태")
             locationManager.requestWhenInUseAuthorization()
         }
     }
@@ -65,7 +65,7 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
         // 권한 상태 재확인
         let authStatus = locationManager.authorizationStatus
         guard authStatus == .authorizedWhenInUse || authStatus == .authorizedAlways else {
-            print("❌ 위치 권한이 없어 위치 업데이트를 시작할 수 없음")
+            print(" 위치 권한이 없어 위치 업데이트를 시작할 수 없음")
             return
         }
 
@@ -73,54 +73,54 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
         // 권한이 허용된 상태에서만 호출되므로 직접 위치 업데이트 시작
         if let location = locationManager.location {
             guard !location.horizontalAccuracy.isNaN else {
-                print("❌ 위치 정확도가 유효하지 않음")
+                print(" 위치 정확도가 유효하지 않음")
                 return
             }
         }
 
         locationManager.startUpdatingLocation()
-        print("📍 위치 업데이트 시작 (포그라운드에서만)")
+        print(" 위치 업데이트 시작 (포그라운드에서만)")
     }
 
     func stopRouteTracking() {
         isTrackingRoute = false
         locationManager.stopUpdatingLocation()
-        print("📍 경로 추적 종료")
+        print(" 경로 추적 종료")
     }
 
     // MARK: - CLLocationManagerDelegate
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let currentLocation = locations.last, isTrackingRoute else { return }
 
-        print("📍 현재 위치 업데이트: \(currentLocation.coordinate.latitude), \(currentLocation.coordinate.longitude)")
+        print(" 현재 위치 업데이트: \(currentLocation.coordinate.latitude), \(currentLocation.coordinate.longitude)")
 
         checkArrivalAtDestinations(currentLocation: currentLocation)
     }
 
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        print("📍 위치 권한 상태 변경: \(status.rawValue)")
+        print(" 위치 권한 상태 변경: \(status.rawValue)")
 
         switch status {
         case .authorizedWhenInUse, .authorizedAlways:
-            print("📍 위치 권한 허용됨")
+            print(" 위치 권한 허용됨")
             if isTrackingRoute {
                 startLocationUpdates()
             }
         case .denied, .restricted:
-            print("📍 위치 권한 거부됨")
+            print(" 위치 권한 거부됨")
             isTrackingRoute = false
             showLocationPermissionAlert()
         case .notDetermined:
-            print("📍 위치 권한 미결정 상태")
+            print(" 위치 권한 미결정 상태")
             // 여기서는 아무것도 하지 않고 사용자의 응답을 기다림
         @unknown default:
-            print("📍 알 수 없는 위치 권한 상태")
+            print(" 알 수 없는 위치 권한 상태")
             isTrackingRoute = false
         }
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("❌ 위치 업데이트 실패: \(error.localizedDescription)")
+        print(" 위치 업데이트 실패: \(error.localizedDescription)")
     }
 
     private func checkArrivalAtDestinations(currentLocation: CLLocation) {
@@ -140,7 +140,7 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
             let distance = currentLocation.distance(from: placeLocation)
 
             if distance <= arrivalThreshold {
-                print("📍 도착! \(place.name) - 거리: \(String(format: "%.1f", distance))m")
+                print(" 도착! \(place.name) - 거리: \(String(format: "%.1f", distance))m")
 
                 // 해당 장소를 지도에서 제거
                 removeArrivedPlace(place)
@@ -177,7 +177,7 @@ extension TravelChannelViewController: CLLocationManagerDelegate {
         if remainingPlaces.isEmpty {
             // 현재 경로 완료, 다음 경로로 이동
             currentRouteIndex += 1
-            print("✅ \(currentRoute.travelName) \(currentRoute.currentDay)일차 완료!")
+            print(" \(currentRoute.travelName) \(currentRoute.currentDay)일차 완료!")
 
             if currentRouteIndex < currentTravelRoutes.count {
                 let nextRoute = currentTravelRoutes[currentRouteIndex]

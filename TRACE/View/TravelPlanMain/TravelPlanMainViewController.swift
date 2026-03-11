@@ -127,16 +127,16 @@ class TravelPlanMainViewController: UIViewController {
     // MARK: - Sample Data Methods
     private func addSampleDataIfNeeded() {
         guard let realm = RealmManager.shared.getRealm() else {
-            print("❌ Realm 인스턴스를 가져올 수 없습니다")
+            print(" Realm 인스턴스를 가져올 수 없습니다")
             return
         }
 
         let existingPlans = realm.objects(TravelPlan.self)
         if existingPlans.isEmpty {
-            print("📝 Realm에 여행 계획이 없습니다. 샘플 데이터를 추가합니다...")
+            print(" Realm에 여행 계획이 없습니다. 샘플 데이터를 추가합니다...")
             addSampleTravelPlans()
         } else {
-            print("📋 Realm에 \(existingPlans.count)개의 여행 계획이 있습니다")
+            print(" Realm에 \(existingPlans.count)개의 여행 계획이 있습니다")
             for plan in existingPlans {
                 print("   • \(plan.travelName), \(plan.nation) - \(DateManager.shared.formatToStandardString(from: plan.startDate))")
             }
@@ -172,10 +172,10 @@ class TravelPlanMainViewController: UIViewController {
                 jejuTrip.endDate = Calendar.current.date(byAdding: .day, value: 33, to: Date()) ?? Date()
                 realm.add(jejuTrip)
 
-                print("✅ 샘플 여행 계획 3개를 추가했습니다")
+                print(" 샘플 여행 계획 3개를 추가했습니다")
             }
         } catch {
-            print("❌ 샘플 데이터 추가 실패: \(error)")
+            print(" 샘플 데이터 추가 실패: \(error)")
         }
     }
 }
@@ -255,7 +255,7 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
                 self?.dateLabel.text = NSLocalizedString("plan_new_travel", comment: "Plan new travel")
                 self?.dDayLabel.text = ""
                 self?.imagePlaceholderLabel.isHidden = true // 이미지가 있으므로 텍스트 숨김
-                print("📭 No upcoming travel plans, showing default UI")
+                print(" No upcoming travel plans, showing default UI")
                 return
             }
 
@@ -264,11 +264,11 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
             self?.dDayLabel.text = data.dDay
             self?.imagePlaceholderLabel.isHidden = true // 이미지가 있으므로 텍스트 숨김
 
-            print("🔄 메인 여행 데이터 업데이트:")
-            print("   🏝️ 여행지: \(data.country)")
-            print("   🌍 국가: \(data.nation)")
-            print("   📅 날짜: \(data.date)")
-            print("   📊 D-Day: \(data.dDay)")
+            print(" 메인 여행 데이터 업데이트:")
+            print("    여행지: \(data.country)")
+            print("    국가: \(data.nation)")
+            print("    날짜: \(data.date)")
+            print("    D-Day: \(data.dDay)")
         }
     }
 
@@ -282,7 +282,7 @@ extension TravelPlanMainViewController: DesiginProtocolBind {
             imagePlaceholderLabel.isHidden = true
             print("🐹 랜덤 햄토리 이미지 설정: \(imageName)")
         } else {
-            print("⚠️ 햄토리 이미지를 찾을 수 없음: \(imageName)")
+            print(" 햄토리 이미지를 찾을 수 없음: \(imageName)")
             // 이미지가 없으면 기본 상태 유지
             imagePlaceholderLabel.isHidden = false
         }

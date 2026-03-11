@@ -70,7 +70,7 @@ class SearchViewModel {
 
     // MARK: - Private Methods
     private func performSearch(query: String, countryType: String) {
-        print("🔍 검색 시작: '\(query)' (국가: \(countryType))")
+        print(" 검색 시작: '\(query)' (국가: \(countryType))")
         isLoadingRelay.accept(true)
 
         if countryType == "해외" {
@@ -104,16 +104,16 @@ class SearchViewModel {
                     }
 
                     self?.searchResultsRelay.accept(places)
-                    print("✅ 카카오 검색 완료: \(places.count)개 장소 발견")
+                    print(" 카카오 검색 완료: \(places.count)개 장소 발견")
 
                 case .failure(let error):
-                    print("❌ 카카오 검색 실패: \(error.localizedDescription)")
+                    print(" 카카오 검색 실패: \(error.localizedDescription)")
                     self?.errorMessageRelay.accept("검색에 실패했습니다. 다시 시도해주세요.")
                     self?.searchResultsRelay.accept([])
                 }
             }, onError: { [weak self] error in
                 self?.isLoadingRelay.accept(false)
-                print("❌ 카카오 네트워크 오류: \(error.localizedDescription)")
+                print(" 카카오 네트워크 오류: \(error.localizedDescription)")
                 self?.errorMessageRelay.accept("네트워크 오류가 발생했습니다.")
                 self?.searchResultsRelay.accept([])
             })
@@ -144,16 +144,16 @@ class SearchViewModel {
                     }
 
                     self?.searchResultsRelay.accept(places)
-                    print("✅ 구글 검색 완료: \(places.count)개 장소 발견")
+                    print(" 구글 검색 완료: \(places.count)개 장소 발견")
 
                 case .failure(let error):
-                    print("❌ 구글 검색 실패: \(error.localizedDescription)")
+                    print(" 구글 검색 실패: \(error.localizedDescription)")
                     self?.errorMessageRelay.accept("검색에 실패했습니다. 다시 시도해주세요.")
                     self?.searchResultsRelay.accept([])
                 }
             }, onError: { [weak self] error in
                 self?.isLoadingRelay.accept(false)
-                print("❌ 구글 네트워크 오류: \(error.localizedDescription)")
+                print(" 구글 네트워크 오류: \(error.localizedDescription)")
                 self?.errorMessageRelay.accept("네트워크 오류가 발생했습니다.")
                 self?.searchResultsRelay.accept([])
             })

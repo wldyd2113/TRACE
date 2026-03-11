@@ -90,9 +90,9 @@ class TravelChannelViewController: UIViewController {
             // ViewModel 바인딩
             bindViewModel()
 
-            print("✅ TravelChannelViewController 초기화 완료")
+            print(" TravelChannelViewController 초기화 완료")
         } catch {
-            print("❌ TravelChannelViewController 초기화 실패: \(error)")
+            print(" TravelChannelViewController 초기화 실패: \(error)")
         }
     }
 
@@ -101,7 +101,7 @@ class TravelChannelViewController: UIViewController {
         navigationController?.setNavigationBarHidden(false, animated: animated)
 
         // 뷰가 나타날 때마다 데이터 새로고침 (안전하게)
-        print("📍 TravelChannel 화면 나타남 - 데이터 새로고침")
+        print(" TravelChannel 화면 나타남 - 데이터 새로고침")
         DispatchQueue.main.async { [weak self] in
             self?.viewModel.refreshData()
         }
@@ -112,7 +112,7 @@ class TravelChannelViewController: UIViewController {
         if isTrackingRoute {
             stopRouteTracking()
         }
-        print("🗑️ TravelChannelViewController 메모리 해제")
+        print(" TravelChannelViewController 메모리 해제")
     }
 }
 

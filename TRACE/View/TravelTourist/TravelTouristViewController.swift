@@ -292,16 +292,16 @@ extension TravelTouristViewController {
         let alert = UIAlertController(title: attraction.name, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        🌍 \(NSLocalizedString("country", comment: "Country")): \(attraction.country)
+         \(NSLocalizedString("country", comment: "Country")): \(attraction.country)
         🏷️ \(NSLocalizedString("category", comment: "Category")): \(attraction.category.localizedTitle)
-        📍 \(NSLocalizedString("location", comment: "Location")): \(attraction.latitude), \(attraction.longitude)
-        📝 \(NSLocalizedString("description", comment: "Description")): \(attraction.description)
+         \(NSLocalizedString("location", comment: "Location")): \(attraction.latitude), \(attraction.longitude)
+         \(NSLocalizedString("description", comment: "Description")): \(attraction.description)
         """
 
         alert.message = infoMessage
 
         alert.addAction(UIAlertAction(title: NSLocalizedString("add_to_travel_plan", comment: "Add to travel plan"), style: .default) { _ in
-            print("📋 여행 계획에 추가: \(attraction.name)")
+            print(" 여행 계획에 추가: \(attraction.name)")
             // TODO: 여행 계획에 추가 기능 구현
         })
 

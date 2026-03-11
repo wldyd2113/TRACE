@@ -232,7 +232,7 @@ extension TravelPlanDetailViewController {
 
     // MARK: - UI Update Methods
     func updateScheduleUI(items: [ScheduleItem]) {
-        print("🔄 Schedule UI 업데이트 시작: \(items.count)개 일정")
+        print(" Schedule UI 업데이트 시작: \(items.count)개 일정")
 
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -280,7 +280,7 @@ extension TravelPlanDetailViewController {
             }
         }
 
-        print("✅ Schedule UI 업데이트 완료: \(items.count)개 일정 (애니메이션 포함)")
+        print(" Schedule UI 업데이트 완료: \(items.count)개 일정 (애니메이션 포함)")
     }
 
     func updateDayUI(dayData: PlanDetailViewModel.DayData) {
@@ -298,11 +298,11 @@ extension TravelPlanDetailViewController {
                 self?.mapManager.displaySearchResults(places: dayData.searchedPlaces)
             }
 
-            print("🔄 ViewModel Day UI 업데이트: Day \(self?.viewModel.getCurrentDay() ?? 0)")
-            print("   💰 예산: '\(dayData.budget.isEmpty ? "빈 값" : dayData.budget)'")
-            print("   🚗 경로: '\(dayData.route.isEmpty ? "빈 값" : dayData.route)'")
-            print("   📋 일정: \(dayData.scheduleItems.count)개")
-            print("   📍 좌표: \(dayData.searchedPlaces.count)개")
+            print(" ViewModel Day UI 업데이트: Day \(self?.viewModel.getCurrentDay() ?? 0)")
+            print("    예산: '\(dayData.budget.isEmpty ? "빈 값" : dayData.budget)'")
+            print("    경로: '\(dayData.route.isEmpty ? "빈 값" : dayData.route)'")
+            print("    일정: \(dayData.scheduleItems.count)개")
+            print("    좌표: \(dayData.searchedPlaces.count)개")
         }
     }
 

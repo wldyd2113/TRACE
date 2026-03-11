@@ -24,14 +24,14 @@ class MapManager: NSObject {
         do {
             setupMapView()
             setupLocationManager()
-            print("✅ MapManager 초기화 완료")
+            print(" MapManager 초기화 완료")
         } catch {
-            print("❌ MapManager 초기화 실패: \(error)")
+            print(" MapManager 초기화 실패: \(error)")
         }
     }
 
     deinit {
-        print("🗑️ MapManager 메모리 해제")
+        print(" MapManager 메모리 해제")
         delegate = nil
         locationManager.delegate = nil
         mapView.delegate = nil
@@ -53,53 +53,53 @@ class MapManager: NSObject {
     // MARK: - Public Methods
     func requestInitialLocation() {
         let authStatus = locationManager.authorizationStatus
-        print("📍 MapManager: Current authorization status: \(authStatus.rawValue)")
+        print(" MapManager: Current authorization status: \(authStatus.rawValue)")
 
         switch authStatus {
         case .notDetermined:
-            print("📍 MapManager: Permission not determined, using default location")
+            print(" MapManager: Permission not determined, using default location")
             setDefaultLocation()
         case .denied, .restricted:
-            print("📍 MapManager: Location access denied or restricted, using default location")
+            print(" MapManager: Location access denied or restricted, using default location")
             setDefaultLocation()
         case .authorizedWhenInUse, .authorizedAlways:
-            print("📍 MapManager: Location authorized, requesting current location...")
+            print(" MapManager: Location authorized, requesting current location...")
             locationManager.requestLocation()
         @unknown default:
-            print("📍 MapManager: Unknown authorization status, using default location")
+            print(" MapManager: Unknown authorization status, using default location")
             setDefaultLocation()
         }
     }
 
     func requestCurrentLocation() {
         let authStatus = locationManager.authorizationStatus
-        print("📍 MapManager: Requesting current location, status: \(authStatus.rawValue)")
+        print(" MapManager: Requesting current location, status: \(authStatus.rawValue)")
 
         switch authStatus {
         case .notDetermined:
-            print("📍 MapManager: Permission not determined, requesting permission...")
+            print(" MapManager: Permission not determined, requesting permission...")
             locationManager.requestWhenInUseAuthorization()
         case .denied, .restricted:
-            print("📍 MapManager: Location access denied, cannot get current location")
+            print(" MapManager: Location access denied, cannot get current location")
             // 사용자에게 설정으로 이동하라는 알림을 보낼 수 있음
             delegate?.mapManagerDidFailToGetLocation()
         case .authorizedWhenInUse, .authorizedAlways:
-            print("📍 MapManager: Location authorized, requesting current location...")
+            print(" MapManager: Location authorized, requesting current location...")
             locationManager.requestLocation()
         @unknown default:
-            print("📍 MapManager: Unknown authorization status")
+            print(" MapManager: Unknown authorization status")
             delegate?.mapManagerDidFailToGetLocation()
         }
     }
 
     func setDefaultLocation() {
-        print("📍 Setting default location (Seoul)")
+        print(" Setting default location (Seoul)")
         let defaultCoordinate = CLLocationCoordinate2D(latitude: 37.5665, longitude: 126.9780)
         setMapRegion(coordinate: defaultCoordinate)
     }
 
     func setMapRegion(coordinate: CLLocationCoordinate2D) {
-        print("📍 Setting map region to: \(coordinate.latitude), \(coordinate.longitude)")
+        print(" Setting map region to: \(coordinate.latitude), \(coordinate.longitude)")
         let region = MKCoordinateRegion(
             center: coordinate,
             latitudinalMeters: 5000,
@@ -134,21 +134,21 @@ class MapManager: NSObject {
     // MARK: - Search Results Display
     func displaySearchResults(places: [KakaoPlace]) {
         guard !places.isEmpty else {
-            print("📍 표시할 장소가 없음")
+            print(" 표시할 장소가 없음")
             return
         }
 
-        print("📍 ===== 지도에 \(places.count)개 장소 표시 시작 =====")
-        print("📍 기존 장소 수: \(searchedPlaces.count)개")
+        print(" ===== 지도에 \(places.count)개 장소 표시 시작 =====")
+        print(" 기존 장소 수: \(searchedPlaces.count)개")
 
         // 새로운 장소들을 기존 장소들에 누적 추가 (중복 제거)
         for newPlace in places {
             // 중복 검사 (같은 장소가 이미 있는지 확인)
             if !searchedPlaces.contains(where: { $0.placeName == newPlace.placeName }) {
                 searchedPlaces.append(newPlace)
-                print("📍 새 장소 추가: \(newPlace.placeName)")
+                print(" 새 장소 추가: \(newPlace.placeName)")
             } else {
-                print("📍 이미 존재하는 장소 스킵: \(newPlace.placeName)")
+                print(" 이미 존재하는 장소 스킵: \(newPlace.placeName)")
             }
         }
 
@@ -169,7 +169,7 @@ class MapManager: NSObject {
             mapView.addAnnotation(annotation)
             coordinates.append(place.coordinate)
 
-            print("📍 POI 표시: \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
+            print(" POI 표시: \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
         }
 
         // 2개 이상의 장소가 있으면 루트 그리기
@@ -184,14 +184,14 @@ class MapManager: NSObject {
         // 델리게이트에 검색된 장소들 업데이트 알림
         delegate?.mapManagerDidUpdateSearchedPlaces(searchedPlaces)
 
-        print("📍 ===== 지도 표시 완료: 총 \(searchedPlaces.count)개 마커 =====")
+        print(" ===== 지도 표시 완료: 총 \(searchedPlaces.count)개 마커 =====")
     }
 
     func clearAllSearchResults() {
         searchedPlaces.removeAll()
         mapView.removeAnnotations(mapView.annotations)
         mapView.removeOverlays(mapView.overlays)
-        print("📍 모든 검색 결과 삭제")
+        print(" 모든 검색 결과 삭제")
     }
 
     func removePlace(at coordinate: CLLocationCoordinate2D) {
@@ -200,7 +200,7 @@ class MapManager: NSObject {
             abs(place.coordinate.longitude - coordinate.longitude) < 0.0001
         }) {
             let removedPlace = searchedPlaces.remove(at: index)
-            print("📍 장소 제거: \(removedPlace.placeName)")
+            print(" 장소 제거: \(removedPlace.placeName)")
 
             // 지도 다시 그리기 (루트 포함)
             displaySearchResults(places: searchedPlaces)
@@ -259,7 +259,7 @@ class MapManager: NSObject {
 
         directions.calculate { [weak self] response, error in
             if let error = error {
-                print("❌ 자동차 경로 실패: \(error.localizedDescription), 도보 경로로 재시도")
+                print(" 자동차 경로 실패: \(error.localizedDescription), 도보 경로로 재시도")
                 // 자동차 경로 실패시 도보 경로로 재시도
                 self?.requestWalkingRoute(startCoordinate: startCoordinate,
                                         endCoordinate: endCoordinate,
@@ -270,7 +270,7 @@ class MapManager: NSObject {
             }
 
             guard let route = response?.routes.first else {
-                print("❌ 경로를 찾을 수 없음, 직선으로 대체")
+                print(" 경로를 찾을 수 없음, 직선으로 대체")
                 // 실제 경로를 찾을 수 없으면 직선으로 대체
                 self?.drawStraightLine(startCoordinate: startCoordinate,
                                      endCoordinate: endCoordinate,
@@ -288,7 +288,7 @@ class MapManager: NSObject {
 
             DispatchQueue.main.async {
                 self?.mapView.addOverlay(customPolyline)
-                print("✅ 실제 도로 경로 추가: 세그먼트 \(segmentIndex + 1)/\(totalSegments)")
+                print(" 실제 도로 경로 추가: 세그먼트 \(segmentIndex + 1)/\(totalSegments)")
 
                 // 다음 세그먼트 처리
                 self?.drawRealRoutes(coordinates: coordinates, segmentIndex: segmentIndex + 1, totalSegments: totalSegments)
@@ -311,7 +311,7 @@ class MapManager: NSObject {
 
         directions.calculate { [weak self] response, error in
             if let error = error {
-                print("❌ 도보 경로도 실패: \(error.localizedDescription), 직선으로 대체")
+                print(" 도보 경로도 실패: \(error.localizedDescription), 직선으로 대체")
                 // 도보 경로도 실패하면 직선으로 대체
                 self?.drawStraightLine(startCoordinate: startCoordinate,
                                      endCoordinate: endCoordinate,
@@ -322,7 +322,7 @@ class MapManager: NSObject {
             }
 
             guard let route = response?.routes.first else {
-                print("❌ 도보 경로를 찾을 수 없음, 직선으로 대체")
+                print(" 도보 경로를 찾을 수 없음, 직선으로 대체")
                 self?.drawStraightLine(startCoordinate: startCoordinate,
                                      endCoordinate: endCoordinate,
                                      segmentIndex: segmentIndex,
@@ -340,7 +340,7 @@ class MapManager: NSObject {
 
             DispatchQueue.main.async {
                 self?.mapView.addOverlay(customPolyline)
-                print("✅ 실제 도보 경로 추가: 세그먼트 \(segmentIndex + 1)/\(totalSegments)")
+                print(" 실제 도보 경로 추가: 세그먼트 \(segmentIndex + 1)/\(totalSegments)")
 
                 // 다음 세그먼트 처리
                 self?.drawRealRoutes(coordinates: coordinates, segmentIndex: segmentIndex + 1, totalSegments: totalSegments)
@@ -360,7 +360,7 @@ class MapManager: NSObject {
 
         DispatchQueue.main.async { [weak self] in
             self?.mapView.addOverlay(polyline)
-            print("⚠️ 직선 경로로 대체: 세그먼트 \(segmentIndex + 1)/\(totalSegments)")
+            print(" 직선 경로로 대체: 세그먼트 \(segmentIndex + 1)/\(totalSegments)")
         }
     }
 }
@@ -369,36 +369,36 @@ class MapManager: NSObject {
 extension MapManager: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else {
-            print("📍 No location found in locations array")
+            print(" No location found in locations array")
             return
         }
-        print("📍 Location updated: \(location.coordinate.latitude), \(location.coordinate.longitude)")
+        print(" Location updated: \(location.coordinate.latitude), \(location.coordinate.longitude)")
         setMapRegion(coordinate: location.coordinate)
         delegate?.mapManagerDidUpdateLocation(location.coordinate)
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("📍 Location error: \(error.localizedDescription)")
+        print(" Location error: \(error.localizedDescription)")
         setDefaultLocation()
         delegate?.mapManagerDidFailToGetLocation()
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         let authStatus = manager.authorizationStatus
-        print("📍 MapManager: Authorization changed to: \(authStatus.rawValue)")
+        print(" MapManager: Authorization changed to: \(authStatus.rawValue)")
 
         switch authStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            print("📍 MapManager: Authorization granted, requesting location...")
+            print(" MapManager: Authorization granted, requesting location...")
             manager.requestLocation()
         case .denied, .restricted:
-            print("📍 MapManager: Authorization denied/restricted, using default location")
+            print(" MapManager: Authorization denied/restricted, using default location")
             setDefaultLocation()
         case .notDetermined:
-            print("📍 MapManager: Authorization not determined, using default location")
+            print(" MapManager: Authorization not determined, using default location")
             setDefaultLocation()
         @unknown default:
-            print("📍 MapManager: Unknown authorization status, using default location")
+            print(" MapManager: Unknown authorization status, using default location")
             setDefaultLocation()
         }
     }
@@ -432,18 +432,18 @@ extension MapManager: MKMapViewDelegate {
         print("   • 어노테이션 타입: \(type(of: view.annotation))")
 
         guard let placeAnnotation = view.annotation as? PlaceAnnotation else {
-            print("❌ PlaceAnnotation으로 캐스팅 실패")
+            print(" PlaceAnnotation으로 캐스팅 실패")
             return
         }
 
-        print("✅ PlaceAnnotation 캐스팅 성공")
+        print(" PlaceAnnotation 캐스팅 성공")
 
         guard let kakaoPlace = placeAnnotation.kakaoPlace else {
-            print("❌ kakaoPlace 데이터가 nil")
+            print(" kakaoPlace 데이터가 nil")
             return
         }
 
-        print("✅ KakaoPlace 데이터 확인:")
+        print(" KakaoPlace 데이터 확인:")
         print("   • 장소명: '\(kakaoPlace.placeName)'")
         print("   • 주소: '\(kakaoPlace.addressName)'")
         print("   • 카테고리: '\(kakaoPlace.categoryName)'")
@@ -479,7 +479,7 @@ extension MapManager: MKMapViewDelegate {
                     )
                     renderer.strokeColor = blendedColor
                     renderer.lineWidth = 5.0
-                    print("🚗 차량 경로 렌더링")
+                    print(" 차량 경로 렌더링")
                 }
             } else {
                 // 직선 경로 (실제 경로를 찾을 수 없는 경우)

@@ -12,11 +12,11 @@ import CoreLocation
 // MARK: - MapManagerDelegate
 extension TravelRecordWriteViewController: MapManagerDelegate {
     func mapManagerDidUpdateLocation(_ coordinate: CLLocationCoordinate2D) {
-        print("📍 TravelRecordWrite: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
+        print(" TravelRecordWrite: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
     }
 
     func mapManagerDidFailToGetLocation() {
-        print("📍 TravelRecordWrite: Failed to get location, using default")
+        print(" TravelRecordWrite: Failed to get location, using default")
     }
 
     func mapManagerDidSelectPlace(_ place: KakaoPlace) {
@@ -24,7 +24,7 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
         if countryType == "해외" {
             // 구글 검색 결과에서 해당 장소 찾기
             if let googlePlace = currentGooglePlaces.first(where: { $0.name == place.placeName }) {
-                print("🌍 구글 장소 정보 표시: \(place.placeName)")
+                print(" 구글 장소 정보 표시: \(place.placeName)")
                 showGooglePlaceInfoAlert(place: googlePlace)
             } else {
                 // 구글 장소를 찾을 수 없는 경우 기본 alert 표시
@@ -43,7 +43,7 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
         // ViewModel에 검색된 장소들 전달
         searchedPlacesRelay.accept(places)
 
-        print("📍 검색된 장소들 업데이트: \(places.count)개")
+        print(" 검색된 장소들 업데이트: \(places.count)개")
         for (index, place) in places.enumerated() {
             print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
         }
@@ -53,10 +53,10 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
         let alert = UIAlertController(title: place.placeName, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        📍 주소: \(place.addressName)
+         주소: \(place.addressName)
         🏢 카테고리: \(place.categoryName)
         📞 전화번호: \(place.phone.isEmpty ? NSLocalizedString("no_info", comment: "No info") : place.phone)
-        🌐 카카오맵: \(place.placeUrl)
+         카카오맵: \(place.placeUrl)
         📏 거리: \(place.distance)m
         """
 
@@ -119,9 +119,9 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
         let alert = UIAlertController(title: place.name, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        📍 주소: \(place.formattedAddress ?? NSLocalizedString("no_info", comment: "No info"))
+         주소: \(place.formattedAddress ?? NSLocalizedString("no_info", comment: "No info"))
         🏢 카테고리: \(place.types.first ?? NSLocalizedString("no_info", comment: "No info"))
-        🌐 구글맵: Google Maps
+         구글맵: Google Maps
         📏 좌표: \(place.geometry.location.lat), \(place.geometry.location.lng)
         """
 
@@ -198,20 +198,20 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
         }
 
         guard let url = googleMapsURL else {
-            print("❌ 구글맵 URL 생성 실패")
+            print(" 구글맵 URL 생성 실패")
             return
         }
 
         if UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url, options: [:]) { success in
                 if success {
-                    print("✅ 구글맵 앱으로 이동 성공: \(place.name)")
+                    print(" 구글맵 앱으로 이동 성공: \(place.name)")
                 } else {
-                    print("❌ 구글맵 앱 이동 실패")
+                    print(" 구글맵 앱 이동 실패")
                 }
             }
         } else {
-            print("❌ 구글맵 URL을 열 수 없음: \(url)")
+            print(" 구글맵 URL을 열 수 없음: \(url)")
         }
     }
 }
@@ -235,7 +235,7 @@ extension TravelRecordWriteViewController {
         currentSearchedPlaces.removeAll()
         currentGooglePlaces.removeAll()
         countryType = "" // 국가 타입도 초기화 (다시 선택할 수 있도록)
-        print("🗑️ 모든 검색 결과, 선택된 장소 및 국가 타입 삭제")
+        print(" 모든 검색 결과, 선택된 장소 및 국가 타입 삭제")
     }
 
 

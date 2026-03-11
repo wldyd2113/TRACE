@@ -120,11 +120,11 @@ class TouristAttractionCell: UICollectionViewCell {
             ) { [weak self] result in
                 switch result {
                 case .success(let value):
-                    print("✅ 이미지 로딩 성공: \(attraction.name)")
+                    print(" 이미지 로딩 성공: \(attraction.name)")
                     // 이미지 로딩 성공 시 tint 제거
                     self?.imageView.tintColor = nil
                 case .failure(let error):
-                    print("❌ 이미지 로딩 실패: \(attraction.name) - \(error.localizedDescription)")
+                    print(" 이미지 로딩 실패: \(attraction.name) - \(error.localizedDescription)")
                     // 실패 시 플레이스홀더 아이콘으로 설정
                     self?.imageView.image = UIImage(systemName: "photo")
                     self?.imageView.tintColor = .systemGray3

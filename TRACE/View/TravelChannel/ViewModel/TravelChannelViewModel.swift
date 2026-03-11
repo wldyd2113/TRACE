@@ -115,7 +115,7 @@ class TravelChannelViewModel: BaseViewModel {
 
         // 안전한 Realm 접근
         guard let realm = RealmManager.shared.safeRealm() else {
-            print("❌ Realm 초기화 실패")
+            print(" Realm 초기화 실패")
             errorRelay.accept("데이터베이스 연결에 실패했습니다.")
             isLoadingRelay.accept(false)
             return
@@ -125,7 +125,7 @@ class TravelChannelViewModel: BaseViewModel {
             let today = Date()
             let calendar = Calendar.current
 
-            print("📅 현재 여행 경로 로드 시작")
+            print(" 현재 여행 경로 로드 시작")
 
             // 모든 여행 계획 가져오기 (안전한 접근)
             let allTravelPlans = Array(realm.objects(TravelPlan.self)
@@ -143,7 +143,7 @@ class TravelChannelViewModel: BaseViewModel {
                 }
             }
 
-            print("📍 현재 활성 여행 경로: \(currentRoutes.count)개")
+            print(" 현재 활성 여행 경로: \(currentRoutes.count)개")
             for route in currentRoutes {
                 print("   • \(route.travelName) - \(route.currentDay)일차 (\(route.routes.count)개 장소)")
             }
@@ -154,7 +154,7 @@ class TravelChannelViewModel: BaseViewModel {
             }
 
         } catch {
-            print("❌ 여행 경로 로드 실패: \(error.localizedDescription)")
+            print(" 여행 경로 로드 실패: \(error.localizedDescription)")
             DispatchQueue.main.async { [weak self] in
                 self?.errorRelay.accept("여행 경로를 불러오는데 실패했습니다.")
                 self?.isLoadingRelay.accept(false)

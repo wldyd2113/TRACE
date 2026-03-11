@@ -44,23 +44,23 @@ class WidgetDataManager {
         // 기기별 고유 키 생성 (사용자 데이터 격리를 위해)
         let deviceKey = getDeviceSpecificKey()
 
-        print("🔄 위젯 데이터 저장 시도...")
+        print(" 위젯 데이터 저장 시도...")
         print("   App Group ID: \(appGroupIdentifier)")
         print("   기기별 키: \(deviceKey)")
 
         guard let userDefaults = sharedUserDefaults else {
-            print("❌ App Groups UserDefaults를 찾을 수 없습니다")
+            print(" App Groups UserDefaults를 찾을 수 없습니다")
             print("   App Groups가 Xcode에서 설정되어 있는지 확인하세요")
 
             // fallback으로 일반 UserDefaults 사용
-            print("⚠️ 일반 UserDefaults를 사용합니다 (위젯에서 접근 불가)")
+            print(" 일반 UserDefaults를 사용합니다 (위젯에서 접근 불가)")
             if let data = data {
                 do {
                     let encodedData = try JSONEncoder().encode(data)
                     UserDefaults.standard.set(encodedData, forKey: deviceKey)
-                    print("✅ 일반 UserDefaults에 저장 완료: \(data.destination)")
+                    print(" 일반 UserDefaults에 저장 완료: \(data.destination)")
                 } catch {
-                    print("❌ 데이터 인코딩 실패: \(error)")
+                    print(" 데이터 인코딩 실패: \(error)")
                 }
             }
             return
@@ -71,16 +71,16 @@ class WidgetDataManager {
                 let encodedData = try JSONEncoder().encode(data)
                 userDefaults.set(encodedData, forKey: deviceKey)
                 userDefaults.synchronize() // 즉시 동기화
-                print("✅ 위젯용 여행 데이터 저장 완료: \(data.destination)")
+                print(" 위젯용 여행 데이터 저장 완료: \(data.destination)")
                 print("   D-\(data.daysUntil) (\(data.startDate))")
                 print("   저장 키: \(deviceKey)")
             } catch {
-                print("❌ 위젯용 데이터 인코딩 실패: \(error)")
+                print(" 위젯용 데이터 인코딩 실패: \(error)")
             }
         } else {
             userDefaults.removeObject(forKey: deviceKey)
             userDefaults.synchronize()
-            print("✅ 위젯용 여행 데이터 삭제 완료 (키: \(deviceKey))")
+            print(" 위젯용 여행 데이터 삭제 완료 (키: \(deviceKey))")
         }
     }
 
@@ -89,21 +89,21 @@ class WidgetDataManager {
         let deviceKey = getDeviceSpecificKey()
 
         guard let userDefaults = sharedUserDefaults else {
-            print("❌ App Groups UserDefaults를 찾을 수 없습니다")
+            print(" App Groups UserDefaults를 찾을 수 없습니다")
             return nil
         }
 
         guard let data = userDefaults.data(forKey: deviceKey) else {
-            print("📭 저장된 여행 데이터가 없습니다 (키: \(deviceKey))")
+            print(" 저장된 여행 데이터가 없습니다 (키: \(deviceKey))")
             return nil
         }
 
         do {
             let travelData = try JSONDecoder().decode(WidgetTravelData.self, from: data)
-            print("✅ 위젯용 여행 데이터 로드 완료: \(travelData.destination)")
+            print(" 위젯용 여행 데이터 로드 완료: \(travelData.destination)")
             return travelData
         } catch {
-            print("❌ 위젯용 데이터 디코딩 실패: \(error)")
+            print(" 위젯용 데이터 디코딩 실패: \(error)")
             return nil
         }
     }
@@ -125,7 +125,7 @@ class WidgetDataManager {
     }
 
     @objc private func handleFirstLaunch() {
-        print("🗑️ 첫 실행으로 인한 위젯 데이터 초기화 시작...")
+        print(" 첫 실행으로 인한 위젯 데이터 초기화 시작...")
         clearAllWidgetData()
     }
 
@@ -136,13 +136,13 @@ class WidgetDataManager {
         if let sharedDefaults = sharedUserDefaults {
             sharedDefaults.removeObject(forKey: deviceKey)
             sharedDefaults.synchronize()
-            print("✅ App Group 위젯 데이터 삭제 완료")
+            print(" App Group 위젯 데이터 삭제 완료")
         }
 
         // 일반 UserDefaults도 초기화 (fallback으로 저장된 데이터)
         UserDefaults.standard.removeObject(forKey: deviceKey)
         UserDefaults.standard.synchronize()
-        print("✅ 일반 UserDefaults 위젯 데이터 삭제 완료")
+        print(" 일반 UserDefaults 위젯 데이터 삭제 완료")
     }
 
     deinit {

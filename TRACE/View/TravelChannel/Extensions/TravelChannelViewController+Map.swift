@@ -12,21 +12,21 @@ import CoreLocation
 // MARK: - MapManagerDelegate
 extension TravelChannelViewController: MapManagerDelegate {
     func mapManagerDidUpdateLocation(_ coordinate: CLLocationCoordinate2D) {
-        print("📍 TravelChannel: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
+        print(" TravelChannel: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
     }
 
     func mapManagerDidFailToGetLocation() {
-        print("📍 TravelChannel: Failed to get location")
+        print(" TravelChannel: Failed to get location")
         showLocationPermissionAlert()
     }
 
     func mapManagerDidSelectPlace(_ place: KakaoPlace) {
-        print("📍 TravelChannel: Place selected: \(place.placeName)")
+        print(" TravelChannel: Place selected: \(place.placeName)")
         moveToPlace(place)
     }
 
     func mapManagerDidUpdateSearchedPlaces(_ places: [KakaoPlace]) {
-        print("📍 TravelChannel: Searched places updated: \(places.count)개")
+        print(" TravelChannel: Searched places updated: \(places.count)개")
     }
 }
 
@@ -38,12 +38,12 @@ extension TravelChannelViewController {
     }
 
     func moveToCurrentLocation() {
-        print("📍 현재 위치로 이동 요청")
+        print(" 현재 위치로 이동 요청")
         mapManager.requestCurrentLocation()
     }
 
     func zoomIn() {
-        print("🔍 지도 확대")
+        print(" 지도 확대")
         let currentRegion = mapManager.mapView.region
         let newSpan = MKCoordinateSpan(
             latitudeDelta: currentRegion.span.latitudeDelta * 0.5,
@@ -57,7 +57,7 @@ extension TravelChannelViewController {
     }
 
     func zoomOut() {
-        print("🔍 지도 축소")
+        print(" 지도 축소")
         let currentRegion = mapManager.mapView.region
         let newSpan = MKCoordinateSpan(
             latitudeDelta: currentRegion.span.latitudeDelta * 2.0,
@@ -71,7 +71,7 @@ extension TravelChannelViewController {
     }
 
     func moveToPlace(_ place: KakaoPlace) {
-        print("📍 선택된 장소로 이동: \(place.placeName)")
+        print(" 선택된 장소로 이동: \(place.placeName)")
         let coordinate = place.coordinate
         let region = MKCoordinateRegion(
             center: coordinate,

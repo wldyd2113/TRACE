@@ -262,7 +262,7 @@ class TravelShowRecordViewController: UIViewController {
         output.isLoading
             .drive(onNext: { [weak self] (isLoading: Bool) in
                 // TODO: 로딩 인디케이터 표시/숨김
-                print("🔄 로딩 상태: \(isLoading)")
+                print(" 로딩 상태: \(isLoading)")
             })
             .disposed(by: disposeBag)
 
@@ -339,7 +339,7 @@ class TravelShowRecordViewController: UIViewController {
             // 한국 좌표 범위 체크 (대략적인 범위)
             if latitude >= 33.0 && latitude <= 38.6 && longitude >= 124.0 && longitude <= 132.0 {
                 countryType = "국내"
-                print("📍 국내 여행으로 판단: \(place.placeName)")
+                print(" 국내 여행으로 판단: \(place.placeName)")
                 return
             }
         }
@@ -347,7 +347,7 @@ class TravelShowRecordViewController: UIViewController {
         // 한국 범위를 벗어나면 해외로 판단
         if !places.isEmpty {
             countryType = "해외"
-            print("📍 해외 여행으로 판단")
+            print(" 해외 여행으로 판단")
         }
     }
 
@@ -454,7 +454,7 @@ extension TravelShowRecordViewController: TravelSearchDelegate {
         routeSearchButton.setTitle(place.placeName, for: .normal)
         routeSearchButton.setTitleColor(.label, for: .normal)
 
-        print("📍 장소 선택됨: \(place.placeName)")
+        print(" 장소 선택됨: \(place.placeName)")
 
         // 선택된 장소를 현재 검색된 장소에 추가
         if !currentSearchedPlaces.contains(where: { $0.placeName == place.placeName }) {

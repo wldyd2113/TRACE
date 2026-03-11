@@ -29,9 +29,9 @@ extension TravelPlanMainViewController {
         alert.addAction(UIAlertAction(title: "허용", style: .default) { _ in
             NotificationManager.shared.requestNotificationPermission { granted in
                 if granted {
-                    print("✅ 알림 권한이 허용되었습니다.")
+                    print(" 알림 권한이 허용되었습니다.")
                 } else {
-                    print("❌ 알림 권한이 거부되었습니다.")
+                    print(" 알림 권한이 거부되었습니다.")
                 }
             }
         })

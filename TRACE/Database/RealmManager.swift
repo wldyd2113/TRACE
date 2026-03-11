@@ -30,14 +30,14 @@ class RealmManager {
 
             if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) {
                 realmURL = groupURL.appendingPathComponent(realmFileName)
-                print("✅ App Groups 경로 사용: \(realmURL.path)")
-                print("✅ 기기 식별자: \(deviceID)")
+                print(" App Groups 경로 사용: \(realmURL.path)")
+                print(" 기기 식별자: \(deviceID)")
             } else {
                 // App Groups가 설정되지 않은 경우 기본 Documents 경로 사용
                 let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
                 realmURL = documentsURL.appendingPathComponent(realmFileName)
-                print("⚠️ App Groups가 설정되지 않아 기본 Documents 경로를 사용합니다: \(realmURL.path)")
-                print("✅ 기기 식별자: \(deviceID)")
+                print(" App Groups가 설정되지 않아 기본 Documents 경로를 사용합니다: \(realmURL.path)")
+                print(" 기기 식별자: \(deviceID)")
             }
 
             let config = Realm.Configuration(
@@ -61,10 +61,10 @@ class RealmManager {
             )
             Realm.Configuration.defaultConfiguration = config
             realm = try Realm(configuration: config)
-            print("✅ Realm 초기화 성공")
-            print("✅ Realm 경로: \(realmURL.path)")
+            print(" Realm 초기화 성공")
+            print(" Realm 경로: \(realmURL.path)")
         } catch {
-            print("❌ Realm 초기화 실패: \(error)")
+            print(" Realm 초기화 실패: \(error)")
         }
     }
 
@@ -79,7 +79,7 @@ class RealmManager {
         do {
             return try Realm()
         } catch {
-            print("❌ Realm 생성 실패: \(error)")
+            print(" Realm 생성 실패: \(error)")
             return nil
         }
     }
@@ -95,23 +95,23 @@ class RealmManager {
     }
 
     @objc private func handleFirstLaunch() {
-        print("🗑️ 첫 실행으로 인한 Realm 데이터베이스 초기화 시작...")
+        print(" 첫 실행으로 인한 Realm 데이터베이스 초기화 시작...")
         clearAllData()
     }
 
     func clearAllData() {
         guard let realm = getRealm() else {
-            print("❌ Realm을 가져올 수 없어 데이터 초기화에 실패했습니다")
+            print(" Realm을 가져올 수 없어 데이터 초기화에 실패했습니다")
             return
         }
 
         do {
             try realm.write {
                 realm.deleteAll()
-                print("✅ 모든 Realm 데이터가 삭제되었습니다")
+                print(" 모든 Realm 데이터가 삭제되었습니다")
             }
         } catch {
-            print("❌ Realm 데이터 초기화 실패: \(error)")
+            print(" Realm 데이터 초기화 실패: \(error)")
         }
     }
 

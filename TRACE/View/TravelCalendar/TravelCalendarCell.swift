@@ -66,9 +66,9 @@ class TravelCalendarCell: FSCalendarCell {
         travelIconView.isUserInteractionEnabled = false // 터치 이벤트 차단 방지
         contentView.addSubview(travelIconView)
 
-        // 아이콘 라벨 (📍 또는 다른 이모지)
+        // 아이콘 라벨 ( 또는 다른 이모지)
         iconLabel = UILabel()
-        iconLabel.text = "📍"
+        iconLabel.text = ""
         iconLabel.font = UIFont.systemFont(ofSize: 12)
         iconLabel.textAlignment = .center
         iconLabel.isUserInteractionEnabled = false // 터치 이벤트 차단 방지

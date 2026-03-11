@@ -13,11 +13,11 @@ import CoreLocation
 // MARK: - MapManagerDelegate
 extension TravelPlanDetailViewController: MapManagerDelegate {
     func mapManagerDidUpdateLocation(_ coordinate: CLLocationCoordinate2D) {
-        print("📍 TravelPlanDetail: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
+        print(" TravelPlanDetail: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
     }
 
     func mapManagerDidFailToGetLocation() {
-        print("📍 TravelPlanDetail: Failed to get location, using default")
+        print(" TravelPlanDetail: Failed to get location, using default")
     }
 
     func mapManagerDidSelectPlace(_ place: KakaoPlace) {
@@ -25,7 +25,7 @@ extension TravelPlanDetailViewController: MapManagerDelegate {
         if countryType == "해외" {
             // 구글 검색 결과에서 해당 장소 찾기
             if let googlePlace = currentGooglePlaces.first(where: { $0.name == place.placeName }) {
-                print("🌍 구글 장소 정보 표시: \(place.placeName)")
+                print(" 구글 장소 정보 표시: \(place.placeName)")
                 showGooglePlaceInfo(place: googlePlace)
             } else {
                 // 구글 장소를 찾을 수 없는 경우 기본 alert 표시
@@ -41,7 +41,7 @@ extension TravelPlanDetailViewController: MapManagerDelegate {
         // currentSearchedPlaces만 업데이트하고 ViewModel 업데이트는 나중에
         currentSearchedPlaces = places
 
-        print("📍 검색된 장소들 업데이트: \(places.count)개")
+        print(" 검색된 장소들 업데이트: \(places.count)개")
         for (index, place) in places.enumerated() {
             print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
         }
@@ -51,10 +51,10 @@ extension TravelPlanDetailViewController: MapManagerDelegate {
         let alert = UIAlertController(title: place.placeName, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        📍 주소: \(place.addressName)
+         주소: \(place.addressName)
         🏢 카테고리: \(place.categoryName)
         📞 전화번호: \(place.phone.isEmpty ? NSLocalizedString("no_info", comment: "No info") : place.phone)
-        🌐 카카오맵: \(place.placeUrl)
+         카카오맵: \(place.placeUrl)
         📏 거리: \(place.distance)m
         """
 
@@ -124,7 +124,7 @@ extension TravelPlanDetailViewController {
     @objc func clearSearchResults() {
         mapManager.clearAllSearchResults()
         currentGooglePlaces.removeAll()
-        print("🗑️ 모든 검색 결과 삭제")
+        print(" 모든 검색 결과 삭제")
     }
 
     @objc func clearCurrentDayData() {
@@ -144,7 +144,7 @@ extension TravelPlanDetailViewController {
     }
 
     private func performClearCurrentDayData() {
-        print("🗑️ ===== Day \(currentDay) 전체 데이터 삭제 시작 =====")
+        print(" ===== Day \(currentDay) 전체 데이터 삭제 시작 =====")
 
         // ViewModel을 통해 해당 일차 데이터 초기화
         viewModel.clearDayData(for: currentDay)
@@ -162,7 +162,7 @@ extension TravelPlanDetailViewController {
         currentSearchedPlaces.removeAll()
         currentGooglePlaces.removeAll()
 
-        print("✅ Day \(currentDay) 전체 데이터 삭제 완료")
+        print(" Day \(currentDay) 전체 데이터 삭제 완료")
 
         // 성공 메시지 표시
         let successAlert = UIAlertController(
@@ -175,14 +175,14 @@ extension TravelPlanDetailViewController {
     }
 
     func performManualSearch(query: String) {
-        print("🔍 수동 검색 실행: \(query)")
-        print("🔍 현재 countryType: \(countryType)")
+        print(" 수동 검색 실행: \(query)")
+        print(" 현재 countryType: \(countryType)")
 
         if countryType == "국내" {
-            print("🇰🇷 [수동검색] 카카오 API 사용")
+            print(" [수동검색] 카카오 API 사용")
             performKakaoSearch(query: query)
         } else {
-            print("🌍 [수동검색] 구글 API 사용")
+            print(" [수동검색] 구글 API 사용")
             performGoogleSearch(query: query)
         }
     }
@@ -192,7 +192,7 @@ extension TravelPlanDetailViewController {
             .subscribe(onNext: { [weak self] result in
                 switch result {
                 case .success(let response):
-                    print("✅ 카카오 검색 성공: \(response.documents.count)개 결과")
+                    print(" 카카오 검색 성공: \(response.documents.count)개 결과")
                     // 카카오 검색 시 구글 장소 정보 초기화
                     self?.currentGooglePlaces.removeAll()
 
@@ -203,11 +203,11 @@ extension TravelPlanDetailViewController {
                         self?.mapManager.displaySearchResults(places: response.documents)
                         print("🎯 검색 결과 지도에 표시: \(response.documents.count)개 POI")
                     } else {
-                        print("⚠️ 검색 결과 없음")
+                        print(" 검색 결과 없음")
                         self?.showNoSearchResultsAlert(query: query)
                     }
                 case .failure(let error):
-                    print("❌ 카카오 검색 실패: \(error.localizedDescription)")
+                    print(" 카카오 검색 실패: \(error.localizedDescription)")
                     self?.showErrorAlert(title: "검색 실패", message: "카카오 검색에 실패했습니다: \(error.localizedDescription)")
                 }
             })
@@ -219,7 +219,7 @@ extension TravelPlanDetailViewController {
             .subscribe(onNext: { [weak self] result in
                 switch result {
                 case .success(let response):
-                    print("✅ 구글 검색 성공: \(response.results.count)개 결과")
+                    print(" 구글 검색 성공: \(response.results.count)개 결과")
 
                     // 원본 구글 장소 정보 저장 (마커 클릭 시 사용)
                     self?.currentGooglePlaces = response.results
@@ -249,11 +249,11 @@ extension TravelPlanDetailViewController {
                         self?.mapManager.displaySearchResults(places: kakaoPlaces)
                         print("🎯 검색 결과 지도에 표시: \(kakaoPlaces.count)개 POI")
                     } else {
-                        print("⚠️ 검색 결과 없음")
+                        print(" 검색 결과 없음")
                         self?.showNoSearchResultsAlert(query: query)
                     }
                 case .failure(let error):
-                    print("❌ 구글 검색 실패: \(error.localizedDescription)")
+                    print(" 구글 검색 실패: \(error.localizedDescription)")
                     self?.showErrorAlert(title: "검색 실패", message: "구글 검색에 실패했습니다: \(error.localizedDescription)")
                 }
             })
@@ -283,20 +283,20 @@ extension TravelPlanDetailViewController {
         }
 
         guard let url = googleMapsURL else {
-            print("❌ 구글맵 URL 생성 실패")
+            print(" 구글맵 URL 생성 실패")
             return
         }
 
         if UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url, options: [:]) { success in
                 if success {
-                    print("✅ 구글맵 앱으로 이동 성공: \(place.name)")
+                    print(" 구글맵 앱으로 이동 성공: \(place.name)")
                 } else {
-                    print("❌ 구글맵 앱 이동 실패")
+                    print(" 구글맵 앱 이동 실패")
                 }
             }
         } else {
-            print("❌ 구글맵 URL을 열 수 없음: \(url)")
+            print(" 구글맵 URL을 열 수 없음: \(url)")
         }
     }
 
@@ -305,9 +305,9 @@ extension TravelPlanDetailViewController {
         let alert = UIAlertController(title: place.name, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        📍 주소: \(place.formattedAddress ?? NSLocalizedString("no_info", comment: "No info"))
+         주소: \(place.formattedAddress ?? NSLocalizedString("no_info", comment: "No info"))
         🏢 카테고리: \(place.types.first ?? NSLocalizedString("no_info", comment: "No info"))
-        🌐 구글맵: Google Maps
+         구글맵: Google Maps
         📏 좌표: \(place.geometry.location.lat), \(place.geometry.location.lng)
         """
 

@@ -13,11 +13,11 @@ import RxSwift
 // MARK: - MapManagerDelegate
 extension TravelShowRecordViewController: MapManagerDelegate {
     func mapManagerDidUpdateLocation(_ coordinate: CLLocationCoordinate2D) {
-        print("📍 TravelShowRecord: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
+        print(" TravelShowRecord: Map updated to location: \(coordinate.latitude), \(coordinate.longitude)")
     }
 
     func mapManagerDidFailToGetLocation() {
-        print("📍 TravelShowRecord: Failed to get location, using default")
+        print(" TravelShowRecord: Failed to get location, using default")
     }
 
     func mapManagerDidSelectPlace(_ place: KakaoPlace) {
@@ -25,7 +25,7 @@ extension TravelShowRecordViewController: MapManagerDelegate {
         if countryType == "해외" {
             // 구글 검색 결과에서 해당 장소 찾기
             if let googlePlace = currentGooglePlaces.first(where: { $0.name == place.placeName }) {
-                print("🌍 구글 장소 정보 표시: \(place.placeName)")
+                print(" 구글 장소 정보 표시: \(place.placeName)")
                 showGooglePlaceInfoAlert(place: googlePlace)
             } else {
                 // 구글 장소를 찾을 수 없는 경우 기본 alert 표시
@@ -41,7 +41,7 @@ extension TravelShowRecordViewController: MapManagerDelegate {
         // currentSearchedPlaces 업데이트
         currentSearchedPlaces = places
 
-        print("📍 검색된 장소들 업데이트: \(places.count)개")
+        print(" 검색된 장소들 업데이트: \(places.count)개")
         for (index, place) in places.enumerated() {
             print("   \(index + 1). \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
         }
@@ -51,10 +51,10 @@ extension TravelShowRecordViewController: MapManagerDelegate {
         let alert = UIAlertController(title: place.placeName, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        📍 주소: \(place.addressName)
+         주소: \(place.addressName)
         🏢 카테고리: \(place.categoryName)
         📞 전화번호: \(place.phone.isEmpty ? NSLocalizedString("no_info", comment: "No info") : place.phone)
-        🌐 카카오맵: \(place.placeUrl)
+         카카오맵: \(place.placeUrl)
         📏 거리: \(place.distance)m
         """
 
@@ -101,8 +101,8 @@ extension TravelShowRecordViewController: MapManagerDelegate {
         let alert = UIAlertController(title: place.name, message: nil, preferredStyle: .actionSheet)
 
         let infoMessage = """
-        📍 주소: \(place.formattedAddress ?? NSLocalizedString("no_info", comment: "No info"))
-        🌍 종류: \(place.types.first ?? NSLocalizedString("no_info", comment: "No info"))
+         주소: \(place.formattedAddress ?? NSLocalizedString("no_info", comment: "No info"))
+         종류: \(place.types.first ?? NSLocalizedString("no_info", comment: "No info"))
         🆔 장소 ID: \(place.placeId)
         """
 
@@ -146,7 +146,7 @@ extension TravelShowRecordViewController {
         routeSearchButton.setTitleColor(.label, for: .normal)
         currentSearchedPlaces.removeAll()
         currentGooglePlaces.removeAll()
-        print("🗑️ 모든 검색 결과, 선택된 장소 삭제")
+        print(" 모든 검색 결과, 선택된 장소 삭제")
     }
 
     func showRouteOnMap(coordinates: [CLLocationCoordinate2D]) {
@@ -162,7 +162,7 @@ extension TravelShowRecordViewController {
     func displayRecordPlaces() {
         if !currentSearchedPlaces.isEmpty {
             mapManager.displaySearchResults(places: currentSearchedPlaces)
-            print("📍 여행 기록 장소들 지도에 표시: \(currentSearchedPlaces.count)개")
+            print(" 여행 기록 장소들 지도에 표시: \(currentSearchedPlaces.count)개")
         }
     }
 

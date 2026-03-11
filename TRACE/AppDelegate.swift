@@ -25,10 +25,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
            let options = FirebaseOptions(contentsOfFile: path) {
             FirebaseApp.configure(options: options)
-            print("✅ Firebase 초기화 완료 (명시적 경로)")
+            print(" Firebase 초기화 완료 (명시적 경로)")
         } else {
             // fallback: 기본 Firebase 초기화 방식 사용
-            print("⚠️ GoogleService-Info.plist 파일을 번들에서 찾을 수 없습니다. 기본 방식으로 초기화합니다.")
+            print(" GoogleService-Info.plist 파일을 번들에서 찾을 수 없습니다. 기본 방식으로 초기화합니다.")
 
             // Bundle의 모든 plist 파일 검색 (디버그용)
             let bundlePath = Bundle.main.bundlePath
@@ -36,11 +36,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let fileManager = FileManager.default
             if let contents = try? fileManager.contentsOfDirectory(atPath: bundlePath) {
                 let plistFiles = contents.filter { $0.hasSuffix(".plist") }
-                print("📋 Bundle에 있는 plist 파일들: \(plistFiles)")
+                print(" Bundle에 있는 plist 파일들: \(plistFiles)")
             }
 
             FirebaseApp.configure()
-            print("✅ Firebase 기본 초기화 완료")
+            print(" Firebase 기본 초기화 완료")
         }
 
         // 알림 대리자 설정
@@ -84,7 +84,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // RealmManager에 첫 실행임을 알림
             NotificationCenter.default.post(name: .firstLaunch, object: nil)
 
-            print("✅ 첫 실행 처리 완료")
+            print(" 첫 실행 처리 완료")
         } else {
             print("📱 기존 사용자 실행 감지")
         }
@@ -114,12 +114,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         // APNS 토큰을 Firebase에 설정
         Messaging.messaging().apnsToken = deviceToken
-        print("✅ APNS 토큰이 설정되었습니다.")
+        print(" APNS 토큰이 설정되었습니다.")
 
         // APNS 토큰 설정 완료 후 FCM 토큰 요청
         Messaging.messaging().token { token, error in
             if let error = error {
-                print("❌ FCM 토큰 요청 오류: \(error.localizedDescription)")
+                print(" FCM 토큰 요청 오류: \(error.localizedDescription)")
             } else if let token = token {
                 print("🔑 FCM 토큰: \(token)")
             }
@@ -128,7 +128,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
     // APNS 등록 실패 시 처리
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("❌ APNS 등록 실패: \(error.localizedDescription)")
+        print(" APNS 등록 실패: \(error.localizedDescription)")
     }
     // 앱이 포그라운드에 있을 때 알림을 받는 경우
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {

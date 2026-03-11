@@ -17,12 +17,12 @@ enum FontManager {
             let possibleNames = ["온글잎 의연체", "OngleafUiyeon", "Ongleaf-Uiyeon"]
             for name in possibleNames {
                 if UIFont(name: name, size: 12) != nil {
-                    print("✅ 커스텀 폰트 찾음: \(name)")
+                    print("커스텀 폰트 찾음: \(name)")
                     return name
                 }
             }
 
-            print("⚠️ 커스텀 폰트를 찾을 수 없어서 시스템 폰트를 사용합니다")
+            print("커스텀 폰트를 찾을 수 없어서 시스템 폰트를 사용합니다")
             return UIFont.systemFont(ofSize: 12).fontName
         }
     }
@@ -30,7 +30,7 @@ enum FontManager {
     func font(size: CGFloat) -> UIFont {
         let font = UIFont(name: fontName, size: size)
         if font == nil {
-            print("⚠️ Font '\(fontName)' not found, using system font")
+            print("Font '\(fontName)' not found, using system font")
             return UIFont.systemFont(ofSize: size)
         }
         return font!
@@ -50,7 +50,7 @@ enum FontManager {
             return customFont
         }
 
-        print("⚠️ Font '\(fontName)' not found for bold, using system bold font")
+        print("Font '\(fontName)' not found for bold, using system bold font")
         return UIFont.boldSystemFont(ofSize: size)
     }
 }

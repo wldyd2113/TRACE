@@ -18,16 +18,16 @@ final class NetworkManger {
 
 
             AF.request(convertible).validate(statusCode: 200..<300).responseDecodable(of: type) { response in
-                print("🌐 Response Status Code: \(response.response?.statusCode ?? -1)")
+                print(" Response Status Code: \(response.response?.statusCode ?? -1)")
                 if let data = response.data, let responseString = String(data: data, encoding: .utf8) {
-                    print("🌐 Response Data: \(responseString)")
+                    print(" Response Data: \(responseString)")
                 }
 
                 switch response.result {
                 case .success(let value):
                     observable.onNext(.success(value))
                 case .failure(let error):
-                    print("🌐 Request failed with error: \(error)")
+                    print(" Request failed with error: \(error)")
 
                     // 네트워크 연결 오류인지 확인
                     if let urlError = error.underlyingError as? URLError {

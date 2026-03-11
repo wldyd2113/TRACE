@@ -4,6 +4,7 @@
 //
 //  Created by 차지용 on 9/29/25.
 //
+//
 
 import UIKit
 import RealmSwift
@@ -12,20 +13,20 @@ import RealmSwift
 extension TravelPlanDetailViewController {
 
     func saveAllDataToRealm() {
-        print("💾 ===== UI에서 저장 요청 =====")
+        print(" ===== UI에서 저장 요청 =====")
 
         // 자동 저장 방지 플래그 확인
         if shouldPreventAutoSave {
-            print("🚫 UI: 자동 저장 방지로 인해 Realm 저장을 건너뜁니다")
+            print(" UI: 자동 저장 방지로 인해 Realm 저장을 건너뜁니다")
             return
         }
 
         // 임시 여행 정보가 있는 경우 먼저 TravelPlan을 생성
         if let tempInfo = tempTravelInfo {
-            print("📝 임시 여행 정보로 TravelPlan 생성:")
-            print("   🌍 국가: \(tempInfo.country)")
-            print("   📍 여행지: \(tempInfo.destination)")
-            print("   📅 기간: \(DateManager.shared.formatToKoreanString(from: tempInfo.startDate)) ~ \(DateManager.shared.formatToKoreanString(from: tempInfo.endDate))")
+            print(" 임시 여행 정보로 TravelPlan 생성:")
+            print("    국가: \(tempInfo.country)")
+            print("    여행지: \(tempInfo.destination)")
+            print("    기간: \(DateManager.shared.formatToKoreanString(from: tempInfo.startDate)) ~ \(DateManager.shared.formatToKoreanString(from: tempInfo.endDate))")
 
             // TravelDay 초기값 생성
             let travelDay = TravelDay()
@@ -49,7 +50,7 @@ extension TravelPlanDetailViewController {
             // countryType 설정 (해외면 Google API, 국내면 Kakao API 사용)
             let planCountryType = tempInfo.country == "해외" ? "해외" : "국내"
             setCountryType(planCountryType)
-            print("🌍 임시 여행 정보에서 countryType 설정됨: \(planCountryType)")
+            print(" 임시 여행 정보에서 countryType 설정됨: \(planCountryType)")
 
             // Realm에 TravelPlan 저장
             do {
@@ -57,13 +58,13 @@ extension TravelPlanDetailViewController {
                 try realm.write {
                     realm.add(travelPlan)
                 }
-                print("✅ TravelPlan 생성 및 저장 완료")
+                print(" TravelPlan 생성 및 저장 완료")
 
                 // 임시 정보 제거 (이제 정식으로 저장됨)
                 self.tempTravelInfo = nil
 
             } catch {
-                print("❌ TravelPlan 저장 실패: \(error.localizedDescription)")
+                print(" TravelPlan 저장 실패: \(error.localizedDescription)")
                 showSaveAlert(success: false, message: "여행 계획 저장에 실패했습니다.")
                 return
             }
@@ -72,9 +73,9 @@ extension TravelPlanDetailViewController {
         // 현재 입력된 데이터를 ViewModel에 업데이트
         let currentBudget = budgetTextField.text ?? ""
 
-        print("📝 현재 UI 데이터:")
-        print("   💰 예산: '\(currentBudget)'")
-        print("   📅 현재 일차: \(currentDay)")
+        print(" 현재 UI 데이터:")
+        print("    예산: '\(currentBudget)'")
+        print("    현재 일차: \(currentDay)")
 
         // ViewModel에 현재 데이터 업데이트
         viewModel.updateBudget(currentBudget, forDay: currentDay)

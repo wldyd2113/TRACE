@@ -33,10 +33,10 @@ extension TravelChannelViewController {
                 if !routes.isEmpty && !(self?.isTrackingRoute ?? false) {
                     // 현재 여행 중인 경로가 있는지 확인
                     if let currentRoute = routes.first(where: { self?.isCurrentlyTraveling(route: $0) ?? false }) {
-                        print("📍 현재 여행 중인 경로 발견: \(currentRoute.travelName) \(currentRoute.currentDay)일차")
+                        print(" 현재 여행 중인 경로 발견: \(currentRoute.travelName) \(currentRoute.currentDay)일차")
                         self?.startRouteTracking()
                     } else {
-                        print("📍 현재 여행 중인 경로가 없음 - 추적하지 않음")
+                        print(" 현재 여행 중인 경로가 없음 - 추적하지 않음")
                     }
                 }
             })
@@ -63,7 +63,7 @@ extension TravelChannelViewController {
     }
 
     private func updateMapWithRoutes(_ routes: [TravelChannelViewModel.TravelRouteData]) {
-        print("📍 지도에 여행 경로 업데이트: \(routes.count)개")
+        print(" 지도에 여행 경로 업데이트: \(routes.count)개")
 
         // 기존 마커 제거
         mapManager.clearAllSearchResults()
@@ -100,10 +100,10 @@ extension TravelChannelViewController {
     private func updateLoadingState(_ isLoading: Bool) {
         DispatchQueue.main.async { [weak self] in
             if isLoading {
-                print("🔄 데이터 로딩 중...")
+                print(" 데이터 로딩 중...")
                 // TODO: 로딩 인디케이터 표시
             } else {
-                print("✅ 데이터 로딩 완료")
+                print(" 데이터 로딩 완료")
                 // TODO: 로딩 인디케이터 숨김
             }
         }
@@ -131,11 +131,11 @@ extension TravelChannelViewController {
 
         // 여행 시작일과 종료일 사이에 있는지 확인
         if today >= route.startDate && today <= route.endDate {
-            print("📅 현재 여행 중: \(route.travelName) (\(route.startDate) ~ \(route.endDate))")
+            print(" 현재 여행 중: \(route.travelName) (\(route.startDate) ~ \(route.endDate))")
             return true
         }
 
-        print("📅 여행 기간이 아님: \(route.travelName) (오늘: \(today), 여행: \(route.startDate) ~ \(route.endDate))")
+        print(" 여행 기간이 아님: \(route.travelName) (오늘: \(today), 여행: \(route.startDate) ~ \(route.endDate))")
         return false
     }
 }

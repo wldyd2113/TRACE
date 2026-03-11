@@ -94,7 +94,7 @@ final class TourisViewModel {
         }
 
         isLoadingRelay.accept(true)
-        print("🔍 ViewModel에서 관광지 검색: \(query)")
+        print(" ViewModel에서 관광지 검색: \(query)")
 
         searchWithGooglePlaces(country: query)
     }
@@ -128,7 +128,7 @@ final class TourisViewModel {
 
                     switch result {
                     case .success(let response):
-                        print("✅ Google Places 검색 성공: '\(keyword)' - \(response.results.count)개 결과")
+                        print(" Google Places 검색 성공: '\(keyword)' - \(response.results.count)개 결과")
 
                         // GooglePlace를 TouristAttraction으로 변환
                         let attractions = response.results.prefix(10).map { place in
@@ -138,7 +138,7 @@ final class TourisViewModel {
                         allAttractions.append(contentsOf: attractions)
 
                     case .failure(let error):
-                        print("❌ Google Places 검색 실패: '\(keyword)' - \(error.localizedDescription)")
+                        print(" Google Places 검색 실패: '\(keyword)' - \(error.localizedDescription)")
                     }
                 })
                 .disposed(by: disposeBag)
@@ -149,11 +149,11 @@ final class TourisViewModel {
             self?.isLoadingRelay.accept(false)
 
             if allAttractions.isEmpty {
-                print("⚠️ 검색 결과 없음")
+                print(" 검색 결과 없음")
                 self?.errorMessageRelay.accept("'\(country)' 관광지 검색에 실패했습니다.")
                 self?.attractionsRelay.accept([]) // 빈 배열로 설정
             } else {
-                print("✅ 총 \(allAttractions.count)개 관광지 발견")
+                print(" 총 \(allAttractions.count)개 관광지 발견")
                 let uniqueAttractions = self?.removeDuplicateAttractions(allAttractions) ?? []
                 self?.attractionsRelay.accept(uniqueAttractions)
             }
@@ -213,7 +213,7 @@ final class TourisViewModel {
     }
 
     private func loadKoreanTouristAttractions() {
-        print("🇰🇷 한국 관광지 로딩 시작")
+        print(" 한국 관광지 로딩 시작")
         isLoadingRelay.accept(true)
 
         searchWithGooglePlaces(country: "한국")

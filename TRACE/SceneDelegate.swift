@@ -129,16 +129,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func requestLocationPermissionIfNeeded() {
         switch locationManager.authorizationStatus {
         case .notDetermined:
-            print("📍 App startup: Requesting location permission")
+            print(" App startup: Requesting location permission")
             locationManager.requestWhenInUseAuthorization()
         case .denied:
-            print("📍 App startup: Location permission denied")
+            print(" App startup: Location permission denied")
         case .restricted:
-            print("📍 App startup: Location permission restricted")
+            print(" App startup: Location permission restricted")
         case .authorizedWhenInUse, .authorizedAlways:
-            print("📍 App startup: Location permission already granted")
+            print(" App startup: Location permission already granted")
         @unknown default:
-            print("📍 App startup: Unknown location permission status")
+            print(" App startup: Unknown location permission status")
         }
     }
 
@@ -182,12 +182,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     // MARK: - Widget Data Management
     private func updateWidgetDataOnAppLaunch() {
-        print("🚀 앱 시작 시 위젯 데이터 업데이트...")
+        print("앱 시작 시 위젯 데이터 업데이트...")
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             // Realm이 초기화된 후 데이터 로드
             guard let realm = RealmManager.shared.getRealm() else {
-                print("❌ 앱 시작 시 Realm을 가져올 수 없습니다")
+                print("앱 시작 시 Realm을 가져올 수 없습니다")
                 return
             }
 
@@ -209,11 +209,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     print("🎯 앱 시작 시 위젯 데이터 업데이트 완료: \(widgetData.destination)")
                 } else {
                     WidgetDataManager.shared.saveUpcomingTravelData(nil)
-                    print("📭 앱 시작 시 다가오는 여행 없음 - 위젯 데이터 클리어")
+                    print(" 앱 시작 시 다가오는 여행 없음 - 위젯 데이터 클리어")
                 }
 
             } catch {
-                print("❌ 앱 시작 시 여행 데이터 로드 실패: \(error)")
+                print("앱 시작 시 여행 데이터 로드 실패: \(error)")
             }
         }
     }
@@ -223,23 +223,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 // MARK: - CLLocationManagerDelegate
 extension SceneDelegate: CLLocationManagerDelegate {
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        print("📍 Location authorization changed to: \(manager.authorizationStatus.rawValue)")
+        print(" Location authorization changed to: \(manager.authorizationStatus.rawValue)")
 
         switch manager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            print("📍 Location permission granted, now requesting notification permission")
+            print(" Location permission granted, now requesting notification permission")
             // 위치 권한이 허용되면 알림 권한 요청
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
                 self?.requestNotificationPermissionIfNeeded()
             }
         case .denied, .restricted:
-            print("📍 Location permission denied/restricted, still requesting notification permission")
+            print(" Location permission denied/restricted, still requesting notification permission")
             // 위치 권한이 거부되어도 알림 권한은 요청
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
                 self?.requestNotificationPermissionIfNeeded()
             }
         case .notDetermined:
-            print("📍 Location permission not yet determined")
+            print(" Location permission not yet determined")
         @unknown default:
             break
         }

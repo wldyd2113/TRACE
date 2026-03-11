@@ -159,7 +159,7 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
     }
 
     deinit {
-        print("🗑️ TravelPlanDetailViewController deinit - 자동 저장 방지 활성화")
+        print(" TravelPlanDetailViewController deinit - 자동 저장 방지 활성화")
         shouldPreventAutoSave = true
         viewModel.shouldPreventAutoSave = true
     }
@@ -208,16 +208,16 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("👀 TravelPlanDetail viewWillAppear - 현재 countryType: \(countryType)")
+        print(" TravelPlanDetail viewWillAppear - 현재 countryType: \(countryType)")
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        print("ℹ️ TravelPlanDetail: viewWillDisappear")
+        print(" TravelPlanDetail: viewWillDisappear")
 
         // 자동 저장 방지 플래그 확인
         if shouldPreventAutoSave {
-            print("🚫 viewWillDisappear: 자동 저장 방지로 인해 데이터 저장 생략")
+            print(" viewWillDisappear: 자동 저장 방지로 인해 데이터 저장 생략")
             return
         }
 
@@ -229,10 +229,10 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
     private func loadTravelPlanAndCalculateDays() {
         // 임시 여행 정보가 있는 경우 (아직 저장되지 않은 새로운 여행 계획)
         if let tempInfo = tempTravelInfo {
-            print("📅 임시 여행 정보 사용:")
-            print("   📍 여행지: \(tempInfo.destination)")
-            print("   🗓️시작일: \(DateManager.shared.formatToKoreanString(from: tempInfo.startDate))")
-            print("   🗓️ 종료일: \(DateManager.shared.formatToKoreanString(from: tempInfo.endDate))")
+            print(" 임시 여행 정보 사용:")
+            print("    여행지: \(tempInfo.destination)")
+            print("   시작일: \(DateManager.shared.formatToKoreanString(from: tempInfo.startDate))")
+            print("    종료일: \(DateManager.shared.formatToKoreanString(from: tempInfo.endDate))")
 
             startDate = tempInfo.startDate
             endDate = tempInfo.endDate
@@ -249,7 +249,7 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
             let endDateStr = dateFormatter.string(from: endDate!)
             navigationItem.title = "\(tempInfo.destination) (\(startDateStr)~\(endDateStr), \(totalDays)일)"
 
-            print("   📊 총 일차: \(totalDays)일")
+            print("    총 일차: \(totalDays)일")
 
             // CollectionView 리액티브 업데이트
             updateCollectionViewReactively()
@@ -262,7 +262,7 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
             let allPlans = realm.objects(TravelPlan.self)
 
             guard let latestPlan = allPlans.last else {
-                print("⚠️ Realm에 저장된 여행 계획이 없습니다. 기본 3일차로 설정됩니다.")
+                print(" Realm에 저장된 여행 계획이 없습니다. 기본 3일차로 설정됩니다.")
                 setupDefaultDays()
                 return
             }
@@ -275,17 +275,17 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
             let daysDifference = calendar.dateComponents([.day], from: startDate!, to: endDate!).day ?? 0
             totalDays = max(1, daysDifference + 1) // 최소 1일, 당일 여행도 1일로 계산
 
-            print("📅 저장된 여행 계획 로드:")
-            print("   📍 여행지: \(latestPlan.travelName)")
-            print("   🌍 국가: \(latestPlan.nation)")
-            print("   🗓️ 시작일: \(DateManager.shared.formatToKoreanString(from: startDate!))")
-            print("   🗓️ 종료일: \(DateManager.shared.formatToKoreanString(from: endDate!))")
-            print("   📊 총 일차: \(totalDays)일")
+            print(" 저장된 여행 계획 로드:")
+            print("    여행지: \(latestPlan.travelName)")
+            print("    국가: \(latestPlan.nation)")
+            print("    시작일: \(DateManager.shared.formatToKoreanString(from: startDate!))")
+            print("    종료일: \(DateManager.shared.formatToKoreanString(from: endDate!))")
+            print("    총 일차: \(totalDays)일")
 
             // countryType 설정 (해외면 Google API, 국내면 Kakao API 사용)
             let planCountryType = latestPlan.nation == "해외" ? "해외" : "국내"
             setCountryType(planCountryType)
-            print("🌍 저장된 여행 계획에서 countryType 설정됨: \(planCountryType)")
+            print(" 저장된 여행 계획에서 countryType 설정됨: \(planCountryType)")
 
             // Navigation title 업데이트
             let dateFormatter = DateFormatter()
@@ -298,14 +298,14 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
             updateCollectionViewReactively()
 
         } catch {
-            print("❌ Realm 데이터 로드 실패: \(error.localizedDescription)")
+            print(" Realm 데이터 로드 실패: \(error.localizedDescription)")
             setupDefaultDays()
         }
     }
 
     private func setupDefaultDays() {
         totalDays = 3
-        print("📅 기본 3일차로 설정됨")
+        print(" 기본 3일차로 설정됨")
         updateCollectionViewReactively()
     }
 
@@ -315,7 +315,7 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
             // 현재 일차의 데이터 저장 (검색된 장소들도 포함)
             saveCurrentDayData()
         } else {
-            print("🚫 일차 선택 시 자동 저장 방지됨")
+            print(" 일차 선택 시 자동 저장 방지됨")
         }
 
         // 선택 상태 업데이트
@@ -337,14 +337,14 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
         // 선택된 일차의 데이터 불러오기 (UI 완전 초기화)
         loadDayData(day: currentDay)
 
-        print("📅 일차 선택됨: \(currentDay)일차 (index: \(index))")
-        print("🔄 ViewController와 ViewModel currentDay 동기화 완료")
+        print(" 일차 선택됨: \(currentDay)일차 (index: \(index))")
+        print(" ViewController와 ViewModel currentDay 동기화 완료")
     }
 
     func saveCurrentDayData() {
         // 자동 저장 방지 플래그 확인
         if shouldPreventAutoSave {
-            print("🚫 자동 저장이 방지되어 데이터 저장을 건너뜁니다")
+            print(" 자동 저장이 방지되어 데이터 저장을 건너뜁니다")
             return
         }
 
@@ -357,7 +357,7 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
     }
 
     func loadDayData(day: Int) {
-        print("📅 Day \(day) 데이터 로드 시작")
+        print(" Day \(day) 데이터 로드 시작")
 
         // ViewModel에서 일차 데이터 가져오기
         let dayData = viewModel.getDayData(for: day)
@@ -384,11 +384,11 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
                 self?.mapManager.displaySearchResults(places: dayData.searchedPlaces)
             }
 
-            print("📅 Day \(day) UI 업데이트 완료:")
-            print("   💰 예산: '\(dayData.budget.isEmpty ? "빈 값" : dayData.budget)'")
-            print("   🚗 경로: '\(dayData.route.isEmpty ? "빈 값" : dayData.route)'")
-            print("   📋 일정: \(dayData.scheduleItems.count)개")
-            print("   📍 좌표: \(dayData.searchedPlaces.count)개")
+            print(" Day \(day) UI 업데이트 완료:")
+            print("    예산: '\(dayData.budget.isEmpty ? "빈 값" : dayData.budget)'")
+            print("    경로: '\(dayData.route.isEmpty ? "빈 값" : dayData.route)'")
+            print("    일정: \(dayData.scheduleItems.count)개")
+            print("    좌표: \(dayData.searchedPlaces.count)개")
         }
     }
 
@@ -416,7 +416,7 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
     func setCountryType(_ type: String) {
         countryType = type
         viewModel.setCountryType(type)
-        print("🌍 여행 타입 설정: \(type)")
+        print(" 여행 타입 설정: \(type)")
         setupLocationSearch()
     }
 
@@ -427,48 +427,48 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
     }
 
     private func searchLocation(query: String) {
-        print("🔍 검색 시작 - 쿼리: \(query), 국가타입: \(countryType)")
+        print(" 검색 시작 - 쿼리: \(query), 국가타입: \(countryType)")
 
         if countryType == "국내" {
-            print("📍 카카오 API 사용")
+            print(" 카카오 API 사용")
             searchWithKakao(query: query)
         } else {
-            print("🌏 구글 API 사용")
+            print(" 구글 API 사용")
             searchWithGoogle(query: query)
         }
     }
 
     private func searchWithKakao(query: String) {
-        print("🇰🇷 KAKAO API 호출 시작: \(query)")
-        print("🇰🇷 ===== 카카오 검색 실행 중 =====")
+        print(" KAKAO API 호출 시작: \(query)")
+        print(" ===== 카카오 검색 실행 중 =====")
 
         NetworkManger.shared.searchKakaoPlaces(query: query)
             .subscribe(onNext: { [weak self] result in
-                print("🇰🇷 카카오 API 응답 받음")
+                print(" 카카오 API 응답 받음")
                 switch result {
                 case .success(let response):
                     self?.currentSearchedPlaces = response.documents
                     self?.mapManager.displaySearchResults(places: response.documents)
-                    print("🇰🇷 카카오 검색 결과: \(response.documents.count)개")
+                    print(" 카카오 검색 결과: \(response.documents.count)개")
 
                 case .failure(let error):
-                    print("❌ 카카오 검색 실패: \(error)")
+                    print(" 카카오 검색 실패: \(error)")
                 }
             })
             .disposed(by: disposeBag)
     }
 
     private func searchWithGoogle(query: String) {
-        print("🌍 GOOGLE API 호출 시작: \(query)")
-        print("🌍 ===== 구글 검색 실행 중 =====")
+        print(" GOOGLE API 호출 시작: \(query)")
+        print(" ===== 구글 검색 실행 중 =====")
 
         NetworkManger.shared.searchGooglePlaces(query: query)
             .subscribe(onNext: { [weak self] result in
-                print("🌐 Google API 응답 받음")
+                print(" Google API 응답 받음")
                 switch result {
                 case .success(let response):
-                    print("✅ Google Places 응답 성공: \(response.results.count)개 결과")
-                    print("🔍 첫 번째 결과: \(response.results.first?.name ?? "없음")")
+                    print(" Google Places 응답 성공: \(response.results.count)개 결과")
+                    print(" 첫 번째 결과: \(response.results.first?.name ?? "없음")")
 
                     // PlaceResult를 KakaoPlace 형태로 변환
                     let kakaoPlaces = response.results.map { place in
@@ -490,11 +490,11 @@ class TravelPlanDetailViewController: UIViewController, UINavigationControllerDe
 
                     self?.currentSearchedPlaces = kakaoPlaces
                     self?.mapManager.displaySearchResults(places: kakaoPlaces)
-                    print("🔍 Google Places 검색 결과: \(kakaoPlaces.count)개")
+                    print(" Google Places 검색 결과: \(kakaoPlaces.count)개")
 
                 case .failure(let error):
-                    print("❌ Google Places 검색 실패: \(error)")
-                    print("❌ 오류 상세: \(error.localizedDescription)")
+                    print(" Google Places 검색 실패: \(error)")
+                    print(" 오류 상세: \(error.localizedDescription)")
                 }
             })
             .disposed(by: disposeBag)
@@ -523,19 +523,19 @@ extension TravelPlanDetailViewController: TravelSearchDelegate {
         locationSearchButton.setTitle(place.placeName, for: .normal)
         locationSearchButton.setTitleColor(.label, for: .normal)
 
-        print("📍 장소 선택됨: \(place.placeName)")
+        print(" 장소 선택됨: \(place.placeName)")
 
         // 중복 검사 후 장소 누적 추가
         if !currentSearchedPlaces.contains(where: { $0.placeName == place.placeName }) {
             currentSearchedPlaces.append(place)
-            print("📍 새 장소 추가됨: \(place.placeName) (총 \(currentSearchedPlaces.count)개)")
+            print(" 새 장소 추가됨: \(place.placeName) (총 \(currentSearchedPlaces.count)개)")
         } else {
-            print("📍 이미 존재하는 장소: \(place.placeName)")
+            print(" 이미 존재하는 장소: \(place.placeName)")
         }
 
         // 모든 누적된 장소들을 지도에 표시 (POI + 루트)
         mapManager.displaySearchResults(places: currentSearchedPlaces)
-        print("📍 지도에 \(currentSearchedPlaces.count)개 POI 표시 및 루트 그리기")
+        print(" 지도에 \(currentSearchedPlaces.count)개 POI 표시 및 루트 그리기")
     }
 }
 
@@ -570,7 +570,7 @@ extension TravelPlanDetailViewController {
             // 자동 저장 방지 활성화
             self?.shouldPreventAutoSave = true
             self?.viewModel.shouldPreventAutoSave = true
-            print("🚫 TravelPlanDetail: 사용자가 나가기 선택 - 자동 저장 방지")
+            print(" TravelPlanDetail: 사용자가 나가기 선택 - 자동 저장 방지")
             self?.navigationController?.popViewController(animated: true)
         })
         present(alert, animated: true)
@@ -582,7 +582,7 @@ extension TravelPlanDetailViewController: UIGestureRecognizerDelegate {
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         // 스와이프 뒤로가기 제스처가 시작될 때 확인 알림 표시
         if gestureRecognizer == navigationController?.interactivePopGestureRecognizer {
-            print("🚫 스와이프 뒤로가기 감지 - 확인 알림 표시")
+            print(" 스와이프 뒤로가기 감지 - 확인 알림 표시")
             showCancelAlert()
             return false // 제스처를 취소하고 알림을 먼저 표시
         }
@@ -595,11 +595,11 @@ extension TravelPlanDetailViewController {
     func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
         // TravelPlanDetailViewController에서 다른 화면으로 이동할 때
         if self != viewController {
-            print("🔄 TravelPlanDetail: 다른 화면으로 이동 중")
+            print(" TravelPlanDetail: 다른 화면으로 이동 중")
 
             // 자동 저장 방지 플래그가 설정된 경우 저장하지 않음
             if shouldPreventAutoSave {
-                print("🚫 navigationController willShow: 자동 저장 방지로 인해 데이터 저장 생략")
+                print(" navigationController willShow: 자동 저장 방지로 인해 데이터 저장 생략")
                 return
             }
 

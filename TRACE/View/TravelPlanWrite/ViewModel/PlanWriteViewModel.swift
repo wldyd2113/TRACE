@@ -25,7 +25,7 @@ class PlanWriteViewModel {
     private var shouldPreventAutoSave = false
 
     deinit {
-        print("🗑️ PlanWriteViewModel deinit - 자동 저장 방지 활성화")
+        print(" PlanWriteViewModel deinit - 자동 저장 방지 활성화")
         shouldPreventAutoSave = true
     }
 
@@ -74,11 +74,11 @@ class PlanWriteViewModel {
 
     // MARK: - Methods
     func createTravelPlan() {
-        print("🔍 createTravelPlan() 호출됨 - shouldPreventAutoSave: \(shouldPreventAutoSave)")
+        print(" createTravelPlan() 호출됨 - shouldPreventAutoSave: \(shouldPreventAutoSave)")
 
         // 자동 저장 방지 플래그 확인
         if shouldPreventAutoSave {
-            print("🚫 자동 저장이 방지되어 여행 계획 생성을 건너뜁니다")
+            print(" 자동 저장이 방지되어 여행 계획 생성을 건너뜁니다")
             return
         }
 
@@ -97,7 +97,7 @@ class PlanWriteViewModel {
         let daysDifference = calendar.dateComponents([.day], from: start, to: end).day ?? 0
         let totalDays = max(daysDifference + 1, 1) // 시작일과 종료일 포함, 최소 1일
 
-        print("📅 날짜 계산 결과:")
+        print(" 날짜 계산 결과:")
         print("   • 시작일: \(DateManager.shared.formatToKoreanString(from: start))")
         print("   • 종료일: \(DateManager.shared.formatToKoreanString(from: end))")
         print("   • 일수 차이: \(daysDifference)일")
@@ -126,7 +126,7 @@ class PlanWriteViewModel {
         )
 
         // 각 일차별 상세 정보 생성
-        print("📝 일차별 상세 정보 생성 시작:")
+        print(" 일차별 상세 정보 생성 시작:")
         for dayNumber in 1...totalDays {
             let dayDetail = TravelDayDetail()
             dayDetail.dayNumber = dayNumber
@@ -135,7 +135,7 @@ class PlanWriteViewModel {
             travelPlan.travelDays.append(dayDetail)
             print("   • \(dayNumber)일차 생성 완료")
         }
-        print("📝 총 \(travelPlan.travelDays.count)개 일차 생성됨")
+        print(" 총 \(travelPlan.travelDays.count)개 일차 생성됨")
 
         // Realm에 저장
         saveTravelPlan(travelPlan)
@@ -145,16 +145,16 @@ class PlanWriteViewModel {
     }
 
     private func saveTravelPlan(_ travelPlan: TravelPlan) {
-        print("🔍 saveTravelPlan() 호출됨 - shouldPreventAutoSave: \(shouldPreventAutoSave)")
+        print(" saveTravelPlan() 호출됨 - shouldPreventAutoSave: \(shouldPreventAutoSave)")
 
         // 한 번 더 자동 저장 방지 확인
         if shouldPreventAutoSave {
-            print("🚫 saveTravelPlan에서 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
+            print(" saveTravelPlan에서 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
             return
         }
 
         guard let realm = RealmManager.shared.getRealm() else {
-            print("❌ ===== Realm 저장 실패 =====")
+            print(" ===== Realm 저장 실패 =====")
             print("오류 내용: Realm 인스턴스를 가져올 수 없습니다")
             showAlert.accept((
                 title: NSLocalizedString("save_failed", comment: ""),
@@ -173,8 +173,8 @@ class PlanWriteViewModel {
                 realm.add(travelPlan)
             }
 
-            print("✅ ===== 여행 계획 저장 완료 =====")
-            print("📝 저장된 데이터:")
+            print(" ===== 여행 계획 저장 완료 =====")
+            print(" 저장된 데이터:")
             print("   • 국가: \(travelPlan.nation)")
             print("   • 여행지: \(travelPlan.travelName)")
             print("   • 시작일: \(DateManager.shared.formatToKoreanString(from: travelPlan.startDate))")
@@ -194,7 +194,7 @@ class PlanWriteViewModel {
             ))
 
         } catch {
-            print("❌ ===== Realm 저장 실패 =====")
+            print(" ===== Realm 저장 실패 =====")
             print("오류 내용: \(error.localizedDescription)")
             print("================================")
             showAlert.accept((title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("travel_plan_save_failed", comment: ""), completion: nil))
@@ -204,11 +204,11 @@ class PlanWriteViewModel {
     // MARK: - Auto Save Prevention
     func enableAutoSavePrevention() {
         shouldPreventAutoSave = true
-        print("🚫 자동 저장 방지 활성화")
+        print(" 자동 저장 방지 활성화")
     }
 
     func disableAutoSavePrevention() {
         shouldPreventAutoSave = false
-        print("✅ 자동 저장 방지 비활성화")
+        print(" 자동 저장 방지 비활성화")
     }
 }

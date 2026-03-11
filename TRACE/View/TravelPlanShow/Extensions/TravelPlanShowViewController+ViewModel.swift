@@ -63,12 +63,12 @@ extension TravelPlanShowViewController {
         output.saveResult
             .subscribe(onNext: { [weak self] success, message in
                 if success {
-                    print("✅ 저장 성공: \(message)")
+                    print(" 저장 성공: \(message)")
                     // 저장 성공 시 읽기 모드로 전환
                     self?.setReadOnlyMode()
                     self?.isEditMode = false
                 } else {
-                    print("❌ 저장 실패: \(message)")
+                    print(" 저장 실패: \(message)")
                 }
             })
             .disposed(by: disposeBag)
@@ -101,7 +101,7 @@ extension TravelPlanShowViewController {
                 // ViewModel 업데이트 중이거나 편집 모드가 아닐 때는 무시
                 if !self.isUpdatingFromViewModel && self.isEditMode {
                     budgetChangedSubject.onNext(text)
-                    print("💰 사용자가 예산 변경: '\(text)'")
+                    print(" 사용자가 예산 변경: '\(text)'")
                 }
             })
             .disposed(by: disposeBag)

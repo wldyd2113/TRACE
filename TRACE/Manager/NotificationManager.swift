@@ -46,7 +46,7 @@ class NotificationManager {
         checkNotificationPermission { [weak self] isAuthorized in
             DispatchQueue.main.async {
                 guard isAuthorized else {
-                    print("❌ 알림 권한이 없습니다.")
+                    print(" 알림 권한이 없습니다.")
                     return
                 }
 
@@ -59,7 +59,7 @@ class NotificationManager {
         // 여행 시작일 하루 전 계산
         let calendar = Calendar.current
         guard let reminderDate = calendar.date(byAdding: .day, value: -1, to: travelPlan.startDate) else {
-            print("❌ 알림 날짜 계산 실패")
+            print(" 알림 날짜 계산 실패")
             return
         }
 
@@ -69,7 +69,7 @@ class NotificationManager {
         dateComponents.minute = 0
 
         guard let scheduledTime = calendar.date(from: dateComponents) else {
-            print("❌ 알림 시간 생성 실패")
+            print(" 알림 시간 생성 실패")
             return
         }
 
@@ -80,7 +80,7 @@ class NotificationManager {
 
         // 과거 시간은 알림 스케줄링하지 않음
         if scheduledTime <= now {
-            print("❌ 알림 예정 시간이 이미 지났습니다.")
+            print(" 알림 예정 시간이 이미 지났습니다.")
             return
         }
 
@@ -102,9 +102,9 @@ class NotificationManager {
         notificationCenter.add(request) { [weak self] error in
             DispatchQueue.main.async {
                 if let error = error {
-                    print("❌ 알림 스케줄링 실패: \(error.localizedDescription)")
+                    print(" 알림 스케줄링 실패: \(error.localizedDescription)")
                 } else {
-                    print("✅ 여행 알림 스케줄링 완료!")
+                    print(" 여행 알림 스케줄링 완료!")
                     print("   • 여행지: \(travelPlan.travelName)")
                     print("   • 여행 시작일: \(DateManager.shared.formatToKoreanString(from: travelPlan.startDate))")
                     print("   • 알림 예정일: \(DateManager.shared.formatToKoreanString(from: scheduledTime))")

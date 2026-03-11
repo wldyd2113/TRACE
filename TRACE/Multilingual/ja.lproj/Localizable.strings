@@ -93,8 +93,8 @@
 "search_place_placeholder" = "検索する場所を入力してください";
 "no_search_results" = "検索結果がありません。\n他のキーワードで検索してみてください。";
 "search_error" = "検索エラー";
-"country_type_domestic" = "🇰🇷 国内検索（カカオマップ）";
-"country_type_international" = "🌍 海外検索（Google）";
+"country_type_domestic" = " 国内検索（カカオマップ）";
+"country_type_international" = " 海外検索（Google）";
 
 // TravelPlanShow Screen
 "estimated_budget" = "予想予算";

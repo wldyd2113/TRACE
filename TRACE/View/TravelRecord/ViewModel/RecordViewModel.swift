@@ -81,7 +81,7 @@ final class RecordViewModel: BaseViewModel {
 
         // 안전한 Realm 로드
         guard let realm = RealmManager.shared.safeRealm() else {
-            print("❌ Realm 인스턴스를 생성할 수 없습니다")
+            print(" Realm 인스턴스를 생성할 수 없습니다")
             isLoadingRelay.accept(false)
             recordsRelay.accept([])
             return
@@ -93,11 +93,11 @@ final class RecordViewModel: BaseViewModel {
 
             recordsRelay.accept(records)
             isLoadingRelay.accept(false)
-            print("📝 여행 기록 로드 완료: \(records.count)개")
+            print(" 여행 기록 로드 완료: \(records.count)개")
         } catch {
             isLoadingRelay.accept(false)
             recordsRelay.accept([])
-            print("❌ 여행 기록 로드 실패: \(error)")
+            print(" 여행 기록 로드 실패: \(error)")
         }
     }
 
@@ -128,7 +128,7 @@ final class RecordViewModel: BaseViewModel {
             let photoData = try Data(contentsOf: photoPath)
             return photoData
         } catch {
-            print("❌ 사진 로드 실패: \(error) - 경로: \(photoPath.path)")
+            print(" 사진 로드 실패: \(error) - 경로: \(photoPath.path)")
             return nil
         }
     }
@@ -161,7 +161,7 @@ final class RecordViewModel: BaseViewModel {
             loadRecords()
             return true
         } catch {
-            print("❌ 기록 삭제 실패: \(error)")
+            print(" 기록 삭제 실패: \(error)")
             return false
         }
     }
@@ -174,18 +174,18 @@ final class RecordViewModel: BaseViewModel {
             try FileManager.default.removeItem(at: filePath)
             print("📸 사진 삭제 완료: \(filePath.path)")
         } catch {
-            print("❌ 사진 삭제 실패: \(error)")
+            print(" 사진 삭제 실패: \(error)")
         }
     }
 
     func getRecord(by id: String) -> TravelRecord? {
         guard let realm = RealmManager.shared.safeRealm() else {
-            print("❌ Realm 인스턴스를 생성할 수 없습니다")
+            print(" Realm 인스턴스를 생성할 수 없습니다")
             return nil
         }
 
         guard let objectId = try? ObjectId(string: id) else {
-            print("❌ 잘못된 ObjectId: \(id)")
+            print(" 잘못된 ObjectId: \(id)")
             return nil
         }
 

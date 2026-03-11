@@ -34,12 +34,12 @@ class TravelPlanShowViewController: UIViewController {
 
     // 국내/해외 타입 설정 메서드
     func setCountryType(_ type: String) {
-        print("🔄 TravelPlanShow: setCountryType 호출됨")
+        print(" TravelPlanShow: setCountryType 호출됨")
         print("   • 이전 countryType: '\(countryType)'")
         print("   • 새로운 countryType: '\(type)'")
 
         countryType = type
-        print("✅ TravelPlanShow: countryType 설정 완료 - '\(countryType)'")
+        print(" TravelPlanShow: countryType 설정 완료 - '\(countryType)'")
     }
 
     // 검색된 장소들을 저장 (좌표 정보 포함)
@@ -205,13 +205,13 @@ class TravelPlanShowViewController: UIViewController {
 
     // MARK: - Search Modal Methods
     func presentSearchModal() {
-        print("🔍 TravelPlanShow: presentSearchModal 호출")
-        print("🌍 현재 countryType: '\(countryType)'")
+        print(" TravelPlanShow: presentSearchModal 호출")
+        print(" 현재 countryType: '\(countryType)'")
 
         let searchVC = TravelSearchViewController()
         searchVC.delegate = self
         searchVC.countryType = countryType
-        print("🔄 TravelSearchViewController에 countryType 전달: '\(countryType)'")
+        print(" TravelSearchViewController에 countryType 전달: '\(countryType)'")
 
         searchVC.modalPresentationStyle = .overFullScreen
         searchVC.modalTransitionStyle = .crossDissolve
@@ -231,7 +231,7 @@ extension TravelPlanShowViewController: TravelSearchDelegate {
         locationSearchButton.setTitle(place.placeName, for: .normal)
         locationSearchButton.setTitleColor(.label, for: .normal)
 
-        print("📍 장소 선택됨: \(place.placeName)")
+        print(" 장소 선택됨: \(place.placeName)")
 
         // 선택된 장소를 지도에 표시 (선택된 장소만)
         currentSearchedPlaces = [place]

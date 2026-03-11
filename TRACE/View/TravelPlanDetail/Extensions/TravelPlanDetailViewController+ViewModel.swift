@@ -77,7 +77,7 @@ extension TravelPlanDetailViewController {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     let currentDayData = self.viewModel.getDayData(for: self.currentDay)
                     self.updateScheduleUI(items: currentDayData.scheduleItems)
-                    print("✅ 일정 추가 후 현재 일차(\(self.currentDay)) UI 업데이트 완료")
+                    print(" 일정 추가 후 현재 일차(\(self.currentDay)) UI 업데이트 완료")
                 }
             })
             .disposed(by: disposeBag)
@@ -108,11 +108,11 @@ extension TravelPlanDetailViewController {
 extension TravelPlanDetailViewController {
     @objc func deleteScheduleItem(_ sender: UIButton) {
         let index = sender.tag
-        print("🗑️ 일정 삭제 요청: index \(index)")
+        print(" 일정 삭제 요청: index \(index)")
 
         // 삭제할 뷰 찾기
         guard index < scheduleStackView.arrangedSubviews.count else {
-            print("❌ 잘못된 인덱스: \(index)")
+            print(" 잘못된 인덱스: \(index)")
             return
         }
 
@@ -130,7 +130,7 @@ extension TravelPlanDetailViewController {
                 guard let self = self else { return }
                 let updatedItems = self.viewModel.getDayData(for: self.currentDay).scheduleItems
                 self.updateScheduleUI(items: updatedItems)
-                print("✅ 일정 삭제 후 UI 업데이트 완료 (애니메이션 포함)")
+                print(" 일정 삭제 후 UI 업데이트 완료 (애니메이션 포함)")
             }
         }
     }

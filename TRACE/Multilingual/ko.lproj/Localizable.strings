@@ -93,8 +93,8 @@
 "search_place_placeholder" = "검색할 장소를 입력하세요";
 "no_search_results" = "검색 결과가 없습니다.\n다른 키워드로 검색해보세요.";
 "search_error" = "검색 오류";
-"country_type_domestic" = "🇰🇷 국내 검색 (카카오맵)";
-"country_type_international" = "🌍 해외 검색 (Google)";
+"country_type_domestic" = "국내 검색 (카카오맵)";
+"country_type_international" = " 해외 검색 (Google)";
 
 // TravelPlanShow Screen
 "estimated_budget" = "예상 경비";

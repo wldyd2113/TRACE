@@ -56,7 +56,7 @@ final class CalendarViewModel {
 
             isLoading.accept(false)
 
-            print("📊 [CalendarViewModel] 여행 계획 로드 완료: \(plansArray.count)개")
+            print(" [CalendarViewModel] 여행 계획 로드 완료: \(plansArray.count)개")
 
         } catch {
             handleError("여행 계획 로드 중 오류 발생: \(error.localizedDescription)")
@@ -81,9 +81,9 @@ final class CalendarViewModel {
         selectedDateInfo.accept(travelPlan)
 
         if let plan = travelPlan {
-            print("📅 [CalendarViewModel] 선택된 날짜 \(dateString)의 여행: \(plan.travelName)")
+            print(" [CalendarViewModel] 선택된 날짜 \(dateString)의 여행: \(plan.travelName)")
         } else {
-            print("📅 [CalendarViewModel] 선택된 날짜 \(dateString)에 여행 계획 없음")
+            print(" [CalendarViewModel] 선택된 날짜 \(dateString)에 여행 계획 없음")
         }
     }
 
@@ -143,6 +143,6 @@ final class CalendarViewModel {
     private func handleError(_ message: String) {
         isLoading.accept(false)
         errorMessage.accept(message)
-        print("❌ [CalendarViewModel] 오류: \(message)")
+        print(" [CalendarViewModel] 오류: \(message)")
     }
 }

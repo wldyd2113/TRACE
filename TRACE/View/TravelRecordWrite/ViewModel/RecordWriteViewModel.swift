@@ -93,7 +93,7 @@ final class RecordWriteViewModel: BaseViewModel {
                 guard let realm = RealmManager.shared.safeRealm() else {
                     self.isLoadingRelay.accept(false)
                     self.saveResultRelay.accept(.failure(NSLocalizedString("database_connection_failed", comment: "Database connection failed")))
-                    print("❌ Realm 인스턴스 생성 실패")
+                    print(" Realm 인스턴스 생성 실패")
                     return
                 }
 
@@ -128,12 +128,12 @@ final class RecordWriteViewModel: BaseViewModel {
 
                     self.isLoadingRelay.accept(false)
                     self.saveResultRelay.accept(.success)
-                    print("📝 여행 기록 저장 완료: \(recordId)")
+                    print(" 여행 기록 저장 완료: \(recordId)")
 
                 } catch {
                     self.isLoadingRelay.accept(false)
                     self.saveResultRelay.accept(.failure(String(format: "%@ %@", NSLocalizedString("record_save_error", comment: "Record save error"), error.localizedDescription)))
-                    print("❌ 여행 기록 저장 실패: \(error)")
+                    print(" 여행 기록 저장 실패: \(error)")
                 }
             }
         }
@@ -171,7 +171,7 @@ final class RecordWriteViewModel: BaseViewModel {
             print("📸 사진 저장 완료: \(filePath.path)")
             return "photo/\(fileName)" // photo/ 경로 포함해서 반환
         } catch {
-            print("❌ 사진 저장 실패: \(error)")
+            print(" 사진 저장 실패: \(error)")
             return nil
         }
     }
@@ -182,7 +182,7 @@ final class RecordWriteViewModel: BaseViewModel {
             let realm = try Realm()
             return Array(realm.objects(TravelRecord.self).sorted(byKeyPath: "travelDate", ascending: false))
         } catch {
-            print("❌ Realm 접근 실패: \(error)")
+            print(" Realm 접근 실패: \(error)")
             return []
         }
     }
@@ -206,7 +206,7 @@ final class RecordWriteViewModel: BaseViewModel {
             }
             return true
         } catch {
-            print("❌ 기록 삭제 실패: \(error)")
+            print(" 기록 삭제 실패: \(error)")
             return false
         }
     }
@@ -219,7 +219,7 @@ final class RecordWriteViewModel: BaseViewModel {
             try FileManager.default.removeItem(at: filePath)
             print("📸 사진 삭제 완료: \(filePath.path)")
         } catch {
-            print("❌ 사진 삭제 실패: \(error)")
+            print(" 사진 삭제 실패: \(error)")
         }
     }
 }

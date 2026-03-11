@@ -111,7 +111,7 @@ class PlanDetailViewModel: BaseViewModel {
                     // 현재 일차 데이터 저장
                     self?.saveCurrentDayData(budget: data.budget, route: data.route, day: data.currentDay)
                 } else {
-                    print("🚫 ViewModel: 일차 변경 시 자동 저장 방지됨")
+                    print(" ViewModel: 일차 변경 시 자동 저장 방지됨")
                 }
                 // 새로운 일차로 변경
                 self?.currentDay.accept(data.selectedDay)
@@ -136,14 +136,14 @@ class PlanDetailViewModel: BaseViewModel {
             ))
             .do(onNext: { [weak self] budget, route, day, storage in
                 print("🚀 저장 버튼 탭됨 - 현재 일차: \(day)")
-                print("📝 현재 입력된 데이터:")
-                print("   💰 예산: '\(budget)'")
-                print("   🚗 경로: '\(route)'")
-                print("   📊 현재 storage: \(storage.count)개 일차")
+                print(" 현재 입력된 데이터:")
+                print("    예산: '\(budget)'")
+                print("    경로: '\(route)'")
+                print("    현재 storage: \(storage.count)개 일차")
 
                 // 현재 dayDataStorage 상태 확인
                 let currentStorage = self?.dayDataStorage.value ?? [:]
-                print("📊 현재 ViewModel storage 상태: \(currentStorage.count)개 일차")
+                print(" 현재 ViewModel storage 상태: \(currentStorage.count)개 일차")
                 for (dayNum, data) in currentStorage {
                     print("   Day \(dayNum): 일정 \(data.scheduleItems.count)개, 예산 '\(data.budget)', 경로 '\(data.route)'")
                 }
@@ -182,7 +182,7 @@ class PlanDetailViewModel: BaseViewModel {
         print("➕ ViewModel: 일정 추가 시작 - Day \(day): \(item.time) \(item.location)")
 
         var currentStorage = dayDataStorage.value
-        print("📊 추가 전 storage 상태: \(currentStorage.count)개 일차")
+        print(" 추가 전 storage 상태: \(currentStorage.count)개 일차")
 
         if currentStorage[day] == nil {
             currentStorage[day] = DayData()
@@ -195,9 +195,9 @@ class PlanDetailViewModel: BaseViewModel {
 
         dayDataStorage.accept(currentStorage)
 
-        print("✅ 일정 추가 완료 - Day \(day): \(item.time) \(item.location)")
+        print(" 일정 추가 완료 - Day \(day): \(item.time) \(item.location)")
         print("📈 일정 개수: \(beforeCount) → \(afterCount)")
-        print("📊 추가 후 전체 storage: \(dayDataStorage.value.count)개 일차")
+        print(" 추가 후 전체 storage: \(dayDataStorage.value.count)개 일차")
     }
 
     private func saveCurrentDayData(budget: String, route: String, day: Int) {
@@ -219,28 +219,28 @@ class PlanDetailViewModel: BaseViewModel {
         dayDataStorage.accept(currentStorage)
 
         print("💾 ViewModel: Day \(day) 데이터 저장 완료")
-        print("   💰 예산: '\(budget)'")
-        print("   🚗 경로: '\(route)'")
-        print("   📋 일정: \(existingScheduleItems.count)개 (기존 유지)")
-        print("   📍 좌표: \(existingSearchedPlaces.count)개 (기존 유지)")
+        print("    예산: '\(budget)'")
+        print("    경로: '\(route)'")
+        print("    일정: \(existingScheduleItems.count)개 (기존 유지)")
+        print("    좌표: \(existingSearchedPlaces.count)개 (기존 유지)")
     }
 
     private func saveTravelPlan(storage: [Int: DayData]) {
         // 자동 저장 방지 플래그 확인
         if shouldPreventAutoSave {
-            print("🚫 ViewModel: saveTravelPlan - 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
+            print(" ViewModel: saveTravelPlan - 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
             return
         }
 
-        print("✅ ===== 여행 계획 저장 시작 =====")
-        print("📊 새로 저장할 데이터 개수: \(storage.count)개 일차")
+        print(" ===== 여행 계획 저장 시작 =====")
+        print(" 새로 저장할 데이터 개수: \(storage.count)개 일차")
 
         for (day, data) in storage {
-            print("📅 Day \(day) 미리보기:")
-            print("   💰 예산: '\(data.budget)'")
-            print("   🚗 경로: '\(data.route)'")
-            print("   📋 일정: \(data.scheduleItems.count)개")
-            print("   📍 좌표: \(data.searchedPlaces.count)개")
+            print(" Day \(day) 미리보기:")
+            print("    예산: '\(data.budget)'")
+            print("    경로: '\(data.route)'")
+            print("    일정: \(data.scheduleItems.count)개")
+            print("    좌표: \(data.searchedPlaces.count)개")
         }
 
         do {
@@ -257,7 +257,7 @@ class PlanDetailViewModel: BaseViewModel {
             var allDaysStorage: [Int: DayData] = [:]
 
             // 기존 Realm 데이터 로드
-            print("📋 기존 저장된 일차: \(currentPlan.travelDays.count)개")
+            print(" 기존 저장된 일차: \(currentPlan.travelDays.count)개")
             for dayDetail in currentPlan.travelDays {
                 var dayData = DayData()
                 dayData.budget = dayDetail.budget
@@ -289,18 +289,18 @@ class PlanDetailViewModel: BaseViewModel {
                 dayData.searchedPlaces = Array(places)
 
                 allDaysStorage[dayDetail.dayNumber] = dayData
-                print("📋 기존 데이터 복원: Day \(dayDetail.dayNumber)")
+                print(" 기존 데이터 복원: Day \(dayDetail.dayNumber)")
             }
 
             // 새로운 데이터로 업데이트 (기존 데이터 덮어쓰기)
             for (day, data) in storage {
                 allDaysStorage[day] = data
-                print("📝 새 데이터 추가/업데이트: Day \(day)")
+                print(" 새 데이터 추가/업데이트: Day \(day)")
             }
 
             // Realm write 직전에도 한번 더 확인
             if shouldPreventAutoSave {
-                print("🚫 ViewModel: realm.write 직전 - 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
+                print(" ViewModel: realm.write 직전 - 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
                 return
             }
 
@@ -328,22 +328,22 @@ class PlanDetailViewModel: BaseViewModel {
 
                     currentPlan.travelDays.append(dayDetail)
 
-                    print("📅 Day \(day) 저장:")
-                    print("   💰 예산: \(data.budget.isEmpty ? "미설정" : data.budget)")
-                    print("   🚗 경로: \(data.route.isEmpty ? "미설정" : data.route)")
-                    print("   📋 일정 수: \(data.scheduleItems.count)개")
-                    print("   📍 경로 좌표: \(dayDetail.routeCoordinates.count)개")
+                    print(" Day \(day) 저장:")
+                    print("    예산: \(data.budget.isEmpty ? "미설정" : data.budget)")
+                    print("    경로: \(data.route.isEmpty ? "미설정" : data.route)")
+                    print("    일정 수: \(data.scheduleItems.count)개")
+                    print("    경로 좌표: \(dayDetail.routeCoordinates.count)개")
                 }
             }
 
-            print("✅ Realm 저장 완료!")
+            print(" Realm 저장 완료!")
             print("🗄️ 총 저장된 일차: \(currentPlan.travelDays.count)개")
 
             // 저장된 데이터 확인
             let savedPlans = realm.objects(TravelPlan.self)
-            print("📊 Realm 내 전체 TravelPlan 수: \(savedPlans.count)")
+            print(" Realm 내 전체 TravelPlan 수: \(savedPlans.count)")
             if let lastPlan = savedPlans.last {
-                print("📋 마지막 저장된 계획:")
+                print(" 마지막 저장된 계획:")
                 print("   • ID: \(lastPlan.id)")
                 print("   • 여행지: \(lastPlan.travelName)")
                 print("   • 일차 수: \(lastPlan.travelDays.count)")
@@ -357,7 +357,7 @@ class PlanDetailViewModel: BaseViewModel {
             navigateToMainRelay.accept(())
 
         } catch {
-            print("❌ Realm 저장 실패: \(error.localizedDescription)")
+            print(" Realm 저장 실패: \(error.localizedDescription)")
             // 실패 결과 emit
             saveResult.onNext((success: false, message: NSLocalizedString("travel_plan_save_retry", comment: "Travel plan save retry")))
         }
@@ -388,7 +388,7 @@ class PlanDetailViewModel: BaseViewModel {
             coordinate.order = index + 1
             dayDetail.routeCoordinates.append(coordinate)
 
-            print("📍 좌표 저장: \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
+            print(" 좌표 저장: \(place.placeName) (\(place.coordinate.latitude), \(place.coordinate.longitude))")
         }
     }
 
@@ -396,14 +396,14 @@ class PlanDetailViewModel: BaseViewModel {
     func saveAllDataToRealm() {
         // 자동 저장 방지 플래그 확인
         if shouldPreventAutoSave {
-            print("🚫 ViewModel: 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
+            print(" ViewModel: 자동 저장이 방지되어 Realm 저장을 건너뜁니다")
             return
         }
 
         print("💾 ===== ViewModel 저장 시작 =====")
 
         let currentStorage = dayDataStorage.value
-        print("📊 저장할 데이터 개수: \(currentStorage.count)개 일차")
+        print(" 저장할 데이터 개수: \(currentStorage.count)개 일차")
 
         // 빈 데이터 제외하고 저장
         let filteredStorage = currentStorage.filter { (day, data) in
@@ -422,7 +422,7 @@ class PlanDetailViewModel: BaseViewModel {
                     NotificationManager.shared.scheduleTravelReminder(for: currentPlan)
                 }
             } catch {
-                print("❌ Realm 접근 오류: \(error.localizedDescription)")
+                print(" Realm 접근 오류: \(error.localizedDescription)")
             }
         }
     }
@@ -430,7 +430,7 @@ class PlanDetailViewModel: BaseViewModel {
     // MARK: - CountryType Methods
     func setCountryType(_ type: String) {
         countryType = type
-        print("🌍 PlanDetailViewModel: countryType 설정됨 - \(type)")
+        print(" PlanDetailViewModel: countryType 설정됨 - \(type)")
     }
 
     // MARK: - Public Methods
@@ -445,7 +445,7 @@ class PlanDetailViewModel: BaseViewModel {
         currentStorage[day] = dayData
         dayDataStorage.accept(currentStorage)
 
-        print("🗑️ 일정 삭제됨 - Day \(day): \(removedItem.time) \(removedItem.location)")
+        print(" 일정 삭제됨 - Day \(day): \(removedItem.time) \(removedItem.location)")
     }
 
     func getCurrentDay() -> Int {
@@ -454,7 +454,7 @@ class PlanDetailViewModel: BaseViewModel {
 
     func setCurrentDay(_ day: Int) {
         currentDay.accept(day)
-        print("🔄 ViewModel: currentDay 업데이트 - \(day)")
+        print(" ViewModel: currentDay 업데이트 - \(day)")
     }
 
     func getDayData(for day: Int) -> DayData {
@@ -487,11 +487,11 @@ class PlanDetailViewModel: BaseViewModel {
         currentStorage[day]?.searchedPlaces = places
         dayDataStorage.accept(currentStorage)
 
-        print("🔄 Day \(day) 검색된 장소 업데이트: \(places.count)개")
+        print(" Day \(day) 검색된 장소 업데이트: \(places.count)개")
     }
 
     private func searchPlaces(query: String) -> Observable<[KakaoPlace]> {
-        print("🔍 ViewModel: 검색 시작 - \(query) (countryType: \(countryType))")
+        print(" ViewModel: 검색 시작 - \(query) (countryType: \(countryType))")
 
         // countryType에 따라 API 분기
         if countryType == "해외" {
@@ -500,7 +500,7 @@ class PlanDetailViewModel: BaseViewModel {
                 .map { [weak self] result in
                     switch result {
                     case .success(let response):
-                        print("🔍 ViewModel: Google 검색 성공 - \(response.results.count)개 결과")
+                        print(" ViewModel: Google 검색 성공 - \(response.results.count)개 결과")
                         // Google Places 결과를 KakaoPlace 형식으로 변환
                         let kakaoPlaces = response.results.map { googlePlace in
                             return KakaoPlace(
@@ -520,7 +520,7 @@ class PlanDetailViewModel: BaseViewModel {
                         }
                         return kakaoPlaces
                     case .failure(let error):
-                        print("🔍 ViewModel: Google 검색 실패 - \(error.localizedDescription)")
+                        print(" ViewModel: Google 검색 실패 - \(error.localizedDescription)")
                         return []
                     }
                 }
@@ -531,11 +531,11 @@ class PlanDetailViewModel: BaseViewModel {
                 .map { [weak self] result in
                     switch result {
                     case .success(let response):
-                        print("🔍 ViewModel: Kakao 검색 성공 - \(response.documents.count)개 결과")
+                        print(" ViewModel: Kakao 검색 성공 - \(response.documents.count)개 결과")
                         let filteredPlace = self?.selectBestMatch(places: response.documents, query: query)
                         return filteredPlace != nil ? [filteredPlace!] : []
                     case .failure(let error):
-                        print("🔍 ViewModel: Kakao 검색 실패 - \(error.localizedDescription)")
+                        print(" ViewModel: Kakao 검색 실패 - \(error.localizedDescription)")
                         return []
                     }
                 }
@@ -583,12 +583,12 @@ class PlanDetailViewModel: BaseViewModel {
 
     // MARK: - Clear Day Data
     func clearDayData(for day: Int) {
-        print("🗑️ ViewModel: Day \(day) 데이터 초기화 시작")
+        print(" ViewModel: Day \(day) 데이터 초기화 시작")
 
         var currentStorage = dayDataStorage.value
         currentStorage[day] = DayData.empty
         dayDataStorage.accept(currentStorage)
 
-        print("✅ ViewModel: Day \(day) 데이터 초기화 완료")
+        print(" ViewModel: Day \(day) 데이터 초기화 완료")
     }
 }

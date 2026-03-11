@@ -93,8 +93,8 @@
 "search_place_placeholder" = "Enter a place to search";
 "no_search_results" = "No search results found.\nTry searching with different keywords.";
 "search_error" = "Search Error";
-"country_type_domestic" = "🇰🇷 Domestic Search (KakaoMap)";
-"country_type_international" = "🌍 International Search (Google)";
+"country_type_domestic" = "Domestic Search (KakaoMap)";
+"country_type_international" = " International Search (Google)";
 
 // TravelPlanShow Screen
 "estimated_budget" = "Estimated Budget";

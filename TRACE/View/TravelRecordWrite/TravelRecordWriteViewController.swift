@@ -240,7 +240,7 @@ class TravelRecordWriteViewController: UIViewController {
 
     @objc private func saveButtonTapped() {
         // ViewModel을 통한 저장은 bindViewModel에서 처리됨
-        print("📝 저장 버튼 탭됨")
+        print(" 저장 버튼 탭됨")
     }
 
     // MARK: - ViewModel Binding
@@ -280,7 +280,7 @@ class TravelRecordWriteViewController: UIViewController {
                 self?.view.isUserInteractionEnabled = !isLoading
                 if isLoading {
                     // 로딩 인디케이터 표시 (선택사항)
-                    print("📝 저장 중...")
+                    print(" 저장 중...")
                 }
             })
             .disposed(by: disposeBag)
@@ -292,7 +292,7 @@ class TravelRecordWriteViewController: UIViewController {
                 case .success:
                     self?.navigateToTravelRecord()
                 case .failure(let message):
-                    print("❌ 저장 실패: \(message)")
+                    print(" 저장 실패: \(message)")
                 }
             })
             .disposed(by: disposeBag)
@@ -333,7 +333,7 @@ extension TravelRecordWriteViewController: TravelSearchDelegate {
         routeSearchButton.setTitle(place.placeName, for: .normal)
         routeSearchButton.setTitleColor(.label, for: .normal)
 
-        print("📍 장소 선택됨: \(place.placeName)")
+        print(" 장소 선택됨: \(place.placeName)")
 
         // 선택된 장소를 지도에 표시 (선택된 장소만)
         currentSearchedPlaces = [place]
@@ -598,13 +598,13 @@ extension TravelRecordWriteViewController {
 
         alert.addAction(UIAlertAction(title: NSLocalizedString("domestic", comment: "Domestic"), style: .default) { [weak self] _ in
             self?.countryType = "국내"
-            print("🇰🇷 국내 선택됨")
+            print(" 국내 선택됨")
             self?.presentSearchModal()
         })
 
         alert.addAction(UIAlertAction(title: NSLocalizedString("international", comment: "International"), style: .default) { [weak self] _ in
             self?.countryType = "해외"
-            print("🌍 해외 선택됨")
+            print(" 해외 선택됨")
             self?.presentSearchModal()
         })
 
