@@ -60,7 +60,7 @@ class TravelRecordViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("📱 TravelRecordViewController viewDidLoad 시작")
+        print(" TravelRecordViewController viewDidLoad 시작")
 
         // Realm 초기화 체크
         if RealmManager.shared.safeRealm() == nil {
@@ -155,7 +155,7 @@ class TravelRecordViewController: UIViewController {
     }
 
     private func navigateToShowRecord(with recordId: String) {
-        print("📱 기록 상세보기 이동: \(recordId)")
+        print(" 기록 상세보기 이동: \(recordId)")
 
         // ViewModel에서 기록 조회
         guard let record = viewModel.getRecord(by: recordId) else {
@@ -283,12 +283,12 @@ extension TravelRecordViewController: DesiginProtocolBind {
 extension TravelRecordViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let count = displayModels.count
-        print("📱 CollectionView numberOfItems: \(count)")
+        print(" CollectionView numberOfItems: \(count)")
         return count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        print("📱 CollectionView cellForItemAt: \(indexPath.item)")
+        print(" CollectionView cellForItemAt: \(indexPath.item)")
 
         guard indexPath.item < displayModels.count else {
             print(" IndexPath out of bounds: \(indexPath.item) >= \(displayModels.count)")
@@ -302,7 +302,7 @@ extension TravelRecordViewController: UICollectionViewDataSource, UICollectionVi
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("📱 여행 기록 선택: \(indexPath.item + 1)번째")
+        print(" 여행 기록 선택: \(indexPath.item + 1)번째")
         recordSelectedTrigger.accept(indexPath)
     }
 

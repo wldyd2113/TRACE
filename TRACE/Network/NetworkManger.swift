@@ -77,6 +77,17 @@ final class NetworkManger {
         return request(router, type: KakaoPlacesResponse.self)
     }
 
+    // Kakao Image 검색
+    func searchKakaoImage(query: String) -> Observable<Result<KakaoImageResponse, AFError>> {
+        let headers: HTTPHeaders = [
+            "Authorization": "KakaoAK \(APIKey.kakaoKey)",
+            "KA": "sdk/1.0 os/ios origin/com.jiyong.TRACE",
+            "content-type": "application/json;charset=UTF-8"
+        ]
+        let router = NetworkRouter.kakaoImageSearch(query: query, headers: headers)
+        return request(router, type: KakaoImageResponse.self)
+    }
+
     // Google Places 검색
     func searchGooglePlaces(query: String) -> Observable<Result<GooglePlacesResponse, AFError>> {
         let router = NetworkRouter.googleMapsSearch(query: query)

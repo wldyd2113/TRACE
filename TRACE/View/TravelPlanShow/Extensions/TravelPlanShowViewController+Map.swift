@@ -213,7 +213,7 @@ extension TravelPlanShowViewController: MapManagerDelegate {
     }
 
     private func showPlaceInfoAlert(place: KakaoPlace) {
-        print("📱 ===== 장소 정보 Alert 표시 시작 =====")
+        print(" ===== 장소 정보 Alert 표시 시작 =====")
         print("   • 장소명: '\(place.placeName)'")
         print("   • 편집모드: \(isEditMode)")
 
@@ -275,7 +275,7 @@ extension TravelPlanShowViewController: MapManagerDelegate {
 
         present(alert, animated: true)
 
-        print("📱 ===== Alert 표시 완료 =====")
+        print(" ===== Alert 표시 완료 =====")
     }
 
     private func showGooglePlaceInfoAlert(place: PlaceResult) {
@@ -333,7 +333,7 @@ extension TravelPlanShowViewController: MapManagerDelegate {
 
         present(alert, animated: true)
 
-        print("📱 구글 장소 정보 표시: \(place.name)")
+        print(" 구글 장소 정보 표시: \(place.name)")
     }
 
     private func addPlaceToSchedule(place: KakaoPlace) {

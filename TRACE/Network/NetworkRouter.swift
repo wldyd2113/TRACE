@@ -11,10 +11,15 @@ import Alamofire
 enum NetworkRouter: URLRequestConvertible {
 
     case kakaoMapsearch(query: String, headers: HTTPHeaders)
+    case kakaoImageSearch(query: String, headers: HTTPHeaders)
     case googleMapsSearch(query: String)
     
     var kakoBaseURL: String {
         return "\(APIKey.kakaoUrl)"
+    }
+    
+    var kakaoImageURL: String {
+        return "https://dapi.kakao.com/v2/search/image"
     }
     
     var googleBaseURL: String {
@@ -25,6 +30,8 @@ enum NetworkRouter: URLRequestConvertible {
         switch self {
         case .kakaoMapsearch(let query, _):
             return "query=\(query)"
+        case .kakaoImageSearch(let query, _):
+            return "query=\(query)&size=1" // 일단 가장 관련성 높은 1개만 가져옴
         case .googleMapsSearch(let query):
             return "query=\(query)&language=ko&key=\(APIKey.googleKey)"
         }
@@ -32,9 +39,7 @@ enum NetworkRouter: URLRequestConvertible {
 
     var method: HTTPMethod {
         switch self {
-        case .kakaoMapsearch(query: let query, headers: let headers):
-                .get
-        case .googleMapsSearch(query: let query):
+        case .kakaoMapsearch, .kakaoImageSearch, .googleMapsSearch:
                 .get
         }
     }
@@ -43,10 +48,10 @@ enum NetworkRouter: URLRequestConvertible {
     var headers: HTTPHeaders {
         switch self {
 
-        case .kakaoMapsearch(query: let query, headers: let headers):
+        case .kakaoMapsearch(_, let headers), .kakaoImageSearch(_, let headers):
             return headers
 
-        case .googleMapsSearch(query: let query):
+        case .googleMapsSearch(_):
             return [
                 "Accept": "application/json",
                 "User-Agent": "TRACE-iOS-App"
@@ -59,6 +64,8 @@ enum NetworkRouter: URLRequestConvertible {
         switch self {
         case .kakaoMapsearch:
             baseURL = kakoBaseURL
+        case .kakaoImageSearch:
+            baseURL = kakaoImageURL
         case .googleMapsSearch:
             baseURL = googleBaseURL
         }

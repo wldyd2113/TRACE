@@ -74,7 +74,7 @@ class TravelDayCell: UICollectionViewCell, BaseCellProtocol, DesiginProtocol {
         dayLabel.text = String(format: NSLocalizedString("day_format", comment: "Day format"), day)
         updateSelectionState(isSelected: isSelected)
 
-        print("📱 TravelDayCell 구성: \(day)일차, 선택됨: \(isSelected)")
+        print(" TravelDayCell 구성: \(day)일차, 선택됨: \(isSelected)")
     }
 
     private func updateSelectionState(isSelected: Bool) {

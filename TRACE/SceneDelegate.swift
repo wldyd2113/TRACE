@@ -170,12 +170,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func requestNotificationPermissionIfNeeded() {
         NotificationManager.shared.checkNotificationPermission { isAuthorized in
             if !isAuthorized {
-                print("📱 App startup: Requesting notification permission")
+                print(" App startup: Requesting notification permission")
                 NotificationManager.shared.requestNotificationPermission { granted in
-                    print("📱 Notification permission: \(granted ? "granted" : "denied")")
+                    print(" Notification permission: \(granted ? "granted" : "denied")")
                 }
             } else {
-                print("📱 App startup: Notification permission already granted")
+                print(" App startup: Notification permission already granted")
             }
         }
     }

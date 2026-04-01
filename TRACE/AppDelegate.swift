@@ -86,7 +86,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
             print(" 첫 실행 처리 완료")
         } else {
-            print("📱 기존 사용자 실행 감지")
+            print(" 기존 사용자 실행 감지")
         }
     }
 

@@ -325,7 +325,7 @@ extension TravelPlanDetailViewController {
     func updateCollectionViewReactively() {
         DispatchQueue.main.async { [weak self] in
             self?.dateCollectionView.reloadData()
-            print("📱 CollectionView 업데이트: \(self?.totalDays ?? 0)개 일차")
+            print(" CollectionView 업데이트: \(self?.totalDays ?? 0)개 일차")
         }
     }
 

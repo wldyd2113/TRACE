@@ -106,7 +106,7 @@ class NetworkAlertManager {
 
         if UIApplication.shared.canOpenURL(settingsUrl) {
             UIApplication.shared.open(settingsUrl)
-            print("📱 설정 앱으로 이동")
+            print(" 설정 앱으로 이동")
         }
     }
 

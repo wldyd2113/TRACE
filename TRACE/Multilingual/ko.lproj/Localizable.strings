@@ -50,10 +50,10 @@
 "tourist_attraction" = "관광명소";
 
 // TravelTourist Screen
-"tourist_recommendation" = "관광지 추천";
-"country_search" = "나라 검색";
-"enter_country_name" = "나라및 지역을 입력하세요";
-"country_example" = "예: 일본, 프랑스";
+"tourist_recommendation" = "한국 관광지 추천";
+"country_search" = "관광지 검색";
+"enter_country_name" = "장소 및 관광지를 입력하세요";
+"country_example" = "예: 남산타워, 경복궁";
 "recommended_attractions" = "추천 관광지";
 "popular" = "인기";
 "scenic" = "성지";

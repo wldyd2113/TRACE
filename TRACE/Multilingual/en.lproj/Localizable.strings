@@ -50,10 +50,10 @@
 "tourist_attraction" = "Tourist Attraction";
 
 // TravelTourist Screen
-"tourist_recommendation" = "Tourist Recommendation";
-"country_search" = "Country Search";
-"enter_country_name" = "Enter country name";
-"country_example" = "e.g., Japan, France";
+"tourist_recommendation" = "Korea Tourist Recommendation";
+"country_search" = "Place Search";
+"enter_country_name" = "Enter a place or attraction";
+"country_example" = "e.g., N Seoul Tower, Gyeongbokgung";
 "recommended_attractions" = "Recommended Attractions";
 "popular" = "Popular";
 "scenic" = "Scenic";

@@ -36,19 +36,23 @@ final class TourisViewModel {
 
     // MARK: - Initialization
     init() {
-        // 초기화 시에는 아무것도 로드하지 않음
-        // 사용자가 검색할 때만 데이터 표시
+        // 초기화 시 한국 인기 관광지를 불러옴
+        loadKoreanTouristAttractions()
     }
 
     // MARK: - Transform
     func transform(input: Input) -> Output {
 
-        // 검색 텍스트 처리
+        // 검색 텍스트 처리 (한국 지역/장소 기반)
         input.searchText
             .debounce(.seconds(1), scheduler: MainScheduler.instance)
             .distinctUntilChanged()
             .subscribe(onNext: { [weak self] searchText in
-                self?.searchCountryAttractions(query: searchText)
+                if searchText.isEmpty {
+                    self?.loadKoreanTouristAttractions()
+                } else {
+                    self?.searchCountryAttractions(query: searchText)
+                }
             })
             .disposed(by: disposeBag)
 
@@ -94,109 +98,128 @@ final class TourisViewModel {
         }
 
         isLoadingRelay.accept(true)
-        print(" ViewModel에서 관광지 검색: \(query)")
+        print(" ViewModel에서 카카오 관광지 검색: \(query)")
 
-        searchWithGooglePlaces(country: query)
+        searchWithKakaoPlaces(query: query)
     }
 
-    private func searchWithGooglePlaces(country: String) {
-        // 관광지 관련 키워드들
-        let touristKeywords = [
-            "\(country) tourist attractions",
-            "\(country) sightseeing",
-            "\(country) landmarks",
-            "\(country) museums",
-            "\(country) temples",
-            "\(country) parks",
-            "\(country) popular places",
-            "\(country) things to do",
-            "\(country) famous places",
-            "\(country) must visit"
-        ]
-
-        var allAttractions: [TouristAttraction] = []
-        let group = DispatchGroup()
-
-        // 6개 키워드로 병렬 검색
-        touristKeywords.prefix(6).forEach { keyword in
-            group.enter()
-
-            NetworkManger.shared.searchGooglePlaces(query: keyword)
-                .observe(on: MainScheduler.instance)
-                .subscribe(onNext: { [weak self] result in
-                    defer { group.leave() }
-
-                    switch result {
-                    case .success(let response):
-                        print(" Google Places 검색 성공: '\(keyword)' - \(response.results.count)개 결과")
-
-                        // GooglePlace를 TouristAttraction으로 변환
-                        let attractions = response.results.prefix(10).map { place in
-                            self?.convertGooglePlaceToTouristAttraction(place: place, country: country) ?? TouristAttraction.empty
-                        }.filter { $0.id != "empty" }
-
-                        allAttractions.append(contentsOf: attractions)
-
-                    case .failure(let error):
-                        print(" Google Places 검색 실패: '\(keyword)' - \(error.localizedDescription)")
+    private func searchWithKakaoPlaces(query: String) {
+        // 검색어에 '관광지'를 붙여서 더 정확한 결과를 가져옴
+        let searchQuery = "\(query) 관광지"
+        
+        NetworkManger.shared.searchKakaoPlaces(query: searchQuery)
+            .observe(on: MainScheduler.instance)
+            .flatMap { [weak self] result -> Observable<[TouristAttraction]> in
+                guard let self = self else { return .just([]) }
+                
+                switch result {
+                case .success(let response):
+                    print(" 카카오 장소 검색 성공: \(response.documents.count)개 결과")
+                    
+                    // 각 장소에 대해 이미지 검색 수행
+                    let attractionObservables = response.documents.map { document in
+                        return self.fetchImageAndCreateAttraction(kakaoPlace: document)
                     }
-                })
-                .disposed(by: disposeBag)
-        }
-
-        // 모든 검색 완료 후 결과 처리
-        group.notify(queue: .main) { [weak self] in
-            self?.isLoadingRelay.accept(false)
-
-            if allAttractions.isEmpty {
-                print(" 검색 결과 없음")
-                self?.errorMessageRelay.accept("'\(country)' 관광지 검색에 실패했습니다.")
-                self?.attractionsRelay.accept([]) // 빈 배열로 설정
-            } else {
-                print(" 총 \(allAttractions.count)개 관광지 발견")
-                let uniqueAttractions = self?.removeDuplicateAttractions(allAttractions) ?? []
-                self?.attractionsRelay.accept(uniqueAttractions)
+                    
+                    return Observable.zip(attractionObservables)
+                    
+                case .failure(let error):
+                    print(" 카카오 장소 검색 실패: \(error.localizedDescription)")
+                    self.errorMessageRelay.accept("검색 중 오류가 발생했습니다.")
+                    return .just([])
+                }
             }
-        }
+            .subscribe(onNext: { [weak self] attractions in
+                self?.isLoadingRelay.accept(false)
+                let validAttractions = attractions.filter { $0.id != "empty" }
+                self?.attractionsRelay.accept(validAttractions)
+                
+                if validAttractions.isEmpty && !query.isEmpty {
+                    self?.errorMessageRelay.accept("'\(query)'에 대한 검색 결과가 없습니다.")
+                }
+            }, onError: { [weak self] error in
+                self?.isLoadingRelay.accept(false)
+                print(" 카카오 네트워크 오류: \(error.localizedDescription)")
+                self?.errorMessageRelay.accept("네트워크 오류가 발생했습니다.")
+                self?.attractionsRelay.accept([])
+            })
+            .disposed(by: disposeBag)
     }
 
-    private func convertGooglePlaceToTouristAttraction(place: PlaceResult, country: String) -> TouristAttraction {
-        let category = determineCategoryFromGoogleTypes(types: place.types)
-        let imageURL = place.photos?.first?.getPhotoURL(maxWidth: 400)
+    private func fetchImageAndCreateAttraction(kakaoPlace: KakaoPlace) -> Observable<TouristAttraction> {
+        // 장소 이름으로 이미지 검색
+        return NetworkManger.shared.searchKakaoImage(query: kakaoPlace.placeName)
+            .map { result -> TouristAttraction in
+                var imageUrl: String? = nil
+                
+                if case .success(let response) = result, let firstImage = response.documents.first {
+                    imageUrl = firstImage.imageUrl
+                    print("📷 이미지 발견: \(kakaoPlace.placeName) -> \(imageUrl ?? "")")
+                } else {
+                    print("📷 이미지 URL 없음: \(kakaoPlace.placeName)")
+                }
+                
+                let category = self.determineCategoryFromKakaoCategory(categoryName: kakaoPlace.categoryName)
+                
+                return TouristAttraction(
+                    id: kakaoPlace.id,
+                    name: kakaoPlace.placeName,
+                    country: "한국",
+                    category: category,
+                    imageURL: imageUrl,
+                    imageURLs: imageUrl != nil ? [imageUrl!] : nil,
+                    description: kakaoPlace.addressName,
+                    latitude: Double(kakaoPlace.coordinate.latitude),
+                    longitude: Double(kakaoPlace.coordinate.longitude)
+                )
+            }
+            .catchAndReturn(TouristAttraction(
+                id: kakaoPlace.id,
+                name: kakaoPlace.placeName,
+                country: "한국",
+                category: .popular,
+                imageURL: nil,
+                imageURLs: nil,
+                description: kakaoPlace.addressName,
+                latitude: Double(kakaoPlace.coordinate.latitude),
+                longitude: Double(kakaoPlace.coordinate.longitude)
+            ))
+    }
 
-        // 여러 이미지 URL 생성 (최대 5개)
-        let imageURLs = place.photos?.prefix(5).map { photo in
-            photo.getPhotoURL(maxWidth: 400)
-        }
-
+    private func convertKakaoPlaceToTouristAttraction(kakaoPlace: KakaoPlace) -> TouristAttraction {
+        let category = determineCategoryFromKakaoCategory(categoryName: kakaoPlace.categoryName)
+        
+        // 카카오는 검색 API에서 이미지 URL을 제공하지 않으므로 nil로 설정하거나 
+        // 추후 이미지 검색 API를 연동할 수 있도록 구조 유지
         return TouristAttraction(
-            id: place.placeId,
-            name: place.name,
-            country: country,
+            id: kakaoPlace.id,
+            name: kakaoPlace.placeName,
+            country: "한국",
             category: category,
-            imageURL: imageURL,
-            imageURLs: imageURLs,
-            description: place.formattedAddress ?? "",
-            latitude: place.geometry.location.lat,
-            longitude: place.geometry.location.lng
+            imageURL: nil, 
+            imageURLs: nil,
+            description: kakaoPlace.addressName,
+            latitude: Double(kakaoPlace.coordinate.latitude),
+            longitude: Double(kakaoPlace.coordinate.longitude)
         )
     }
 
-    private func determineCategoryFromGoogleTypes(types: [String]) -> TouristCategory {
-        let typeString = types.joined(separator: " ").lowercased()
-
-        if typeString.contains("museum") || typeString.contains("historical") ||
-           typeString.contains("heritage") || typeString.contains("monument") ||
-           typeString.contains("temple") || typeString.contains("church") ||
-           typeString.contains("shrine") || typeString.contains("castle") {
+    private func determineCategoryFromKakaoCategory(categoryName: String) -> TouristCategory {
+        if categoryName.contains("문화") || categoryName.contains("유적") || categoryName.contains("역사") {
             return .historical
-        } else if typeString.contains("park") || typeString.contains("natural") ||
-                  typeString.contains("beach") || typeString.contains("mountain") ||
-                  typeString.contains("garden") || typeString.contains("scenic") {
+        } else if categoryName.contains("자연") || categoryName.contains("산") || categoryName.contains("바다") || categoryName.contains("공원") {
             return .scenic
         } else {
             return .popular
         }
+    }
+
+    private func loadKoreanTouristAttractions() {
+        print(" 한국 인기 관광지 로딩 시작")
+        isLoadingRelay.accept(true)
+        
+        // 기본적으로 '한국 인기 관광지'로 검색
+        searchWithKakaoPlaces(query: "한국 인기")
     }
 
     private func removeDuplicateAttractions(_ attractions: [TouristAttraction]) -> [TouristAttraction] {
@@ -210,13 +233,6 @@ final class TourisViewModel {
                 return true
             }
         }
-    }
-
-    private func loadKoreanTouristAttractions() {
-        print(" 한국 관광지 로딩 시작")
-        isLoadingRelay.accept(true)
-
-        searchWithGooglePlaces(country: "한국")
     }
 
     private func loadSampleData() {

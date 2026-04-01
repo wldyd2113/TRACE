@@ -100,7 +100,7 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
 
         present(alert, animated: true)
 
-        print("📱 장소 정보 표시: \(place.placeName)")
+        print(" 장소 정보 표시: \(place.placeName)")
     }
 
     private func addPlaceToRoute(place: KakaoPlace) {
@@ -146,7 +146,7 @@ extension TravelRecordWriteViewController: MapManagerDelegate {
 
         present(alert, animated: true)
 
-        print("📱 구글 장소 정보 표시: \(place.name)")
+        print(" 구글 장소 정보 표시: \(place.name)")
     }
 
     private func addGooglePlaceToRoute(place: PlaceResult) {
