@@ -3,7 +3,7 @@
 
 TRACE는 MVVM 아키텍처 기반으로 개발된 iOS 여행 계획 및 기록 관리 앱입니다. 사용자가 여행 계획을 세우고, 실시간으로 위치를 추적하며, 여행 기록을 사진과 함께 저장할 수 있는 종합적인 여행 관리 솔루션을 제공합니다.
 
-## 📱 앱 스크린샷
+## 앱 스크린샷
 
 <img width="150" alt="1" src="https://github.com/user-attachments/assets/60584dd2-1e2e-46c4-b617-7266cd470d37" />
 <img width="150"  alt="2" src="https://github.com/user-attachments/assets/25351c92-c0be-48f1-9d17-b39a0bb85f7b" />
@@ -14,7 +14,7 @@ TRACE는 MVVM 아키텍처 기반으로 개발된 iOS 여행 계획 및 기록 �
 
 </div>
 
-## 🏗️ 아키텍처 패턴
+## 아키텍처 패턴
 
 ### MVVM (Model-View-ViewModel) 아키텍처
 - **View**: 사용자 인터페이스 담당 (UIViewController)
@@ -50,7 +50,7 @@ enum NetworkRouter: URLRequestConvertible {
 - Kakao Places API, Google Places API 요청 로직 모듈화
 - API 확장 시 최소 수정으로 대응 가능한 확장성 제공
 
-## 🛠️ 기술 스택
+## 기술 스택
 
 ### 반응형 프로그래밍
 - **RxSwift**: 사용자 입력과 UI 업데이트 간의 비동기 흐름을 일관성 있게 관리
@@ -94,39 +94,39 @@ enum NetworkRouter: URLRequestConvertible {
 - **WidgetKit + SwiftUI**: 홈 화면 위젯 개발
 - 다가오는 여행 D-day 정보 실시간 표시
 
-## ✨ 주요 기능
+## 주요 기능
 
-### 🗺️ 여행 계획 생성 및 관리
+### 여행 계획 생성 및 관리
 - 국가, 여행지, 여행 일자를 입력해 전체 일정을 일차별로 여행 계획 생성
 - 국내/해외 선택에 따라 카카오·구글 API로 여행지 검색 및 최적 루트 표시
 - 여행 일정의 추가·수정·삭제 기능 제공
 
-### 📅 D-Day 및 캘린더 기능
+### D-Day 및 캘린더 기능
 - 가장 가까운 여행 일정의 D-Day를 메인 화면 및 위젯에서 실시간 표시
 - 지역/국가별 추천 관광지 목록 제공
 - 여행 일정이 달력에 자동 표시되며, 날짜 선택 시 상세 정보 확인 가능
 
-### 🧭 실시간 지도 및 위치 서비스
+### 실시간 지도 및 위치 서비스
 - 최신 여행 일정 루트를 지도에 자동 시각화
 - 실시간 위치 추적 및 현재 위치 업데이트
 - 방문 예정지와 실제 방문지 비교 분석
 
-### 📸 여행 기록 및 추억 관리
+### 여행 기록 및 추억 관리
 - 여행 중 촬영한 사진을 선택·저장·관리
 - 방문지와 GPS 좌표를 기반으로 지도에서 추억 탐색 지원
 - 다중 이미지 첨부 및 위치 정보와 연동된 기록 시스템
 
-### 🔔 스마트 알림 시스템
+### 스마트 알림 시스템
 - 여행 전날 오후 8시 자동 알림 발송
 - 개인화된 여행 준비 리마인더
 - 권한 기반 알림 관리 시스템
 
-### 🏠 홈 화면 위젯
+### 홈 화면 위젯
 - 다가오는 여행의 D-Day 정보 실시간 표시
 - 앱 실행 없이도 여행 일정 확인 가능
 - SwiftUI 기반 네이티브 위젯 구현
 
-## 📂 프로젝트 구조
+## 프로젝트 구조
 
 ```
 TRACE/
@@ -165,7 +165,7 @@ TRACE/
     └── UIButton+Extension.swift
 ```
 
-## 🚀 설치 및 실행
+## 설치 및 실행
 
 ### 요구사항
 - iOS 15.0+
@@ -204,7 +204,7 @@ open TRACE.xcodeproj
 4. 빌드 및 실행
 - Xcode에서 `Cmd + R`로 빌드 및 실행
 
-## 🔑 API 설정
+## API 설정
 
 ### Kakao Developers API
 1. [Kakao Developers](https://developers.kakao.com/) 콘솔에서 앱 등록
@@ -221,7 +221,7 @@ open TRACE.xcodeproj
 2. iOS 앱 추가 및 `GoogleService-Info.plist` 다운로드
 3. Analytics, Crashlytics 활성화
 
-## 📱 주요 화면별 기능
+## 주요 화면별 기능
 
 ### 1. 메인 화면 (TravelPlanMain)
 - 다가오는 여행 D-Day 표시
@@ -248,14 +248,14 @@ open TRACE.xcodeproj
 - 날짜별 여행 계획 확인
 - 일정 추가/수정 바로가기
 
-## 🔧 개발 환경 설정
+## 개발 환경 설정
 
 ### 코드 스타일 가이드
 - Swift API Design Guidelines 준수
 - MVVM 패턴 일관성 유지
 - Protocol-Oriented Programming 적극 활용
 
-## 📈 성능 최적화
+## 성능 최적화
 
 ### 메모리 관리
 - Weak/Unowned 참조로 순환 참조 방지
